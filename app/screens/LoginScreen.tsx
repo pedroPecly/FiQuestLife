@@ -5,8 +5,9 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
@@ -159,10 +160,18 @@ const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <StatusBar barStyle="dark-content" />
-
-      <Header />
+      
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Header />
 
       <Card>
         <Tag
@@ -265,7 +274,8 @@ const LoginScreen = () => {
       <Text style={styles.disclaimer}>
         Ao {isLogin ? 'entrar' : 'criar uma conta'}, você concorda com nossos <Text style={styles.link}>Termos de Uso</Text> e <Text style={styles.link}>Política de Privacidade</Text>
       </Text>
-    </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

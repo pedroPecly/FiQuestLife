@@ -1,0 +1,35 @@
+feat: implementar sistema de desafios (Challenge System)
+
+## 🎯 Sprint 2 - Sistema de Desafios
+
+### Adicionado:
+- 4 ENUMs para classificação de desafios:
+  * ChallengeCategory (8 categorias: PHYSICAL_ACTIVITY, NUTRITION, HYDRATION, etc)
+  * ChallengeDifficulty (4 níveis: EASY, MEDIUM, HARD, EXPERT)
+  * ChallengeFrequency (4 tipos: DAILY, WEEKLY, MONTHLY, ONE_TIME)
+  * ChallengeStatus (5 status: PENDING, IN_PROGRESS, COMPLETED, FAILED, SKIPPED)
+
+- Model Challenge (catálogo de desafios):
+  * Campos: title, description, category, difficulty
+  * Recompensas: xpReward, coinsReward
+  * Configurações: isActive, frequency
+  * Timestamps automáticos
+
+- Model UserChallenge (relação N:N User <-> Challenge):
+  * Rastreamento de progresso individual
+  * Status e datas (assignedAt, completedAt)
+  * Campo progress para desafios incrementais
+  * Constraints únicos e índices para performance
+
+### Modificado:
+- User model: ativada relação userChallenges
+- Prisma schema: adicionados comentários detalhados e exemplos de uso
+
+### Database:
+- Migration: 20251016152857_add_challenges
+- Tabelas criadas: challenges, user_challenges
+- Prisma Client regenerado
+
+### Referência:
+- Prompt 2.1 - Challenge System Schema
+- 100% dos requisitos implementados

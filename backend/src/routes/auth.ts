@@ -5,11 +5,14 @@
  *
  * POST /register - Cadastro de usuário
  * POST /login    - Login de usuário
+ * GET  /me       - Perfil do usuário (protegida)
  */
 
 import { Hono } from 'hono';
 
 import { authController } from '../controllers/auth.controller.js';
+import { prisma } from '../lib/prisma.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
 
 const auth = new Hono();
 
@@ -64,6 +67,56 @@ auth.post('/login', async (c) => {
   }
   // Chama o controller
   return await authController.login(c);
+});
+
+/**
+ * GET /auth/me
+ * Alias para /user/me - Retorna perfil completo do usuário
+ * 
+ * Rota protegida que retorna todos os dados do usuário logado.
+ * Esta é uma rota alternativa seguindo o padrão do prompt.
+ * A rota principal continua sendo /user/me
+ */
+auth.get('/me', authMiddleware, async (c) => {
+  try {
+    // O middleware já validou o token
+    // @ts-ignore
+    const userData = c.get('user') as { userId: string };
+    
+    // Busca perfil completo no banco
+    const user = await prisma.user.findUnique({
+      where: { id: userData.userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        bio: true,
+        avatarUrl: true,
+        xp: true,
+        coins: true,
+        level: true,
+        currentStreak: true,
+        longestStreak: true,
+        lastActiveDate: true,
+        notificationsEnabled: true,
+        dailyReminderTime: true,
+        profilePublic: true,
+        createdAt: true,
+        updatedAt: true,
+        password: false, // NUNCA retorna senha
+      },
+    });
+    
+    if (!user) {
+      return c.json({ error: 'Usuário não encontrado' }, 404);
+    }
+    
+    return c.json({ user });
+  } catch (error) {
+    console.error('Erro ao buscar perfil:', error);
+    return c.json({ error: 'Erro ao carregar perfil' }, 500);
+  }
 });
 
 export default auth;

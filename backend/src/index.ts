@@ -46,13 +46,14 @@ app.get('/', (c) => {
     message: '🎮 Bem-vindo ao FiQuestLife API!',
     version: '1.0.0',
     endpoints: {
-      health: '/health',
-      database: '/health/db',
-      register: '/auth/register',
-      login: '/auth/login',
-      userMe: '/user/me (requer token)',
+      health: '/health - Verifica se API está online',
+      database: '/health/db - Verifica conexão com banco',
+      register: '/auth/register - Cadastro de novo usuário',
+      login: '/auth/login - Login com email ou username',
+      profile: '/auth/me ou /user/me - Perfil completo (requer token)',
     },
     docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
+    authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
   });
 });
 
