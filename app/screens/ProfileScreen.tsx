@@ -3,13 +3,14 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  View,
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar } from '../../components/ui/Avatar';
@@ -96,28 +97,51 @@ const ProfileScreen = () => {
       await authStorage.logout();
       
       // Redireciona para tela de login
-      router.replace('/');
+      if (Platform.OS === 'web') {
+        // Web: força reload completo da página (mais rápido e confiável)
+        window.location.href = '/';
+      } else {
+        // Mobile: usa navegação nativa do Expo Router
+        if (router.canDismiss()) {
+          router.dismissAll();
+        }
+        router.replace('/');
+      }
     } catch (error) {
+      console.error('Erro ao fazer logout:', error);
       Alert.alert('Erro', 'Erro ao fazer logout');
     }
   };
 
   const confirmLogout = () => {
-    Alert.alert(
-      'Sair',
-      'Tem certeza que deseja sair da sua conta?',
-      [
-        { 
-          text: 'Cancelar', 
-          style: 'cancel',
-        },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: handleLogout,
-        },
-      ]
-    );
+    // ==========================================
+    // COMPATIBILIDADE WEB + MOBILE
+    // ==========================================
+    // Alert.alert NÃO funciona no navegador web!
+    // Por isso usamos window.confirm no web e Alert.alert no mobile
+    
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Tem certeza que deseja sair da sua conta?');
+      if (confirmed) {
+        handleLogout();
+      }
+    } else {
+      Alert.alert(
+        'Sair',
+        'Tem certeza que deseja sair da sua conta?',
+        [
+          { 
+            text: 'Cancelar', 
+            style: 'cancel',
+          },
+          {
+            text: 'Sair',
+            style: 'destructive',
+            onPress: handleLogout,
+          },
+        ]
+      );
+    }
   };
 
   // Função para pegar iniciais do nome ou email
