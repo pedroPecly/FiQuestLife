@@ -85,6 +85,29 @@ FiQuestLife/
 
 ---
 
+## ⚙️ Configurações do Projeto
+
+### 🔐 Estrutura do arquivo `.env` do backend
+
+O arquivo `.env` deve ficar na pasta `backend` e conter:
+
+```env
+# URL de conexão do banco de dados PostgreSQL (Supabase)
+DATABASE_URL="postgresql://usuario:senha@host:porta/database"
+
+# Exemplo para Supabase:
+# DATABASE_URL="postgresql://postgres:senha_super_secreta@db.xxxxx.supabase.co:5432/postgres"
+```
+
+**Como obter a URL do Supabase:**
+- Acesse o painel do Supabase
+- Vá em "Project Settings" > "Database" > "Connection string"
+- Copie a string de conexão PostgreSQL
+
+> ⚠️ Não compartilhe o arquivo `.env` publicamente. Mantenha a senha segura!
+
+---
+
 ## ⚙️ Setup Inicial
 
 ### **1. Instalar Dependências**

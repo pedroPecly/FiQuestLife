@@ -1,10 +1,11 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    StyleSheet,
-    TextInput,
-    TextInputProps,
-    View,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  View,
 } from 'react-native';
 
 interface InputProps extends TextInputProps {
@@ -20,11 +21,16 @@ export const Input: React.FC<InputProps> = ({
   style,
   ...props
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
-    <View style={[
-      styles.container, 
-      multiline && styles.multilineContainer
-    ]}>
+    <View
+      style={[
+        styles.container,
+        multiline && styles.multilineContainer,
+        isFocused && styles.focusedContainer,
+      ]}
+    >
       {icon && (
         <MaterialCommunityIcons
           name={icon as any}
@@ -35,14 +41,17 @@ export const Input: React.FC<InputProps> = ({
       )}
       <TextInput
         style={[
-          styles.input, 
+          styles.input,
           multiline && styles.multilineInput,
-          style
+          style,
+          Platform.OS === 'web' && { outline: 'none', boxShadow: 'none' },
         ]}
         placeholderTextColor="#888"
         multiline={multiline}
         numberOfLines={multiline ? 3 : 1}
         textAlignVertical={multiline ? 'top' : 'center'}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         {...props}
       />
     </View>
@@ -59,6 +68,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
     paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  focusedContainer: {
+    borderColor: '#007BFF', // Azul primário
+    shadowColor: '#007BFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   multilineContainer: {
     height: 80,
@@ -75,6 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     color: '#333',
+    backgroundColor: 'transparent',
   },
   multilineInput: {
     paddingTop: 0,

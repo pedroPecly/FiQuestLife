@@ -12,7 +12,7 @@ import axios from 'axios';
 // URL base da API (mude conforme necessário)
 // Em produção, use a URL real do servidor
 // No desenvolvimento local, use o IP da sua máquina (não localhost!)
-const API_URL = 'http://192.168.1.13:3000'; // IP local configurado
+const API_URL = 'http://192.168.1.12:3000'; // IP local configurado
 
 // Cria instância do Axios com configurações padrão
 const api = axios.create({
