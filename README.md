@@ -2,7 +2,14 @@
 
 Aplicativo de gamificação para transformar sua saúde e produtividade em uma aventura épica!
 
-## � Stack Tecnológica
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React Native](https://img.shields.io/badge/React_Native-20232A?logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-000020?logo=expo&logoColor=white)](https://expo.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+
+## 🎯 Stack Tecnológica
 
 ### **Backend**
 - **Runtime:** Node.js v20+
@@ -34,26 +41,41 @@ FiQuestLife/
 │   └── index.tsx             # Rota inicial
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 7 componentes de UI
-│   │   ├── Button.tsx        # Botão com variantes
+│   ├── ui/                   # 8 componentes de UI
+│   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Input.tsx         # Input com ícone e multiline
-│   │   ├── Card.tsx          # Container com sombra
-│   │   ├── Avatar.tsx        # Avatar circular
-│   │   ├── Tag.tsx           # Badge/Tag
-│   │   ├── InfoRow.tsx       # Linha de informação
-│   │   └── StatBox.tsx       # Caixa de estatística
+│   │   ├── Card.tsx          # Container com sombra e padding
+│   │   ├── Avatar.tsx        # Avatar circular com iniciais
+│   │   ├── Tag.tsx           # Badge/Tag com ícone
+│   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
+│   │   ├── StatBox.tsx       # Caixa de estatística gamificada
+│   │   └── LoadingScreen.tsx # Tela de loading reutilizável
 │   └── layout/
 │       └── Header.tsx        # Cabeçalho do app
 │
-├── backend/                   # Backend (Node.js)
+├── utils/                     # 🛠️ Funções Utilitárias
+│   ├── validators.ts         # Validações (email, username, password, etc)
+│   ├── dateUtils.ts          # Formatação e cálculos de datas
+│   └── dialog.ts             # Alertas compatíveis Web + Mobile
+│
+├── backend/                   # Backend (Node.js + Hono)
 │   ├── src/
 │   │   ├── controllers/      # 🎯 Lógica de negócio
+│   │   │   ├── auth.controller.ts   # Login, Register, Profile
+│   │   │   └── health.controller.ts # Health check
 │   │   ├── routes/           # 🛣️ Definição de rotas
-│   │   ├── middlewares/      # 🔒 Autenticação JWT
-│   │   └── lib/              # 🔧 Prisma client
+│   │   │   ├── auth.ts       # Rotas de autenticação
+│   │   │   ├── user.ts       # Rotas de usuário (protegidas)
+│   │   │   └── health.ts     # Health check
+│   │   ├── middlewares/      # 🔒 Middlewares
+│   │   │   ├── auth.middleware.ts   # Validação JWT
+│   │   │   └── error.middleware.ts  # Tratamento de erros
+│   │   └── lib/              # 🔧 Clientes e utilitários
+│   │       ├── prisma.ts     # Prisma Client
+│   │       └── supabase.ts   # Supabase Client
 │   ├── prisma/
-│   │   ├── schema.prisma     # 🗄️ Schema com gamificação
-│   │   └── migrations/       # Histórico de mudanças
+│   │   ├── schema.prisma     # 🗄️ Schema (User + Challenge System)
+│   │   └── migrations/       # Histórico de mudanças do DB
 │   └── .env                  # 🔐 Variáveis de ambiente
 │
 └── services/                  # 🌐 Comunicação com API
@@ -171,9 +193,26 @@ npx prisma generate
 
 ## 🗄️ Banco de Dados
 
-### **Schema Atual (com Gamificação)**
+### **Schema Atual (User + Challenge System)**
 
 ```prisma
+// ENUMs para o sistema de desafios
+enum ChallengeCategory {
+  PHYSICAL_ACTIVITY
+  NUTRITION
+  HYDRATION
+  MENTAL_HEALTH
+  SLEEP
+  SOCIAL
+  PRODUCTIVITY
+  MINDFULNESS
+}
+
+enum ChallengeDifficulty { EASY MEDIUM HARD EXPERT }
+enum ChallengeFrequency { DAILY WEEKLY MONTHLY ONE_TIME }
+enum ChallengeStatus { PENDING IN_PROGRESS COMPLETED FAILED SKIPPED }
+
+// Modelo de Usuário
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -196,14 +235,55 @@ model User {
   dailyReminderTime    String?
   profilePublic        Boolean @default(false)
   
+  // Relações
+  userChallenges UserChallenge[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Catálogo de Desafios
+model Challenge {
+  id          String              @id @default(uuid())
+  title       String
+  description String
+  category    ChallengeCategory
+  difficulty  ChallengeDifficulty
+  xpReward    Int
+  coinsReward Int
+  isActive    Boolean             @default(true)
+  frequency   ChallengeFrequency  @default(DAILY)
+  
+  userChallenges UserChallenge[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Relação N:N User <-> Challenge
+model UserChallenge {
+  id          String          @id @default(uuid())
+  userId      String
+  challengeId String
+  status      ChallengeStatus @default(PENDING)
+  assignedAt  DateTime        @default(now())
+  completedAt DateTime?
+  progress    Int             @default(0)
+  notes       String?
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, challengeId, assignedAt])
+  @@index([userId, status])
+  @@index([assignedAt])
 }
 ```
 
 ### **Migrations Aplicadas**
 - ✅ `20251016122028_add_username` - Adicionou campo username
 - ✅ `20251016131113_add_gamification_fields` - Sistema de gamificação completo
+- ✅ `20251016152857_add_challenges` - Sistema de desafios (Challenge + UserChallenge)
 
 ### **Comandos Úteis**
 
@@ -225,12 +305,14 @@ echo "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" | npx prisma db execute --
 
 ## 🔐 Endpoints da API
 
-| Método | Rota              | Auth | Descrição                |
-|--------|-------------------|------|--------------------------|
-| GET    | `/`               | ❌   | Health check             |
-| POST   | `/auth/register`  | ❌   | Cadastrar usuário        |
-| POST   | `/auth/login`     | ❌   | Login (email ou username)|
-| GET    | `/user/me`        | ✅   | Dados do usuário logado  |
+| Método | Rota              | Auth | Descrição                         |
+|--------|-------------------|------|-----------------------------------|
+| GET    | `/`               | ❌   | Health check (status da API)      |
+| GET    | `/health`         | ❌   | Health check detalhado            |
+| POST   | `/auth/register`  | ❌   | Cadastrar usuário                 |
+| POST   | `/auth/login`     | ❌   | Login (email ou username)         |
+| GET    | `/auth/me`        | ✅   | Perfil do usuário logado          |
+| GET    | `/user/me`        | ✅   | Perfil do usuário logado (alias)  |
 
 ### **Exemplo de Requisição**
 
@@ -279,13 +361,22 @@ POST /auth/login
 ## 🐛 Troubleshooting
 
 ### **Erro: "Network request failed"**
-- ✅ Backend está rodando?
+- ✅ Backend está rodando? (`cd backend && npm run dev`)
 - ✅ IP em `services/api.ts` está correto?
 - ✅ Celular e PC na mesma rede Wi-Fi?
+- ✅ Firewall bloqueando porta 3000?
 
 ### **Erro 409 (Conflict)**
 - Email ou username já existe no banco
 - Solução: Use outro email/username ou limpe o banco
+
+### **Erro: "Alert.alert não funciona no navegador"**
+- ✅ Use `showAlert()` ou `showConfirm()` de `utils/dialog.ts`
+- ✅ Compatível com Web (window.alert/confirm) e Mobile (Alert.alert)
+
+### **Botão de Logout não funciona**
+- ✅ Corrija com `showConfirm()` de `utils/dialog.ts`
+- ✅ `Alert.alert()` NÃO funciona no navegador web
 
 ### **Prisma Client não atualiza**
 ```bash
@@ -335,13 +426,20 @@ cd backend && npx prisma studio
 - ✅ Proteção de rotas com middleware JWT
 
 ### **Interface**
-- ✅ 8 componentes reutilizáveis (7 UI + 1 Layout)
-- ✅ Design gamificado com ícones e cores
-- ✅ Alertas compatíveis Web + Mobile
-- ✅ Loading states em botões
+- ✅ 8 componentes reutilizáveis de UI (Button, Input, Card, Avatar, Tag, InfoRow, StatBox, LoadingScreen)
+- ✅ 1 componente de Layout (Header)
+- ✅ Design gamificado com ícones e cores vibrantes
+- ✅ Alertas compatíveis Web + Mobile (`utils/dialog.ts`)
+- ✅ Loading states em botões e telas
 - ✅ Enter key submete formulários
 - ✅ Erros específicos e informativos
+- ✅ Logout funcionando em todas as plataformas
 - ✅ Redução de ~40% de código via componentização
+
+### **Utilitários**
+- ✅ `utils/validators.ts` - 6 validadores (email, username, password, nome, telefone)
+- ✅ `utils/dateUtils.ts` - 7 funções de data (formatação, cálculos, tempo relativo)
+- ✅ `utils/dialog.ts` - 6 funções de diálogo (alert, confirm, error, success, warning, info)
 
 ### **Perfil e Gamificação**
 - ✅ Sistema de XP e Level (prontos para uso)
@@ -352,26 +450,49 @@ cd backend && npx prisma studio
 - ✅ Configurações: notificações, perfil público
 - ✅ Logout com confirmação
 
+### **Banco de Dados**
+- ✅ Sistema de desafios completo (ENUMs + Models)
+- ✅ 4 ENUMs: ChallengeCategory (8 tipos), ChallengeDifficulty (4 níveis), ChallengeFrequency (4 tipos), ChallengeStatus (5 estados)
+- ✅ Model Challenge: catálogo de desafios com recompensas
+- ✅ Model UserChallenge: relação N:N com tracking de progresso
+- ✅ Constraints e índices para performance
+- ✅ Migrations versionadas e documentadas
+
 ### **Código e Organização**
-- ✅ 100% TypeScript
-- ✅ Código componentizado e reutilizável
-- ✅ Zero console.logs (25+ removidos)
-- ✅ Exports centralizados (index.ts)
-- ✅ Migrations versionadas
-- ✅ Documentação completa
+- ✅ 100% TypeScript (frontend + backend)
+- ✅ Código altamente componentizado e reutilizável
+- ✅ Utils centralizados (validators, dateUtils, dialog)
+- ✅ Exports organizados (index.ts)
+- ✅ Documentação inline com JSDoc
+- ✅ README completo e atualizado
 
 ## 🚀 Próximos Passos
 
+### **Sprint 3 - API de Desafios**
+- [ ] Endpoints CRUD de desafios (criar, listar, editar, deletar)
+- [ ] Atribuir desafios ao usuário
+- [ ] Atualizar progresso de desafios
+- [ ] Completar desafios e ganhar recompensas (XP + coins)
+- [ ] Sistema automático de Level Up
+
+### **Sprint 4 - Interface de Desafios**
+- [ ] Tela de listagem de desafios disponíveis
+- [ ] Tela de desafios ativos do usuário
+- [ ] Tela de progresso de desafio individual
+- [ ] Animações de conclusão e recompensa
+- [ ] Filtros por categoria e dificuldade
+
+### **Futuras Funcionalidades**
 - [ ] Tela de edição de perfil (bio, avatar, configs)
 - [ ] Upload de foto de avatar
-- [ ] Sistema de Desafios (UserChallenge)
 - [ ] Badges/Conquistas (UserBadge)
 - [ ] Customização de avatar (UserAvatarItem)
 - [ ] Histórico de recompensas (RewardHistory)
 - [ ] Feed de atividades (ActivityFeed)
-- [ ] Sistema automático de Level Up
 - [ ] Streak tracking automático (daily check-in)
 - [ ] Notificações push
+- [ ] Sistema de amigos e ranking
+- [ ] Loja de itens com moedas
 
 ---
 
