@@ -1,0 +1,22 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  // Configura validação de SQL para PostgreSQL
+  "mssql.intelliSense.enableIntelliSense": false,
+  "files.associations": {
+    "*.sql": "sql"
+  },
+  // Desabilita validação nos arquivos SQL de scripts e migrations
+  "[sql]": {
+    "editor.defaultFormatter": null,
+    "editor.formatOnSave": false
+  },
+  // Ignora erros SQL em pastas específicas
+  "files.exclude": {},
+  "search.exclude": {},
+  // Desabilita diagnósticos de SQL
+  "mssql.enableQueryHistoryCapture": false
+}

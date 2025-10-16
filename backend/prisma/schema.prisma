@@ -1,0 +1,94 @@
+// ============================================
+// PRISMA SCHEMA - ESTRUTURA DO BANCO DE DADOS
+// ============================================
+// 
+// Esse arquivo define como é a estrutura do banco.
+// É tipo um "mapa" que o Prisma usa pra saber:
+// - Quais tabelas existem
+// - Quais campos cada tabela tem
+// - Qual o tipo de cada campo (texto, número, data, etc)
+// 
+// Depois de editar esse arquivo, rode:
+//   npm run prisma:push  (sincroniza com o banco)
+//   npm run prisma:generate  (atualiza o código TypeScript)
+
+// ============================================
+// CONFIGURAÇÃO DO GERADOR
+// ============================================
+// Isso aqui diz pro Prisma gerar o código JavaScript/TypeScript
+// que a gente usa pra fazer queries (tipo prisma.user.findMany())
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================
+// CONFIGURAÇÃO DO BANCO DE DADOS
+// ============================================
+// Informa que tipo de banco a gente tá usando (PostgreSQL)
+// e onde ele tá (URL vem do arquivo .env)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")  // Pega a URL do .env
+}
+
+// ============================================
+// MODEL USER - TABELA DE USUÁRIOS
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  name      String?
+  password  String
+  bio       String?
+  avatarUrl String?  @map("avatar_url")
+  
+  // Campos de gamificação
+  xp            Int      @default(0)
+  coins         Int      @default(0)
+  level         Int      @default(1)
+  currentStreak Int      @default(0) @map("current_streak")
+  longestStreak Int      @default(0) @map("longest_streak")
+  lastActiveDate DateTime? @map("last_active_date")
+  
+  // Configurações do usuário
+  notificationsEnabled Boolean @default(true) @map("notifications_enabled")
+  dailyReminderTime    String?  @map("daily_reminder_time")
+  profilePublic        Boolean  @default(false) @map("profile_public")
+  
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relações (serão adicionadas quando criar as tabelas correspondentes)
+  // userChallenges    UserChallenge[]
+  // userBadges        UserBadge[]
+  // userAvatarItems   UserAvatarItem[]
+  // equippedItems     EquippedAvatarItem[]
+  // rewardHistory     RewardHistory[]
+  // activityFeed      ActivityFeed[]
+
+  @@map("users")
+}
+
+// ============================================
+// COMO ADICIONAR MAIS MODELS?
+// ============================================
+// 
+// Exemplo de uma tabela de Posts:
+// 
+// model Post {
+//   id        String   @id @default(uuid())
+//   title     String
+//   content   String
+//   authorId  String
+//   author    User     @relation(fields: [authorId], references: [id])
+//   createdAt DateTime @default(now())
+//   
+//   @@map("posts")
+// }
+// 
+// Aí no User, adiciona:
+//   posts Post[]
+// 
+// Isso cria um relacionamento: 1 User tem vários Posts!
