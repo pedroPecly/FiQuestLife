@@ -36,6 +36,13 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Audit and Analysis Reports (local use only)
+AUDIT_REPORT.md
+AUDIT_SUMMARY.md
+IMPROVEMENTS.md
+commit-message.txt
+CHECKLIST.md
+
 app-example
 
 # generated native folders

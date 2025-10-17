@@ -174,7 +174,6 @@ export default function SettingsScreen() {
         async () => {
           try {
             const logoutResult = await authStorage.logout();
-            console.log('🔓 Logout realizado:', logoutResult);
             if (logoutResult) {
               // Força navegação para tela de login com reset completo da stack
               if (Platform.OS === 'web') {
@@ -205,7 +204,6 @@ export default function SettingsScreen() {
             onPress: async () => {
               try {
                 const logoutResult = await authStorage.logout();
-                console.log('🔓 Logout realizado:', logoutResult);
                 if (logoutResult) {
                   // Força navegação para tela de login
                   router.replace('/' as any);

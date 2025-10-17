@@ -1247,8 +1247,8 @@ User (1) ←→ (N) RewardHistory
 - ✅ Criado componente reutilizável `SettingsMenuItem.tsx`
 - ✅ Suporte a 3 tipos: `clickable`, `toggle`, `info`
 - ✅ Economia de ~73% no código de telas de configurações
-- ✅ Documentação completa com 8 exemplos de uso
-- ✅ Arquivo de exemplos: `SettingsMenuItem.example.tsx`
+- ✅ Documentação completa no README com exemplos de uso
+- ✅ Exportado em `components/ui/index.ts`
 
 #### **Refatoração da Tela de Configurações**
 - ✅ Refatorada `SettingsScreen` usando `SettingsMenuItem`
