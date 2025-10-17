@@ -11,6 +11,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { User } from '../types/user';
 
 // Chave para armazenar o token
 const TOKEN_KEY = '@FiQuestLife:token';
@@ -20,7 +21,7 @@ export const authStorage = {
   /**
    * Salvar token e dados do usuário
    */
-  async saveAuth(token: string, user: any) {
+  async saveAuth(token: string, user: User) {
     try {
       await AsyncStorage.setItem(TOKEN_KEY, token);
       await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -45,7 +46,7 @@ export const authStorage = {
   /**
    * Recuperar dados do usuário
    */
-  async getUser() {
+  async getUser(): Promise<User | null> {
     try {
       const userJson = await AsyncStorage.getItem(USER_KEY);
       return userJson ? JSON.parse(userJson) : null;

@@ -40,6 +40,7 @@ user.get('/me', authMiddleware, async (c) => {
         email: true,
         username: true,
         name: true,
+        birthDate: true,
         bio: true,
         avatarUrl: true,
         

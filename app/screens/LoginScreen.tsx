@@ -4,7 +4,6 @@ import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,29 +13,26 @@ import {
   View,
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
+import { AlertModal } from '../../components/ui/AlertModal';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { DateInput } from '../../components/ui/DateInput';
 import { Input } from '../../components/ui/Input';
 import { Tag } from '../../components/ui/Tag';
+import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import { styles } from '../styles/login.styles';
 
-// Função auxiliar para mostrar alertas compatíveis com Web e Mobile
-const showAlert = (title: string, message: string) => {
-  if (Platform.OS === 'web') {
-    window.alert(`${title}\n\n${message}`);
-  } else {
-    Alert.alert(title, message, [{ text: 'OK', style: 'default' }]);
-  }
-};
-
 const LoginScreen = () => {
+  const { alert, alertConfig, isVisible, hideAlert } = useAlert();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  const [name, setName] = useState(''); // Nome completo (opcional)
+  const [name, setName] = useState(''); // Nome completo (obrigatório)
+  const [birthDate, setBirthDate] = useState(''); // Data de nascimento (obrigatório)
   const [identifier, setIdentifier] = useState(''); // Para login (email ou username)
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // Confirmação de senha
   const [isLogin, setIsLogin] = useState(true); // true = Login, false = Cadastro
   const [loading, setLoading] = useState(false);
 
@@ -55,15 +51,52 @@ const LoginScreen = () => {
     return password.length >= 6;
   };
 
+  // Converte data do formato brasileiro para ISO
+  const convertToISODate = (dateString: string): string => {
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  // Validação de data de nascimento
+  const validateBirthDate = (dateString: string) => {
+    if (!dateString || dateString.length !== 10) return false;
+    
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = dateString.match(regex);
+    
+    if (!match) return false;
+    
+    const [, day, month, year] = match;
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    
+    // Verifica ranges básicos
+    if (monthNum < 1 || monthNum > 12) return false;
+    if (dayNum < 1 || dayNum > 31) return false;
+    if (yearNum < 1900 || yearNum > new Date().getFullYear()) return false;
+    
+    // Verifica dias do mês
+    const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+    if (dayNum > daysInMonth) return false;
+    
+    // Verifica se não é data futura
+    const birthDate = new Date(yearNum, monthNum - 1, dayNum);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return birthDate <= today;
+  };
+
   // Função para fazer login
   const handleLogin = async () => {
     // Validações
     if (!identifier || identifier.trim().length === 0) {
-      showAlert('❌ Erro', 'Digite seu email ou nome de usuário!');
+      alert.error('Erro de Validação', 'Digite seu email ou nome de usuário!');
       return;
     }
     if (!validatePassword(password)) {
-      showAlert('❌ Erro', 'A senha deve ter pelo menos 6 caracteres!');
+      alert.error('Erro de Validação', 'A senha deve ter pelo menos 6 caracteres!');
       return;
     }
 
@@ -83,16 +116,16 @@ const LoginScreen = () => {
       } else {
         // Exibe erro específico do servidor
         console.log('Erro do servidor:', result.error); // Debug
-        showAlert(
-          '🔒 Erro no Login', 
+        alert.error(
+          'Erro no Login',
           result.error || 'Email/usuário ou senha inválidos!'
         );
       }
     } catch (error: any) {
       // Erro de conexão
       console.error('Erro de conexão:', error); // Debug
-      showAlert(
-        '🌐 Erro de Conexão', 
+      alert.error(
+        'Erro de Conexão',
         'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.'
       );
     } finally {
@@ -104,15 +137,31 @@ const LoginScreen = () => {
   const handleRegister = async () => {
     // Validações
     if (!validateEmail(email)) {
-      showAlert('❌ Erro', 'Digite um e-mail válido!');
+      alert.error('Erro de Validação', 'Digite um e-mail válido!');
       return;
     }
     if (!validateUsername(username)) {
-      showAlert('❌ Erro', 'Nome de usuário deve ter pelo menos 3 caracteres e conter apenas letras, números e _');
+      alert.error('Erro de Validação', 'Nome de usuário deve ter pelo menos 3 caracteres e conter apenas letras, números e _');
+      return;
+    }
+    if (!name || name.trim().length === 0) {
+      alert.error('Erro de Validação', 'Nome completo é obrigatório!');
+      return;
+    }
+    if (!birthDate || birthDate.trim().length === 0) {
+      alert.error('Erro de Validação', 'Data de nascimento é obrigatória!');
+      return;
+    }
+    if (!validateBirthDate(birthDate)) {
+      alert.error('Erro de Validação', 'Data de nascimento deve estar no formato DD/MM/YYYY e ser válida!');
       return;
     }
     if (!validatePassword(password)) {
-      showAlert('❌ Erro', 'A senha deve ter pelo menos 6 caracteres!');
+      alert.error('Erro de Validação', 'A senha deve ter pelo menos 6 caracteres!');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert.error('Erro de Validação', 'As senhas não coincidem!');
       return;
     }
 
@@ -128,7 +177,8 @@ const LoginScreen = () => {
         email, 
         username, 
         password,
-        name || undefined  // Envia apenas se tiver valor
+        name,
+        convertToISODate(birthDate)
       );
       
       if (result.success) {
@@ -141,17 +191,17 @@ const LoginScreen = () => {
         // Tratamento especial para erros de validação (array)
         if (Array.isArray(result.error)) {
           const errorMessages = result.error.map((err: any) => err.message).join('\n');
-          showAlert('❌ Erro no Cadastro', errorMessages);
+          alert.error('Erro no Cadastro', errorMessages);
         } else {
-          showAlert(
-            '❌ Erro no Cadastro', 
+          alert.error(
+            'Erro no Cadastro',
             result.error || 'Erro ao criar conta. Tente novamente.'
           );
         }
       }
     } catch (error: any) {
-      showAlert(
-        '🌐 Erro de Conexão', 
+      alert.error(
+        'Erro de Conexão',
         'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.'
       );
     } finally {
@@ -213,10 +263,19 @@ const LoginScreen = () => {
 
             <Input
               icon="card-account-details-outline"
-              placeholder="Nome completo (opcional)"
+              placeholder="Nome completo (obrigatório)"
               autoCapitalize="words"
               value={name}
               onChangeText={setName}
+              editable={!loading}
+              returnKeyType="next"
+              onSubmitEditing={() => {}}
+            />
+
+            <DateInput
+              value={birthDate}
+              onChangeText={setBirthDate}
+              placeholder="Data de nascimento (DD/MM/YYYY) - obrigatório"
               editable={!loading}
               returnKeyType="next"
               onSubmitEditing={() => {}}
@@ -226,14 +285,27 @@ const LoginScreen = () => {
 
         <Input
           icon="lock-outline"
-          placeholder="Sua senha"
+          placeholder={isLogin ? "Sua senha" : "Sua senha (mínimo 6 caracteres)"}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
           editable={!loading}
-          returnKeyType="done"
-          onSubmitEditing={isLogin ? handleLogin : handleRegister}
+          returnKeyType={isLogin ? "done" : "next"}
+          onSubmitEditing={isLogin ? handleLogin : () => {}}
         />
+
+        {!isLogin && (
+          <Input
+            icon="lock-check-outline"
+            placeholder="Confirme sua senha"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            editable={!loading}
+            returnKeyType="done"
+            onSubmitEditing={handleRegister}
+          />
+        )}
 
         <Button
           title={isLogin ? 'Entrar' : 'Criar Conta'}
@@ -275,6 +347,18 @@ const LoginScreen = () => {
         Ao {isLogin ? 'entrar' : 'criar uma conta'}, você concorda com nossos <Text style={styles.link}>Termos de Uso</Text> e <Text style={styles.link}>Política de Privacidade</Text>
       </Text>
       </ScrollView>
+
+      <AlertModal
+        visible={isVisible}
+        title={alertConfig?.title || ''}
+        message={alertConfig?.message || ''}
+        type={alertConfig?.type}
+        confirmText={alertConfig?.confirmText}
+        cancelText={alertConfig?.cancelText}
+        onConfirm={alertConfig?.onConfirm}
+        onCancel={alertConfig?.onCancel}
+        onClose={hideAlert}
+      />
     </KeyboardAvoidingView>
   );
 };

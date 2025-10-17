@@ -9,6 +9,8 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
 
+---
+
 ## 🎯 Stack Tecnológica
 
 ### **Backend**
@@ -32,33 +34,66 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 
 ```
 FiQuestLife/
-├── app/                        # Frontend (React Native)
+├── app/                        # 📱 Frontend (React Native + Expo Router)
+│   ├── (tabs)/                # Navegação em abas (file-based routing)
+│   │   ├── _layout.tsx       # Layout das tabs
+│   │   ├── index.tsx         # Tab Home
+│   │   └── explore.tsx       # Tab Explorar
 │   ├── screens/               # 📱 Componentes das telas
-│   │   ├── LoginScreen.tsx   # Login/Cadastro
-│   │   └── ProfileScreen.tsx # Perfil com gamificação
-│   ├── styles/               # 🎨 Estilos separados
-│   ├── (tabs)/               # Navegação em abas
-│   └── index.tsx             # Rota inicial
+│   │   ├── index.ts          # Barrel export
+│   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
+│   │   └── ProfileScreen.tsx # Perfil com gamificação e stats
+│   ├── styles/                # 🎨 Estilos separados por tela
+│   │   ├── index.ts          # Barrel export
+│   │   ├── login.styles.ts   # Estilos do LoginScreen
+│   │   └── profile.styles.ts # Estilos do ProfileScreen
+│   ├── _layout.tsx           # Layout raiz do app
+│   └── index.tsx             # Rota inicial (redirect)
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 8 componentes de UI
-│   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
-│   │   ├── Input.tsx         # Input com ícone e multiline
-│   │   ├── Card.tsx          # Container com sombra e padding
+│   ├── ui/                   # 11 componentes de UI
+│   │   ├── index.ts          # Barrel export de todos os componentes
+│   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
-│   │   ├── Tag.tsx           # Badge/Tag com ícone
+│   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
+│   │   ├── Card.tsx          # Container com sombra e padding
+│   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
+│   │   ├── Input.tsx         # Input com ícone e multiline + efeitos foco
+│   │   ├── LoadingScreen.tsx # Tela de loading reutilizável
+│   │   ├── LogoutButton.tsx  # Botão de logout com confirmação
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
-│   │   └── LoadingScreen.tsx # Tela de loading reutilizável
+│   │   └── Tag.tsx           # Badge/Tag com ícone
 │   └── layout/
+│       ├── index.ts          # Barrel export
 │       └── Header.tsx        # Cabeçalho do app
 │
-├── utils/                     # 🛠️ Funções Utilitárias
-│   ├── validators.ts         # Validações (email, username, password, etc)
-│   ├── dateUtils.ts          # Formatação e cálculos de datas
-│   └── dialog.ts             # Alertas compatíveis Web + Mobile
+├── hooks/                     # 🎣 Hooks Personalizados
+│   ├── useAlert.ts           # Hook para gerenciamento de alertas
+│   ├── use-color-scheme.ts   # Hook para detecção de tema (claro/escuro)
+│   ├── use-color-scheme.web.ts # Versão web do hook de tema
+│   └── use-theme-color.ts    # Hook para cores temáticas
 │
-├── backend/                   # Backend (Node.js + Hono)
+├── types/                     # 📝 Definições de Tipos TypeScript
+│   └── user.ts               # Interface User (compartilhada)
+│
+├── utils/                     # 🛠️ Funções Utilitárias
+│   ├── dateUtils.ts          # Formatação e cálculos de datas
+│   ├── dialog.ts             # Helpers para dialogs (legado)
+│   └── validators.ts         # Validações (email, username, password, etc)
+│
+├── services/                  # 🌐 Comunicação com API
+│   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
+│   └── auth.ts               # Gerenciamento de token JWT + AsyncStorage
+│
+├── constants/                 # 🎨 Constantes e Temas
+│   ├── responsive.ts         # Breakpoints e helpers responsivos
+│   └── theme.ts              # Cores e estilos globais
+│
+├── assets/                    # 🖼️ Recursos estáticos
+│   └── images/               # Ícones, logos, splash screens
+│
+├── backend/                   # 🔧 Backend (Node.js + Hono)
 │   ├── src/
 │   │   ├── controllers/      # 🎯 Lógica de negócio
 │   │   │   ├── auth.controller.ts   # Login, Register, Profile
@@ -70,48 +105,47 @@ FiQuestLife/
 │   │   ├── middlewares/      # 🔒 Middlewares
 │   │   │   ├── auth.middleware.ts   # Validação JWT
 │   │   │   └── error.middleware.ts  # Tratamento de erros
-│   │   └── lib/              # 🔧 Clientes e utilitários
-│   │       ├── prisma.ts     # Prisma Client
-│   │       └── supabase.ts   # Supabase Client
+│   │   ├── lib/              # 🔧 Clientes e utilitários
+│   │   │   ├── prisma.ts     # Prisma Client
+│   │   │   └── supabase.ts   # Supabase Client
+│   │   └── index.ts          # Entry point do servidor
 │   ├── prisma/
-│   │   ├── schema.prisma     # 🗄️ Schema (User + Challenge System)
-│   │   └── migrations/       # Histórico de mudanças do DB
-│   └── .env                  # 🔐 Variáveis de ambiente
+│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados
+│   │   ├── migrations/       # Histórico de mudanças do DB
+│   │   │   ├── migration_lock.toml
+│   │   │   ├── 20251016122028_add_username/
+│   │   │   ├── 20251016131113_add_gamification_fields/
+│   │   │   ├── 20251016152857_add_challenges/
+│   │   │   └── 20251017122341_make_name_and_birthdate_required/
+│   │   └── scripts/
+│   │       └── clear-database.sql # Script para limpar DB
+│   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
+│   ├── .env.example          # Exemplo de variáveis de ambiente
+│   ├── package.json          # Dependências do backend
+│   └── tsconfig.json         # Configuração TypeScript do backend
 │
-└── services/                  # 🌐 Comunicação com API
-    ├── api.ts                # ⚠️ ALTERAR IP AQUI
-    └── auth.ts               # Gerenciamento de token
+├── .expo/                     # Cache do Expo (não versionado)
+├── .vscode/                   # Configurações do VS Code
+├── node_modules/              # Dependências (não versionado)
+├── app.json                   # Configuração do Expo
+├── expo-env.d.ts             # Tipos do Expo
+├── eslint.config.js          # Configuração ESLint
+├── package.json               # Dependências do frontend
+├── tsconfig.json              # Configuração TypeScript do frontend
+└── README.md                  # 📖 Este arquivo
 ```
 
 ---
 
-## ⚙️ Configurações do Projeto
+## 🚀 Setup Inicial
 
-### 🔐 Estrutura do arquivo `.env` do backend
+### **1. Pré-requisitos**
+- Node.js v20+
+- npm ou yarn
+- PostgreSQL (local ou Supabase)
+- Expo CLI (`npm install -g @expo/cli`)
 
-O arquivo `.env` deve ficar na pasta `backend` e conter:
-
-```env
-# URL de conexão do banco de dados PostgreSQL (Supabase)
-DATABASE_URL="postgresql://usuario:senha@host:porta/database"
-
-# Exemplo para Supabase:
-# DATABASE_URL="postgresql://postgres:senha_super_secreta@db.xxxxx.supabase.co:5432/postgres"
-```
-
-**Como obter a URL do Supabase:**
-- Acesse o painel do Supabase
-- Vá em "Project Settings" > "Database" > "Connection string"
-- Copie a string de conexão PostgreSQL
-
-> ⚠️ Não compartilhe o arquivo `.env` publicamente. Mantenha a senha segura!
-
----
-
-## ⚙️ Setup Inicial
-
-### **1. Instalar Dependências**
-
+### **2. Instalar Dependências**
 ```bash
 # Frontend
 npm install
@@ -119,22 +153,40 @@ npm install
 # Backend
 cd backend
 npm install
+cd ..
 ```
 
-### **2. Configurar Backend**
+### **3. Configurar Banco de Dados**
 
-O arquivo `backend/.env` já está configurado com banco compartilhado (Supabase). Rode as migrations:
+**Estrutura do arquivo `.env`:**
+```env
+# Supabase Configuration
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
 
+# Database URL (Supabase PostgreSQL)
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.your-project.supabase.co:5432/postgres"
+
+# JWT Secret (usado para autenticação)
+JWT_SECRET="your_jwt_secret_key"
+
+# Server
+PORT=3000
+```
+
+**Localização do arquivo:** `backend/.env`
+
+Rode as migrations:
 ```bash
 cd backend
 npx prisma migrate deploy
 npx prisma generate
+cd ..
 ```
 
-### **3. ⚠️ Configurar IP Local (IMPORTANTE)**
+### **4. ⚠️ Configurar IP Local (IMPORTANTE)**
 
-Descubra seu IP local:
-
+**Descubra seu IP local:**
 ```bash
 # Windows
 ipconfig
@@ -143,14 +195,13 @@ ipconfig
 ifconfig
 ```
 
-Edite `services/api.ts` e **altere o IP**:
-
+**Edite `services/api.ts` e altere o IP:**
 ```typescript
 // services/api.ts
 const API_URL = 'http://192.168.1.XX:3000'; // ← TROCAR PARA SEU IP
 ```
 
-### **4. Rodar os Projetos**
+### **5. Rodar os Projetos**
 
 **Terminal 1 - Backend:**
 ```bash
@@ -163,170 +214,257 @@ npm run dev
 npx expo start
 ```
 
-### **5. Testar no Celular**
-
+### **6. Testar no Celular**
 1. Instale **Expo Go** no celular
 2. Conecte na **mesma rede Wi-Fi** do PC
 3. Escaneie o QR code no terminal
 
 ---
 
-## 🔧 Onde Modificar o Código
+## 🎨 Componentes de UI
 
-### **Alterar IP do servidor**
-📁 `services/api.ts` → linha 11
+### AlertModal - Sistema de Alertas Profissional
 
-```typescript
-const API_URL = 'http://SEU_IP_AQUI:3000';
+Modal profissional para alertas, confirmações e mensagens de erro:
+
+```tsx
+import { AlertModal } from '../components/ui/AlertModal';
+import { useAlert } from '../hooks/useAlert';
+
+const MyComponent = () => {
+  const { alert, isVisible, alertConfig, hideAlert } = useAlert();
+
+  const handleSuccess = () => {
+    alert.success('Sucesso!', 'Operação realizada com sucesso.');
+  };
+
+  const handleConfirm = () => {
+    alert.confirm(
+      'Confirmar Exclusão',
+      'Tem certeza que deseja excluir este item?',
+      () => console.log('Excluído'),
+      () => console.log('Cancelado')
+    );
+  };
+
+  return (
+    <>
+      <Button onPress={handleSuccess} title="Mostrar Sucesso" />
+      <Button onPress={handleConfirm} title="Confirmar" />
+
+      <AlertModal
+        visible={isVisible}
+        title={alertConfig?.title || ''}
+        message={alertConfig?.message || ''}
+        type={alertConfig?.type}
+        confirmText={alertConfig?.confirmText}
+        cancelText={alertConfig?.cancelText}
+        onConfirm={alertConfig?.onConfirm}
+        onCancel={alertConfig?.onCancel}
+        onClose={hideAlert}
+      />
+    </>
+  );
+};
 ```
 
-### **Adicionar novo campo no banco**
-📁 `backend/prisma/schema.prisma`
-
-```prisma
-model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  username String @unique
-  novocampo String?  // ← Adicionar aqui
-}
-```
-
-Depois rode:
-```bash
-cd backend
-npx prisma migrate dev --name add_novocamp
-npx prisma generate
-```
-
-### **Criar nova tela**
-1. Criar componente em `app/screens/NovaTela.tsx`
-2. Criar estilos em `app/styles/nova-tela.styles.ts`
-3. Criar rota em `app/nova-tela.tsx`
-
-### **Adicionar novo endpoint**
-1. Criar controller em `backend/src/controllers/`
-2. Criar rota em `backend/src/routes/`
-3. Registrar no `backend/src/index.ts`
-
-### **Alterar cores/estilos**
-📁 `app/styles/*.styles.ts` e `constants/theme.ts`
+**Características:**
+- 4 tipos de alertas: `success`, `error`, `warning`, `info`
+- Método `confirm` para diálogos de confirmação
+- Design diferente para web e mobile
+- Hook `useAlert` para gerenciamento centralizado
+- Ícones Unicode para compatibilidade cross-platform
 
 ---
 
-## 🗄️ Banco de Dados
+### LogoutButton - Logout com Confirmação
 
-### **Schema Atual (User + Challenge System)**
+Componente reutilizável para logout com confirmação profissional:
 
-```prisma
-// ENUMs para o sistema de desafios
-enum ChallengeCategory {
-  PHYSICAL_ACTIVITY
-  NUTRITION
-  HYDRATION
-  MENTAL_HEALTH
-  SLEEP
-  SOCIAL
-  PRODUCTIVITY
-  MINDFULNESS
-}
+```tsx
+import { LogoutButton } from '../components/ui/LogoutButton';
 
-enum ChallengeDifficulty { EASY MEDIUM HARD EXPERT }
-enum ChallengeFrequency { DAILY WEEKLY MONTHLY ONE_TIME }
-enum ChallengeStatus { PENDING IN_PROGRESS COMPLETED FAILED SKIPPED }
-
-// Modelo de Usuário
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  name      String?
-  password  String
-  bio       String?
-  avatarUrl String?
-  
-  // Gamificação
-  xp            Int      @default(0)
-  coins         Int      @default(0)
-  level         Int      @default(1)
-  currentStreak Int      @default(0)
-  longestStreak Int      @default(0)
-  lastActiveDate DateTime?
-  
-  // Configurações
-  notificationsEnabled Boolean @default(true)
-  dailyReminderTime    String?
-  profilePublic        Boolean @default(false)
-  
-  // Relações
-  userChallenges UserChallenge[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// Catálogo de Desafios
-model Challenge {
-  id          String              @id @default(uuid())
-  title       String
-  description String
-  category    ChallengeCategory
-  difficulty  ChallengeDifficulty
-  xpReward    Int
-  coinsReward Int
-  isActive    Boolean             @default(true)
-  frequency   ChallengeFrequency  @default(DAILY)
-  
-  userChallenges UserChallenge[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// Relação N:N User <-> Challenge
-model UserChallenge {
-  id          String          @id @default(uuid())
-  userId      String
-  challengeId String
-  status      ChallengeStatus @default(PENDING)
-  assignedAt  DateTime        @default(now())
-  completedAt DateTime?
-  progress    Int             @default(0)
-  notes       String?
-  
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, challengeId, assignedAt])
-  @@index([userId, status])
-  @@index([assignedAt])
-}
+const MyScreen = () => {
+  return (
+    <LogoutButton
+      title="Sair da Conta"
+      icon="logout"
+      onLogoutSuccess={() => console.log('Logout realizado!')}
+      onLogoutError={(error) => console.log('Erro no logout:', error)}
+    />
+  );
+};
 ```
 
-### **Migrations Aplicadas**
-- ✅ `20251016122028_add_username` - Adicionou campo username
-- ✅ `20251016131113_add_gamification_fields` - Sistema de gamificação completo
-- ✅ `20251016152857_add_challenges` - Sistema de desafios (Challenge + UserChallenge)
-
-### **Comandos Úteis**
-
-```bash
-# Visualizar banco de dados
-npx prisma studio
-
-# Criar migration
-npx prisma migrate dev --name nome_da_alteracao
-
-# Resetar banco (CUIDADO!)
-npx prisma migrate reset
-
-# Limpar todos os usuários
-echo "TRUNCATE TABLE users RESTART IDENTITY CASCADE;" | npx prisma db execute --schema=prisma\schema.prisma --stdin
-```
+**Características:**
+- Confirmação profissional antes do logout
+- Tratamento automático de navegação (web/mobile)
+- Callbacks opcionais para sucesso/erro
+- Design consistente com o app
+- Limpeza automática do AsyncStorage
 
 ---
 
-## 🔐 Endpoints da API
+### Input - Campo de Entrada Aprimorado
+
+Campo de entrada com ícones e efeitos de foco profissional:
+
+```tsx
+import { Input } from '../components/ui/Input';
+
+// Input básico
+<Input
+  placeholder="Digite seu nome"
+  value={name}
+  onChangeText={setName}
+/>
+
+// Input com ícone
+<Input
+  icon="email"
+  placeholder="Digite seu email"
+  value={email}
+  onChangeText={setEmail}
+  keyboardType="email-address"
+/>
+
+// Input multiline (textarea)
+<Input
+  multiline
+  placeholder="Digite sua mensagem"
+  value={message}
+  onChangeText={setMessage}
+  numberOfLines={4}
+/>
+```
+
+**Características:**
+- Ícones opcionais usando MaterialCommunityIcons
+- Efeitos de foco automáticos (borda azul + sombra)
+- Suporte a múltiplas linhas
+- Remoção automática de bordas pretas no web
+- Design responsivo cross-platform
+
+---
+
+### DateInput - Campo de Data com Formatação Automática
+
+Input especializado para datas brasileiras (DD/MM/YYYY) com formatação automática:
+
+```tsx
+import { DateInput } from '../components/ui/DateInput';
+
+const MyComponent = () => {
+  const [birthDate, setBirthDate] = useState('');
+
+  return (
+    <DateInput
+      value={birthDate}
+      onChangeText={setBirthDate}
+      placeholder="Data de nascimento (DD/MM/YYYY)"
+      editable={true}
+      returnKeyType="next"
+    />
+  );
+};
+```
+
+**Características:**
+- Formatação automática DD/MM/YYYY
+- Aceita apenas números
+- Adiciona barras automaticamente
+- Limite de 10 caracteres
+- Previne entrada de caracteres inválidos
+- Baseado no componente Input (herda todos os estilos)
+
+**Exemplo de uso:**
+- Digite: `12` → Mostra: `12`
+- Digite: `1234` → Mostra: `12/34`
+- Digite: `12345678` → Mostra: `12/34/5678`
+
+---
+
+### Componentes de UI Disponíveis
+
+| Componente | Descrição | Arquivo |
+|------------|-----------|---------|
+| **AlertModal** | Modal profissional de alertas (4 tipos) | `components/ui/AlertModal.tsx` |
+| **Button** | Botão com variantes (primary, secondary, danger) | `components/ui/Button.tsx` |
+| **Input** | Campo de entrada com ícones e efeitos de foco | `components/ui/Input.tsx` |
+| **DateInput** | Input de data com formatação automática DD/MM/YYYY | `components/ui/DateInput.tsx` |
+| **Card** | Container com sombra e padding | `components/ui/Card.tsx` |
+| **Avatar** | Avatar circular com iniciais | `components/ui/Avatar.tsx` |
+| **Tag** | Badge/Tag com ícone | `components/ui/Tag.tsx` |
+| **InfoRow** | Linha de informação (label + valor) | `components/ui/InfoRow.tsx` |
+| **StatBox** | Caixa de estatística gamificada | `components/ui/StatBox.tsx` |
+| **LoadingScreen** | Tela de loading reutilizável | `components/ui/LoadingScreen.tsx` |
+| **LogoutButton** | Botão de logout com confirmação | `components/ui/LogoutButton.tsx` |
+
+---
+
+## 🎣 Hooks Personalizados
+
+### useAlert - Gerenciamento de Alertas
+
+Hook para gerenciamento centralizado de alertas e modais:
+
+```tsx
+import { useAlert } from '../hooks/useAlert';
+
+const MyComponent = () => {
+  const { alert, isVisible, alertConfig, hideAlert } = useAlert();
+
+  const handleSuccess = () => {
+    alert.success('Sucesso!', 'Operação realizada.');
+  };
+
+  const handleError = () => {
+    alert.error('Erro', 'Ocorreu um problema.');
+  };
+
+  const handleConfirm = () => {
+    alert.confirm(
+      'Confirmar',
+      'Tem certeza?',
+      () => console.log('Confirmado'),
+      () => console.log('Cancelado')
+    );
+  };
+
+  return (
+    <>
+      <Button onPress={handleSuccess} title="Sucesso" />
+      <Button onPress={handleError} title="Erro" />
+      <Button onPress={handleConfirm} title="Confirmar" />
+
+      <AlertModal
+        visible={isVisible}
+        title={alertConfig?.title || ''}
+        message={alertConfig?.message || ''}
+        type={alertConfig?.type}
+        confirmText={alertConfig?.confirmText}
+        cancelText={alertConfig?.cancelText}
+        onConfirm={alertConfig?.onConfirm}
+        onCancel={alertConfig?.onCancel}
+        onClose={hideAlert}
+      />
+    </>
+  );
+};
+```
+
+**Métodos disponíveis:**
+- `alert.success(title, message, onConfirm?)` - Alerta verde de sucesso
+- `alert.error(title, message, onConfirm?)` - Alerta vermelho de erro
+- `alert.warning(title, message, onConfirm?)` - Alerta amarelo de aviso
+- `alert.info(title, message, onConfirm?)` - Alerta azul informativo
+- `alert.confirm(title, message, onConfirm, onCancel?, confirmText?, cancelText?)` - Confirmação
+
+---
+
+---
+
+## 🔐 API Endpoints
 
 | Método | Rota              | Auth | Descrição                         |
 |--------|-------------------|------|-----------------------------------|
@@ -346,7 +484,8 @@ POST /auth/register
   "email": "usuario@email.com",
   "username": "usuario_teste",
   "password": "123456",
-  "name": "Nome Completo"  // Opcional
+  "name": "João da Silva",      // Obrigatório
+  "birthDate": "1990-05-15"     // Obrigatório (formato ISO: YYYY-MM-DD)
 }
 ```
 
@@ -381,37 +520,6 @@ POST /auth/login
 
 ---
 
-## 🐛 Troubleshooting
-
-### **Erro: "Network request failed"**
-- ✅ Backend está rodando? (`cd backend && npm run dev`)
-- ✅ IP em `services/api.ts` está correto?
-- ✅ Celular e PC na mesma rede Wi-Fi?
-- ✅ Firewall bloqueando porta 3000?
-
-### **Erro 409 (Conflict)**
-- Email ou username já existe no banco
-- Solução: Use outro email/username ou limpe o banco
-
-### **Erro: "Alert.alert não funciona no navegador"**
-- ✅ Use `showAlert()` ou `showConfirm()` de `utils/dialog.ts`
-- ✅ Compatível com Web (window.alert/confirm) e Mobile (Alert.alert)
-
-### **Botão de Logout não funciona**
-- ✅ Corrija com `showConfirm()` de `utils/dialog.ts`
-- ✅ `Alert.alert()` NÃO funciona no navegador web
-
-### **Prisma Client não atualiza**
-```bash
-cd backend
-npx prisma generate
-```
-
-Depois reinicie o TypeScript Server no VS Code:
-- `Ctrl+Shift+P` → "TypeScript: Restart TS Server"
-
----
-
 ## 📝 Comandos Rápidos
 
 ```bash
@@ -437,32 +545,120 @@ cd backend && npx prisma studio
 
 ---
 
+## �️ Guia de Desenvolvimento
+
+### **Alterar IP do servidor**
+📁 `services/api.ts` → linha 11
+```typescript
+const API_URL = 'http://SEU_IP_AQUI:3000';
+```
+
+### **Adicionar novo campo no banco**
+📁 `backend/prisma/schema.prisma`
+```prisma
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  username String @unique
+  novocampo String?  // ← Adicionar aqui
+}
+```
+
+Depois rode:
+```bash
+cd backend
+npx prisma migrate dev --name add_novocamp
+npx prisma generate
+```
+
+### **Criar nova tela**
+1. Criar componente em `app/screens/NovaTela.tsx`
+2. Criar estilos em `app/styles/nova-tela.styles.ts`
+3. Criar rota em `app/nova-tela.tsx`
+
+### **Adicionar novo endpoint**
+1. Criar controller em `backend/src/controllers/`
+2. Criar rota em `backend/src/routes/`
+3. Registrar no `backend/src/index.ts`
+
+### **Alterar cores/estilos**
+📁 `app/styles/*.styles.ts` e `constants/theme.ts`
+
+---
+
+### **Erro: "Network request failed"**
+- ✅ Backend está rodando? (`cd backend && npm run dev`)
+- ✅ IP em `services/api.ts` está correto?
+- ✅ Celular e PC na mesma rede Wi-Fi?
+- ✅ Firewall bloqueando porta 3000?
+
+### **Erro 409 (Conflict)**
+- Email ou username já existe no banco
+- Solução: Use outro email/username ou limpe o banco
+
+### **Erro: "Alert.alert não funciona no navegador"**
+- ✅ Use `alert.success()`, `alert.error()`, etc. do hook `useAlert`
+- ✅ Compatível com Web e Mobile através do `AlertModal`
+- ✅ Exemplo: `const { alert } = useAlert(); alert.success('Título', 'Mensagem');`
+
+### **Botão de Logout não funciona**
+- ✅ Use o componente `LogoutButton` que já inclui confirmação
+- ✅ Ou use `alert.confirm()` do hook `useAlert` para confirmações manuais
+
+### **Prisma Client não atualiza**
+```bash
+cd backend
+npx prisma generate
+```
+
+Depois reinicie o TypeScript Server no VS Code:
+- `Ctrl+Shift+P` → "TypeScript: Restart TS Server"
+
+---
+
 ## 🎯 Funcionalidades Implementadas
 
 ### **Autenticação**
 - ✅ Sistema de autenticação JWT (7 dias)
+### **Autenticação e Cadastro**
 - ✅ Login com email OU username
-- ✅ Cadastro com: email, username, nome (opcional), senha
+- ✅ Cadastro com validações completas:
+  - Email válido (contém @)
+  - Username alfanumérico (3+ caracteres, apenas letras/números/_)
+  - Senha forte (6+ caracteres)
+  - Nome completo obrigatório
+  - Data de nascimento obrigatória (DD/MM/YYYY)
+  - Confirmação de senha (deve coincidir)
 - ✅ Senha criptografada com bcrypt
-- ✅ Validações: email válido, username alfanumérico, senha 6+ chars
 - ✅ Armazenamento seguro de token (AsyncStorage)
 - ✅ Proteção de rotas com middleware JWT
+- ✅ Validações no backend e frontend
 
 ### **Interface**
-- ✅ 8 componentes reutilizáveis de UI (Button, Input, Card, Avatar, Tag, InfoRow, StatBox, LoadingScreen)
+- ✅ 11 componentes reutilizáveis de UI (AlertModal, Button, Input, DateInput, Card, Avatar, Tag, InfoRow, StatBox, LoadingScreen, LogoutButton)
 - ✅ 1 componente de Layout (Header)
+- ✅ 4 hooks personalizados (useAlert, useColorScheme, useThemeColor)
 - ✅ Design gamificado com ícones e cores vibrantes
-- ✅ Alertas compatíveis Web + Mobile (`utils/dialog.ts`)
+- ✅ Sistema de alertas profissional (`AlertModal` + `useAlert` hook)
+- ✅ **AlertModal**: Modal com overlay corrigido cobrindo toda a tela
+- ✅ **useAlert Hook**: Gerenciamento centralizado de alertas e confirmações
+- ✅ **LogoutButton**: Componente de logout com confirmação integrada
+- ✅ **Input Aprimorado**: Efeitos de foco profissional e remoção de bordas pretas
+- ✅ **DateInput**: Campo de data com formatação automática DD/MM/YYYY
 - ✅ Loading states em botões e telas
 - ✅ Enter key submete formulários
 - ✅ Erros específicos e informativos
 - ✅ Logout funcionando em todas as plataformas
+- ✅ Design 100% responsivo para mobile
 - ✅ Redução de ~40% de código via componentização
+- 🎨 Efeitos de foco suaves nos campos de entrada
+- 🔄 Sistema de alertas consistente cross-platform
+- 📱 Design responsivo otimizado para web e mobile
+- ♿ Acessibilidade aprimorada com navegação por teclado
 
 ### **Utilitários**
 - ✅ `utils/validators.ts` - 6 validadores (email, username, password, nome, telefone)
 - ✅ `utils/dateUtils.ts` - 7 funções de data (formatação, cálculos, tempo relativo)
-- ✅ `utils/dialog.ts` - 6 funções de diálogo (alert, confirm, error, success, warning, info)
 
 ### **Perfil e Gamificação**
 - ✅ Sistema de XP e Level (prontos para uso)
@@ -470,24 +666,30 @@ cd backend && npx prisma studio
 - ✅ Streak tracking (sequência de dias)
 - ✅ 6 estatísticas visíveis: Sequência, Level, XP, Moedas, Recorde, Dias
 - ✅ Avatar com iniciais do usuário
+- ✅ Informações completas: Nome, Username, Email, Data de Nascimento
+- ✅ Data de nascimento formatada em português brasileiro
 - ✅ Configurações: notificações, perfil público
 - ✅ Logout com confirmação
 
 ### **Banco de Dados**
 - ✅ Sistema de desafios completo (ENUMs + Models)
 - ✅ 4 ENUMs: ChallengeCategory (8 tipos), ChallengeDifficulty (4 níveis), ChallengeFrequency (4 tipos), ChallengeStatus (5 estados)
+- ✅ Model User: id, email, username, name, birthDate, bio, avatar, gamificação, timestamps
 - ✅ Model Challenge: catálogo de desafios com recompensas
 - ✅ Model UserChallenge: relação N:N com tracking de progresso
 - ✅ Constraints e índices para performance
-- ✅ Migrations versionadas e documentadas
+- ✅ 4 migrations versionadas e aplicadas
+- ✅ Campos obrigatórios: name e birthDate
 
 ### **Código e Organização**
 - ✅ 100% TypeScript (frontend + backend)
 - ✅ Código altamente componentizado e reutilizável
-- ✅ Utils centralizados (validators, dateUtils, dialog)
+- ✅ Utils centralizados (validators, dateUtils, sistema de alertas)
+- ✅ Tipagem forte com interfaces e types compartilhados
 - ✅ Exports organizados (index.ts)
 - ✅ Documentação inline com JSDoc
-- ✅ README completo e atualizado
+- ✅ **Documentação Completa**: JSDoc abrangente em todos os componentes
+- ✅ **README Atualizado**: Guias de uso e exemplos para novos componentes
 
 ## 🚀 Próximos Passos
 

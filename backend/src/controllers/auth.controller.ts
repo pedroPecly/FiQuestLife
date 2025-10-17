@@ -18,7 +18,7 @@ export const authController = {
    */
   async register(c: Context) {
     // Os dados já foram validados na rota
-    const { email, username, password, name } = await c.req.json();
+    const { email, username, password, name, birthDate } = await c.req.json();
 
     // Verifica se já existe usuário com esse email
     const existingEmail = await prisma.user.findUnique({ where: { email } });
@@ -42,7 +42,8 @@ export const authController = {
         email,
         username,
         password: hashedPassword,
-        ...(name && { name }),  // Adiciona name se fornecido
+        name,  // Agora obrigatório
+        birthDate: new Date(birthDate),  // Converte string para Date
       },
     });
 

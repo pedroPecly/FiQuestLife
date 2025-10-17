@@ -1,305 +1,130 @@
-// ============================================
-// PRISMA SCHEMA - ESTRUTURA DO BANCO DE DADOS
-// ============================================
-// 
-// Esse arquivo define como é a estrutura do banco.
-// É tipo um "mapa" que o Prisma usa pra saber:
-// - Quais tabelas existem
-// - Quais campos cada tabela tem
-// - Qual o tipo de cada campo (texto, número, data, etc)
-// 
-// Depois de editar esse arquivo, rode:
-//   npm run prisma:push  (sincroniza com o banco)
-//   npm run prisma:generate  (atualiza o código TypeScript)
-
-// ============================================
-// CONFIGURAÇÃO DO GERADOR
-// ============================================
-// Isso aqui diz pro Prisma gerar o código JavaScript/TypeScript
-// que a gente usa pra fazer queries (tipo prisma.user.findMany())
 generator client {
   provider = "prisma-client-js"
 }
 
-// ============================================
-// CONFIGURAÇÃO DO BANCO DE DADOS
-// ============================================
-// Informa que tipo de banco a gente tá usando (PostgreSQL)
-// e onde ele tá (URL vem do arquivo .env)
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")  // Pega a URL do .env
+  url      = env("DATABASE_URL")
 }
 
-// ============================================
-// ENUMS - TIPOS ENUMERADOS
-// ============================================
-// Definem valores fixos que um campo pode ter
-// Exemplo: status só pode ser PENDING, IN_PROGRESS, etc.
-
-/**
- * Categorias de desafios disponíveis
- * Organiza os desafios por área da vida
- */
-enum ChallengeCategory {
-  PHYSICAL_ACTIVITY  // Exercícios, caminhada, academia
-  NUTRITION          // Alimentação saudável
-  HYDRATION          // Beber água
-  MENTAL_HEALTH      // Meditação, terapia, autocuidado
-  SLEEP              // Dormir bem, rotina de sono
-  SOCIAL             // Interações sociais, família
-  PRODUCTIVITY       // Trabalho, estudos, organização
-  MINDFULNESS        // Atenção plena, gratidão
-}
-
-/**
- * Níveis de dificuldade dos desafios
- * Determina XP e moedas ganhas
- */
-enum ChallengeDifficulty {
-  EASY    // Fácil: 10-50 XP
-  MEDIUM  // Médio: 50-100 XP
-  HARD    // Difícil: 100-200 XP
-  EXPERT  // Expert: 200+ XP
-}
-
-/**
- * Frequência de repetição do desafio
- * Define como o desafio se repete
- */
-enum ChallengeFrequency {
-  DAILY    // Todo dia (ex: beber 2L de água)
-  WEEKLY   // Toda semana (ex: ir à academia 3x)
-  MONTHLY  // Todo mês (ex: ler 1 livro)
-  ONE_TIME // Uma vez só (ex: fazer check-up médico)
-}
-
-/**
- * Status do desafio para o usuário
- * Rastreia o progresso individual
- */
-enum ChallengeStatus {
-  PENDING      // Atribuído, mas não iniciado
-  IN_PROGRESS  // Usuário começou a fazer
-  COMPLETED    // Concluído com sucesso
-  FAILED       // Não conseguiu completar no prazo
-  SKIPPED      // Usuário pulou/ignorou
-}
-
-// ============================================
-// MODEL USER - TABELA DE USUÁRIOS
-// ============================================
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  name      String?
-  password  String
-  bio       String?
-  avatarUrl String?  @map("avatar_url")
-  
-  // Campos de gamificação
-  xp            Int      @default(0)
-  coins         Int      @default(0)
-  level         Int      @default(1)
-  currentStreak Int      @default(0) @map("current_streak")
-  longestStreak Int      @default(0) @map("longest_streak")
-  lastActiveDate DateTime? @map("last_active_date")
-  
-  // Configurações do usuário
-  notificationsEnabled Boolean @default(true) @map("notifications_enabled")
-  dailyReminderTime    String?  @map("daily_reminder_time")
-  profilePublic        Boolean  @default(false) @map("profile_public")
-  
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  // ==========================================
-  // RELAÇÕES COM OUTRAS TABELAS
-  // ==========================================
-  userChallenges    UserChallenge[]
-  // userBadges        UserBadge[]
-  // userAvatarItems   UserAvatarItem[]
-  // equippedItems     EquippedAvatarItem[]
-  // rewardHistory     RewardHistory[]
-  // activityFeed      ActivityFeed[]
+  id                   String          @id @default(uuid())
+  email                String          @unique
+  username             String          @unique
+  name                 String
+  password             String
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  avatarUrl            String?         @map("avatar_url")
+  bio                  String?
+  coins                Int             @default(0)
+  currentStreak        Int             @default(0) @map("current_streak")
+  dailyReminderTime    String?         @map("daily_reminder_time")
+  lastActiveDate       DateTime?       @map("last_active_date")
+  level                Int             @default(1)
+  longestStreak        Int             @default(0) @map("longest_streak")
+  notificationsEnabled Boolean         @default(true) @map("notifications_enabled")
+  profilePublic        Boolean         @default(false) @map("profile_public")
+  xp                   Int             @default(0)
+  birthDate            DateTime        @map("birth_date")
+  userChallenges       UserChallenge[]
 
   @@map("users")
 }
 
-// ============================================
-// MODEL CHALLENGE - DESAFIOS DISPONÍVEIS
-// ============================================
-/**
- * Tabela de desafios (catálogo)
- * 
- * Exemplos:
- * - "Beber 2L de água" (DAILY, HYDRATION, EASY)
- * - "Meditar por 10 minutos" (DAILY, MINDFULNESS, MEDIUM)
- * - "Ir à academia 3x na semana" (WEEKLY, PHYSICAL_ACTIVITY, HARD)
- */
+/// *
+///  * Tabela de desafios (catálogo)
+///  * 
+///  * Exemplos:
+///  * - "Beber 2L de água" (DAILY, HYDRATION, EASY)
+///  * - "Meditar por 10 minutos" (DAILY, MINDFULNESS, MEDIUM)
+///  * - "Ir à academia 3x na semana" (WEEKLY, PHYSICAL_ACTIVITY, HARD)
 model Challenge {
-  id          String   @id @default(uuid())
-  
-  // Informações básicas
-  title       String   // "Beber 2L de água hoje"
-  description String   // "Mantenha-se hidratado ao longo do dia..."
-  
-  // Classificação
-  category    ChallengeCategory  // HYDRATION
-  difficulty  ChallengeDifficulty // EASY
-  
-  // ==========================================
-  // SISTEMA DE RECOMPENSAS
-  // ==========================================
-  xpReward    Int      @map("xp_reward")    // XP que o usuário ganha
-  coinsReward Int      @map("coins_reward") // Moedas que o usuário ganha
-  
-  // ==========================================
-  // CONFIGURAÇÕES DO DESAFIO
-  // ==========================================
-  isActive    Boolean  @default(true) @map("is_active")  // Ativo no sistema?
-  frequency   ChallengeFrequency @default(DAILY)         // Com que frequência repete
-  
-  // Timestamps
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  
-  // ==========================================
-  // RELAÇÕES
-  // ==========================================
-  // Todos os usuários que pegaram esse desafio
+  id             String              @id @default(uuid())
+  title          String
+  description    String
+  category       ChallengeCategory
+  difficulty     ChallengeDifficulty
+  xpReward       Int                 @map("xp_reward")
+  coinsReward    Int                 @map("coins_reward")
+  isActive       Boolean             @default(true) @map("is_active")
+  frequency      ChallengeFrequency  @default(DAILY)
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
   userChallenges UserChallenge[]
 
   @@map("challenges")
 }
 
-// ============================================
-// MODEL USERCHALLENGE - DESAFIOS DO USUÁRIO
-// ============================================
-/**
- * Relação N:N entre User e Challenge
- * 
- * Cada registro representa um desafio atribuído a um usuário.
- * O mesmo usuário pode ter o mesmo desafio várias vezes
- * (ex: "Beber 2L de água" todos os dias)
- * 
- * Por isso temos @@unique([userId, challengeId, assignedAt])
- * - Garante que um usuário não tenha o mesmo desafio 2x no mesmo momento
- * - Mas permite ter o mesmo desafio em dias diferentes
- */
+/// *
+///  * Relação N:N entre User e Challenge
+///  * 
+///  * Cada registro representa um desafio atribuído a um usuário.
+///  * O mesmo usuário pode ter o mesmo desafio várias vezes
+///  * (ex: "Beber 2L de água" todos os dias)
+///  * 
+///  * Por isso temos @@unique([userId, challengeId, assignedAt])
+///  * - Garante que um usuário não tenha o mesmo desafio 2x no mesmo momento
+///  * - Mas permite ter o mesmo desafio em dias diferentes
 model UserChallenge {
-  id          String   @id @default(uuid())
-  
-  // ==========================================
-  // RELAÇÃO COM USUÁRIO
-  // ==========================================
-  userId      String   @map("user_id")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // ==========================================
-  // RELAÇÃO COM DESAFIO
-  // ==========================================
-  challengeId String   @map("challenge_id")
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  
-  // ==========================================
-  // STATUS E PROGRESSO
-  // ==========================================
-  status      ChallengeStatus @default(PENDING)  // Estado atual
-  assignedAt  DateTime @default(now()) @map("assigned_at")  // Quando foi atribuído
-  completedAt DateTime? @map("completed_at")     // Quando foi concluído (null se não concluído)
-  
-  // Progresso (para desafios incrementais)
-  // Ex: "Ir à academia 3x" -> progress vai de 0 até 3
-  progress    Int      @default(0)
-  
-  // Observações do usuário (opcional)
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  challengeId String          @map("challenge_id")
+  status      ChallengeStatus @default(PENDING)
+  assignedAt  DateTime        @default(now()) @map("assigned_at")
+  completedAt DateTime?       @map("completed_at")
+  progress    Int             @default(0)
   notes       String?
+  challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // ==========================================
-  // CONSTRAINTS E ÍNDICES
-  // ==========================================
-  // Garante que não haja duplicatas do mesmo desafio no mesmo momento
   @@unique([userId, challengeId, assignedAt])
-  
-  // Índice para buscar desafios por usuário e status rapidamente
-  // Ex: "Buscar todos os desafios IN_PROGRESS do usuário X"
   @@index([userId, status])
-  
-  // Índice para buscar por data de atribuição
-  // Ex: "Buscar desafios atribuídos hoje"
   @@index([assignedAt])
-  
   @@map("user_challenges")
 }
 
-// ============================================
-// EXEMPLOS DE USO (COMENTADOS)
-// ============================================
-// 
-// 1. CRIAR UM DESAFIO:
-// const challenge = await prisma.challenge.create({
-//   data: {
-//     title: "Beber 2L de água",
-//     description: "Mantenha-se hidratado durante todo o dia",
-//     category: "HYDRATION",
-//     difficulty: "EASY",
-//     xpReward: 20,
-//     coinsReward: 10,
-//     frequency: "DAILY"
-//   }
-// });
-//
-// 2. ATRIBUIR DESAFIO A UM USUÁRIO:
-// const userChallenge = await prisma.userChallenge.create({
-//   data: {
-//     userId: "user-uuid-aqui",
-//     challengeId: "challenge-uuid-aqui",
-//     status: "IN_PROGRESS"
-//   }
-// });
-//
-// 3. COMPLETAR UM DESAFIO:
-// await prisma.userChallenge.update({
-//   where: { id: "user-challenge-uuid" },
-//   data: {
-//     status: "COMPLETED",
-//     completedAt: new Date(),
-//     progress: 100
-//   }
-// });
-//
-// 4. BUSCAR DESAFIOS ATIVOS DO USUÁRIO:
-// const activeChallenges = await prisma.userChallenge.findMany({
-//   where: {
-//     userId: "user-uuid",
-//     status: "IN_PROGRESS"
-//   },
-//   include: {
-//     challenge: true  // Inclui dados do desafio
-//   }
-// });
+/// *
+///  * Categorias de desafios disponíveis
+///  * Organiza os desafios por área da vida
+enum ChallengeCategory {
+  PHYSICAL_ACTIVITY
+  NUTRITION
+  HYDRATION
+  MENTAL_HEALTH
+  SLEEP
+  SOCIAL
+  PRODUCTIVITY
+  MINDFULNESS
+}
 
-// ============================================
-// COMO ADICIONAR MAIS MODELS?
-// ============================================
-// 
-// Exemplo de uma tabela de Posts:
-// 
-// model Post {
-//   id        String   @id @default(uuid())
-//   title     String
-//   content   String
-//   authorId  String
-//   author    User     @relation(fields: [authorId], references: [id])
-//   createdAt DateTime @default(now())
-//   
-//   @@map("posts")
-// }
-// 
-// Aí no User, adiciona:
-//   posts Post[]
-// 
-// Isso cria um relacionamento: 1 User tem vários Posts!
+/// *
+///  * Níveis de dificuldade dos desafios
+///  * Determina XP e moedas ganhas
+enum ChallengeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+/// *
+///  * Frequência de repetição do desafio
+///  * Define como o desafio se repete
+enum ChallengeFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  ONE_TIME
+}
+
+/// *
+///  * Status do desafio para o usuário
+///  * Rastreia o progresso individual
+enum ChallengeStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}

@@ -32,20 +32,23 @@ export const authService = {
    * @param email Email do usuário
    * @param username Nome de usuário (único)
    * @param password Senha do usuário
-   * @param name Nome completo (opcional)
+   * @param name Nome completo (obrigatório)
+   * @param birthDate Data de nascimento (obrigatório)
    */
   async register(
     email: string, 
     username: string, 
     password: string,
-    name?: string
+    name: string,
+    birthDate: string
   ) {
     try {
       const response = await api.post('/auth/register', {
         email,
         username,
         password,
-        ...(name && { name }), // Só envia se tiver valor
+        name,
+        birthDate,
       });
       return { success: true, data: response.data };
     } catch (error: any) {

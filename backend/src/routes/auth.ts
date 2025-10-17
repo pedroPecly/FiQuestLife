@@ -18,7 +18,7 @@ const auth = new Hono();
 
 // Validação manual para cadastro
 auth.post('/register', async (c) => {
-  const { email, username, password } = await c.req.json();
+  const { email, username, password, name, birthDate } = await c.req.json();
   const errors = [];
   
   // Valida email
@@ -39,6 +39,33 @@ auth.post('/register', async (c) => {
   // Valida senha
   if (!password || typeof password !== 'string' || password.length < 6) {
     errors.push({ field: 'password', message: 'Senha deve ter pelo menos 6 caracteres' });
+  }
+  
+  // Valida name (obrigatório)
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    errors.push({ field: 'name', message: 'Nome completo é obrigatório' });
+  }
+  
+  // Valida birthDate (obrigatório)
+  if (!birthDate) {
+    errors.push({ field: 'birthDate', message: 'Data de nascimento é obrigatória' });
+  } else {
+    // Verifica se é uma data válida
+    const date = new Date(birthDate);
+    if (isNaN(date.getTime())) {
+      errors.push({ field: 'birthDate', message: 'Data de nascimento inválida' });
+    } else {
+      // Verifica se não é uma data futura
+      const today = new Date();
+      if (date > today) {
+        errors.push({ field: 'birthDate', message: 'Data de nascimento não pode ser no futuro' });
+      }
+      // Verifica se não é muito antiga (mínimo 1900)
+      const minDate = new Date(1900, 0, 1);
+      if (date < minDate) {
+        errors.push({ field: 'birthDate', message: 'Data de nascimento deve ser após 1900' });
+      }
+    }
   }
   
   if (errors.length > 0) {
@@ -91,6 +118,7 @@ auth.get('/me', authMiddleware, async (c) => {
         email: true,
         username: true,
         name: true,
+        birthDate: true,
         bio: true,
         avatarUrl: true,
         xp: true,

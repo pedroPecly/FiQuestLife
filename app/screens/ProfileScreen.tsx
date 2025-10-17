@@ -4,54 +4,29 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
   Text,
-  View,
+  View
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar } from '../../components/ui/Avatar';
-import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { InfoRow } from '../../components/ui/InfoRow';
+import { LogoutButton } from '../../components/ui/LogoutButton';
 import { StatBox } from '../../components/ui/StatBox';
 import { Tag } from '../../components/ui/Tag';
+import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
+import type { User } from '../../types/user';
 import { styles } from '../styles/profile.styles';
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  name?: string;
-  bio?: string;
-  avatarUrl?: string;
-  
-  // Campos de gamificação
-  xp: number;
-  coins: number;
-  level: number;
-  currentStreak: number;
-  longestStreak: number;
-  lastActiveDate?: string;
-  
-  // Configurações
-  notificationsEnabled: boolean;
-  dailyReminderTime?: string;
-  profilePublic: boolean;
-  
-  // Timestamps
-  createdAt: string;
-  updatedAt: string;
-}
 
 const ProfileScreen = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { alert } = useAlert();
 
   useEffect(() => {
     loadUserData();
@@ -76,71 +51,18 @@ const ProfileScreen = () => {
       if (result.success) {
         setUser(result.data.user);
       } else {
-        Alert.alert('Erro', 'Não foi possível carregar seus dados');
+        alert.error('Erro de Autenticação', 'Não foi possível carregar seus dados. Você foi desconectado.');
         // Força logout se não conseguir carregar dados
         await authStorage.logout();
         router.replace('/');
       }
     } catch (error) {
-      Alert.alert('Erro', 'Erro ao carregar dados do usuário');
+      alert.error('Erro', 'Erro ao carregar dados do usuário. Você foi desconectado.');
       // Força logout em caso de erro
       await authStorage.logout();
       router.replace('/');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      // Limpa o token e dados do AsyncStorage
-      await authStorage.logout();
-      
-      // Redireciona para tela de login
-      if (Platform.OS === 'web') {
-        // Web: força reload completo da página (mais rápido e confiável)
-        window.location.href = '/';
-      } else {
-        // Mobile: usa navegação nativa do Expo Router
-        if (router.canDismiss()) {
-          router.dismissAll();
-        }
-        router.replace('/');
-      }
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-      Alert.alert('Erro', 'Erro ao fazer logout');
-    }
-  };
-
-  const confirmLogout = () => {
-    // ==========================================
-    // COMPATIBILIDADE WEB + MOBILE
-    // ==========================================
-    // Alert.alert NÃO funciona no navegador web!
-    // Por isso usamos window.confirm no web e Alert.alert no mobile
-    
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm('Tem certeza que deseja sair da sua conta?');
-      if (confirmed) {
-        handleLogout();
-      }
-    } else {
-      Alert.alert(
-        'Sair',
-        'Tem certeza que deseja sair da sua conta?',
-        [
-          { 
-            text: 'Cancelar', 
-            style: 'cancel',
-          },
-          {
-            text: 'Sair',
-            style: 'destructive',
-            onPress: handleLogout,
-          },
-        ]
-      );
     }
   };
 
@@ -253,6 +175,12 @@ const ProfileScreen = () => {
           <View style={styles.infoContainer}>
             <InfoRow
               icon="account-outline"
+              label="Nome Completo"
+              value={user.name || 'Não informado'}
+            />
+
+            <InfoRow
+              icon="at"
               label="Nome de Usuário"
               value={`@${user.username || 'Não informado'}`}
             />
@@ -261,6 +189,12 @@ const ProfileScreen = () => {
               icon="email-outline"
               label="Email"
               value={user.email || 'Não informado'}
+            />
+
+            <InfoRow
+              icon="calendar-outline"
+              label="Data de Nascimento"
+              value={user.birthDate ? getFormattedDate(user.birthDate) : 'Não informado'}
             />
           </View>
 
@@ -309,12 +243,7 @@ const ProfileScreen = () => {
             />
           </View>
 
-          <Button
-            title="Sair da Conta"
-            variant="danger"
-            icon="logout"
-            onPress={confirmLogout}
-          />
+          <LogoutButton />
         </Card>
       </ScrollView>
     </SafeAreaView>
