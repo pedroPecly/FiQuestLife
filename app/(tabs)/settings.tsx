@@ -17,15 +17,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
@@ -353,7 +353,7 @@ export default function SettingsScreen() {
             icon="help-circle"
             iconColor="#FF9800"
             label="Suporte"
-            onPress={() => alert.info('Suporte', 'Entre em contato: suporte@fiquestlife.com')}
+            onPress={() => alert.info('Suporte', 'tem contato nao pae')}
           />
 
           <SettingsMenuItem

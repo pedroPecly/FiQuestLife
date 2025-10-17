@@ -23,8 +23,8 @@ export default function TabLayout() {
         },
         // Animações de transição entre tabs
         animation: 'shift',
-        ...(Platform.OS === 'ios' && {
-          // Animação suave no iOS
+        ...((Platform.OS === 'ios' || Platform.OS === 'android') && {
+          // Animação suave no iOS e Android
           animationDuration: 300,
         }),
       }}>

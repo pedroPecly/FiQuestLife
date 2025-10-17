@@ -36,7 +36,7 @@ export default function RootLayout() {
           name="edit-profile" 
           options={{ 
             headerShown: false,
-            animation: 'slide_from_right', // Slide da direita (iOS style)
+            animation: 'slide_from_right', // Slide da direita (iOS e Android style)
             animationDuration: 300,
           }} 
         />
