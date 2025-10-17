@@ -28,6 +28,8 @@ model User {
   xp                   Int             @default(0)
   birthDate            DateTime        @map("birth_date")
   userChallenges       UserChallenge[]
+  userBadges           UserBadge[]
+  rewardHistory        RewardHistory[]
 
   @@map("users")
 }
@@ -85,6 +87,77 @@ model UserChallenge {
 }
 
 /// *
+///  * Catálogo de Badges (Emblemas)
+///  * 
+///  * Define todos os badges disponíveis no sistema.
+///  * Exemplos:
+///  * - "Primeiro Passo" (BEGINNER, completar primeiro desafio)
+///  * - "Guerreiro Semanal" (CONSISTENCY, 7 dias de streak)
+///  * - "Mestre da Hidratação" (ACHIEVEMENT, completar 100 desafios de hidratação)
+model Badge {
+  id               String               @id @default(uuid())
+  name             String               @unique
+  description      String
+  imageUrl         String               @map("image_url")
+  category         BadgeCategory
+  requirementType  BadgeRequirementType @map("requirement_type")
+  requirementValue Int                  @map("requirement_value")
+  rarity           BadgeRarity          @default(COMMON)
+  order            Int                  @default(0)
+  isActive         Boolean              @default(true) @map("is_active")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+  userBadges       UserBadge[]
+
+  @@map("badges")
+}
+
+/// *
+///  * Relação N:N entre User e Badge
+///  * 
+///  * Registra quais badges o usuário conquistou.
+///  * Cada badge só pode ser conquistado uma vez por usuário.
+model UserBadge {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  badgeId     String   @map("badge_id")
+  earnedAt    DateTime @default(now()) @map("earned_at")
+  isDisplayed Boolean  @default(false) @map("is_displayed")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([earnedAt])
+  @@map("user_badges")
+}
+
+/// *
+///  * Histórico de Recompensas
+///  * 
+///  * Registra todas as recompensas recebidas por completar desafios,
+///  * subir de nível, conquistar badges, etc.
+///  * 
+///  * Exemplos:
+///  * - +50 XP por completar desafio
+///  * - +20 moedas por completar desafio
+///  * - Badge "Primeiro Passo" desbloqueado
+model RewardHistory {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  type        RewardType
+  amount      Int
+  source      String
+  sourceId    String?    @map("source_id")
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("reward_history")
+}
+
+/// *
 ///  * Categorias de desafios disponíveis
 ///  * Organiza os desafios por área da vida
 enum ChallengeCategory {
@@ -127,4 +200,49 @@ enum ChallengeStatus {
   COMPLETED
   FAILED
   SKIPPED
+}
+
+/// *
+///  * Categorias de badges (emblemas)
+///  * Define o tipo/tema do badge
+enum BadgeCategory {
+  BEGINNER
+  CONSISTENCY
+  MILESTONE
+  SPECIAL
+  SEASONAL
+  ACHIEVEMENT
+}
+
+/// *
+///  * Tipo de requisito para desbloquear badge
+///  * Define qual condição deve ser cumprida
+enum BadgeRequirementType {
+  CHALLENGES_COMPLETED
+  STREAK_DAYS
+  LEVEL_REACHED
+  XP_EARNED
+  SPECIFIC_CHALLENGE
+  CATEGORY_MASTER
+  SOCIAL_INTERACTION
+}
+
+/// *
+///  * Raridade do badge
+///  * Determina o quão difícil é conseguir
+enum BadgeRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+/// *
+///  * Tipos de recompensas disponíveis
+///  * Define o que o usuário ganha
+enum RewardType {
+  XP
+  COINS
+  BADGE
+  ITEM
 }

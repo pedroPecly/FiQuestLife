@@ -316,4 +316,45 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+
+  // ==========================================
+  // 🎯 ACTION BUTTONS (EDIT & SETTINGS)
+  // ==========================================
+  
+  /** Container dos botões de ação */
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+
+  /** Botão individual de ação */
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    ...Platform.select({
+      web: { cursor: 'pointer' },
+    }),
+  },
+
+  /** Texto do botão de ação */
+  actionButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    ...Platform.select({
+      web: { userSelect: 'none' },
+    }),
+  },
 });

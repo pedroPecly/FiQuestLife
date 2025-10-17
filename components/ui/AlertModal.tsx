@@ -6,18 +6,17 @@
  * Componente modal moderno e responsivo para exibir alertas
  * Funciona perfeitamente em web e mobile com designs otimizados
  *
- * @author GitHub Copilot
  * @created 16 de outubro de 2025
  */
 
 import React from 'react';
 import {
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 /**

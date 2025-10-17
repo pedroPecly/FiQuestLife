@@ -123,3 +123,46 @@ export const validatePhoneBR = (phone: string): boolean => {
   // Verifica se tem 10 ou 11 dígitos (com ou sem 9 na frente)
   return numbersOnly.length === 10 || numbersOnly.length === 11;
 };
+
+/**
+ * Interface de retorno das validações detalhadas
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  error?: string;
+}
+
+/**
+ * Valida nome com retorno detalhado
+ * @param name - Nome a ser validado
+ * @returns Objeto com isValid e error
+ * 
+ * @example
+ * validateName('John Doe') // { isValid: true }
+ * validateName('J') // { isValid: false, error: 'Nome muito curto' }
+ */
+export const validateName = (name: string): ValidationResult => {
+  if (!name || name.trim().length === 0) {
+    return {
+      isValid: false,
+      error: 'Nome é obrigatório',
+    };
+  }
+  
+  if (name.trim().length < 3) {
+    return {
+      isValid: false,
+      error: 'Nome deve ter pelo menos 3 caracteres',
+    };
+  }
+  
+  const parts = name.trim().split(' ').filter(part => part.length > 0);
+  if (parts.length < 2) {
+    return {
+      isValid: false,
+      error: 'Digite seu nome completo (nome e sobrenome)',
+    };
+  }
+  
+  return { isValid: true };
+};

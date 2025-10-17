@@ -1,20 +1,19 @@
 // app/screens/ProfileScreen.tsx
 
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  View
+    ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    View
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar } from '../../components/ui/Avatar';
 import { Card } from '../../components/ui/Card';
 import { InfoRow } from '../../components/ui/InfoRow';
-import { LogoutButton } from '../../components/ui/LogoutButton';
 import { StatBox } from '../../components/ui/StatBox';
 import { Tag } from '../../components/ui/Tag';
 import { useAlert } from '../../hooks/useAlert';
@@ -27,6 +26,13 @@ const ProfileScreen = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { alert } = useAlert();
+
+  // Recarrega dados quando a tela ganhar foco
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
 
   useEffect(() => {
     loadUserData();
@@ -49,7 +55,7 @@ const ProfileScreen = () => {
       const result = await authService.getMe(token);
       
       if (result.success) {
-        setUser(result.data.user);
+        setUser(result.data); // result.data já é o objeto user após a correção no api.ts
       } else {
         alert.error('Erro de Autenticação', 'Não foi possível carregar seus dados. Você foi desconectado.');
         // Força logout se não conseguir carregar dados
@@ -242,8 +248,6 @@ const ProfileScreen = () => {
               label="Dias"
             />
           </View>
-
-          <LogoutButton />
         </Card>
       </ScrollView>
     </SafeAreaView>

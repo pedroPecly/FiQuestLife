@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -20,6 +21,12 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: '600',
         },
+        // Animações de transição entre tabs
+        animation: 'shift',
+        ...(Platform.OS === 'ios' && {
+          // Animação suave no iOS
+          animationDuration: 300,
+        }),
       }}>
       <Tabs.Screen
         name="index"
@@ -41,6 +48,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons 
               name={focused ? 'compass' : 'compass-outline'} 
+              size={28} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Configurações',
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons 
+              name={focused ? 'cog' : 'cog-outline'} 
               size={28} 
               color={color} 
             />

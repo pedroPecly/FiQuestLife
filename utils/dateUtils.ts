@@ -200,3 +200,73 @@ export const isThisWeek = (dateString: string): boolean => {
     return false;
   }
 };
+
+/**
+ * Formata uma data ISO para exibição no formato DD/MM/YYYY
+ * @param dateString - Data ISO (YYYY-MM-DD) ou objeto Date
+ * @returns Data formatada DD/MM/YYYY
+ * 
+ * @example
+ * formatDateForDisplay('2000-05-15') // '15/05/2000'
+ */
+export const formatDateForDisplay = (dateString: string | Date): string => {
+  if (!dateString) return '';
+  
+  try {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    
+    // Usar UTC para evitar problemas de timezone
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    return '';
+  }
+};
+
+/**
+ * Converte data do input (DD/MM/YYYY) para objeto Date
+ * @param dateInput - Data no formato DD/MM/YYYY
+ * @returns Objeto Date ou null se inválido
+ * 
+ * @example
+ * parseDateFromInput('15/05/2000') // Date object
+ */
+export const parseDateFromInput = (dateInput: string): Date | null => {
+  if (!dateInput || dateInput.length !== 10) return null;
+  
+  try {
+    const parts = dateInput.split('/');
+    if (parts.length !== 3) return null;
+    
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Mês é 0-indexed
+    const year = parseInt(parts[2], 10);
+    
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    if (day < 1 || day > 31) return null;
+    if (month < 0 || month > 11) return null;
+    if (year < 1900 || year > new Date().getFullYear()) return null;
+    
+    const date = new Date(year, month, day);
+    
+    // Verificar se a data é válida
+    if (
+      date.getDate() !== day ||
+      date.getMonth() !== month ||
+      date.getFullYear() !== year
+    ) {
+      return null;
+    }
+    
+    return date;
+  } catch (error) {
+    return null;
+  }
+};

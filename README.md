@@ -36,22 +36,27 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 FiQuestLife/
 ├── app/                        # 📱 Frontend (React Native + Expo Router)
 │   ├── (tabs)/                # Navegação em abas (file-based routing)
-│   │   ├── _layout.tsx       # Layout das tabs
-│   │   ├── index.tsx         # Tab Home
-│   │   └── explore.tsx       # Tab Explorar
+│   │   ├── _layout.tsx       # Layout das tabs (Home, Explorar, Configurações)
+│   │   ├── index.tsx         # Tab Home (ProfileScreen)
+│   │   ├── explore.tsx       # Tab Explorar
+│   │   └── settings.tsx      # ⚙️ Tab Configurações (5 seções organizadas em cards)
 │   ├── screens/               # 📱 Componentes das telas
 │   │   ├── index.ts          # Barrel export
 │   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
-│   │   └── ProfileScreen.tsx # Perfil com gamificação e stats
+│   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
+│   │   └── EditProfileScreen.tsx # ✏️ Edição de perfil profissional
 │   ├── styles/                # 🎨 Estilos separados por tela
 │   │   ├── index.ts          # Barrel export
 │   │   ├── login.styles.ts   # Estilos do LoginScreen
-│   │   └── profile.styles.ts # Estilos do ProfileScreen
+│   │   ├── profile.styles.ts # Estilos do ProfileScreen
+│   │   ├── edit-profile.styles.ts # Estilos do EditProfileScreen
+│   │   └── settings.styles.ts # Estilos do SettingsScreen
 │   ├── _layout.tsx           # Layout raiz do app
-│   └── index.tsx             # Rota inicial (redirect)
+│   ├── index.tsx             # Rota inicial (redirect)
+│   └── edit-profile.tsx      # Rota para EditProfileScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 11 componentes de UI
+│   ├── ui/                   # 12 componentes de UI
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
@@ -62,6 +67,7 @@ FiQuestLife/
 │   │   ├── Input.tsx         # Input com ícone e multiline + efeitos foco
 │   │   ├── LoadingScreen.tsx # Tela de loading reutilizável
 │   │   ├── LogoutButton.tsx  # Botão de logout com confirmação
+│   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações (3 tipos)
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
 │   │   └── Tag.tsx           # Badge/Tag com ícone
 │   └── layout/
@@ -111,12 +117,15 @@ FiQuestLife/
 │   │   └── index.ts          # Entry point do servidor
 │   ├── prisma/
 │   │   ├── schema.prisma     # 🗄️ Schema do banco de dados
+│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges iniciais)
 │   │   ├── migrations/       # Histórico de mudanças do DB
 │   │   │   ├── migration_lock.toml
 │   │   │   ├── 20251016122028_add_username/
 │   │   │   ├── 20251016131113_add_gamification_fields/
 │   │   │   ├── 20251016152857_add_challenges/
-│   │   │   └── 20251017122341_make_name_and_birthdate_required/
+│   │   │   ├── 20251017122341_make_name_and_birthdate_required/
+│   │   │   ├── 20251017145006_add_badges_and_rewards/
+│   │   │   └── 20251017145348_fix_reward_and_badge_models/
 │   │   └── scripts/
 │   │       └── clear-database.sql # Script para limpar DB
 │   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
@@ -305,6 +314,126 @@ const MyScreen = () => {
 
 ---
 
+### SettingsMenuItem 🆕 - Item de Menu para Configurações
+
+Componente reutilizável para criar itens de menu em telas de configurações. **Reduz ~73% do código** comparado à implementação manual!
+
+```tsx
+import { SettingsMenuItem } from '../components/ui/SettingsMenuItem';
+
+// Item clicável (navegação)
+<SettingsMenuItem
+  type="clickable"
+  icon="account-edit"
+  iconColor="#4CAF50"
+  label="Editar Perfil"
+  onPress={() => router.push('/edit-profile')}
+/>
+
+// Item com toggle (switch)
+<SettingsMenuItem
+  type="toggle"
+  icon="bell"
+  iconColor="#9C27B0"
+  label="Notificações"
+  switchValue={notificationsEnabled}
+  onSwitchChange={(value) => setNotificationsEnabled(value)}
+/>
+
+// Item informativo (somente exibição)
+<SettingsMenuItem
+  type="info"
+  icon="email"
+  iconColor="#2196F3"
+  label="Email"
+  subtitle="usuario@email.com"
+/>
+
+// Último item da seção (remove borda inferior)
+<SettingsMenuItem
+  type="clickable"
+  icon="help-circle"
+  iconColor="#FF9800"
+  label="Suporte"
+  onPress={handleSupport}
+  isLast  // Remove a borda inferior
+/>
+
+// Item com estilo customizado (ex: danger zone)
+<SettingsMenuItem
+  type="clickable"
+  icon="delete-forever"
+  iconColor="#F44336"
+  label="Excluir Conta"
+  onPress={handleDeleteAccount}
+  labelStyle={{ fontWeight: '600', color: '#F44336' }}
+  isLast
+/>
+```
+
+**Props:**
+- `type`: `'clickable'` | `'toggle'` | `'info'` - Tipo do item
+- `icon`: Nome do ícone do Material Community Icons
+- `iconColor`: Cor do ícone (hex ou nome)
+- `label`: Texto principal do item
+- `subtitle`: Texto secundário opcional
+- `isLast`: Remove borda inferior (último item da seção)
+- `onPress`: Callback para itens clicáveis
+- `switchValue`: Valor do switch (para type='toggle')
+- `onSwitchChange`: Callback quando switch muda
+- `disabled`: Desabilita o item
+- `labelStyle`: Estilo customizado para o texto
+
+**Características:**
+- 3 tipos: clicável (navegação), toggle (switch), informativo
+- Suporte a ícones coloridos do Material Community Icons
+- Subtítulos para informações adicionais
+- Estado de desabilitado com opacidade reduzida
+- Remoção de borda para último item da seção
+- Customização de estilo do label
+- Design consistente com o padrão do app
+- TouchableOpacity automático para itens clicáveis
+- Switch integrado para toggles
+
+**Exemplo completo em uma seção:**
+```tsx
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>CONTA</Text>
+
+  <SettingsMenuItem
+    type="clickable"
+    icon="account-edit"
+    iconColor="#4CAF50"
+    label="Editar Perfil"
+    onPress={() => router.push('/edit-profile')}
+  />
+
+  <SettingsMenuItem
+    type="info"
+    icon="email"
+    iconColor="#2196F3"
+    label="Email"
+    subtitle={user?.email}
+  />
+
+  <SettingsMenuItem
+    type="info"
+    icon="calendar"
+    iconColor="#FF9800"
+    label="Membro desde"
+    subtitle={new Date(user?.createdAt || '').toLocaleDateString('pt-BR')}
+    isLast
+  />
+</View>
+```
+
+**Economia de Código:**
+- **Antes:** 22 linhas por item (com TouchableOpacity, View, MaterialCommunityIcons, Text)
+- **Depois:** 6 linhas por item (apenas props do componente)
+- **Redução:** ~73% menos código! 🎉
+
+---
+
 ### Input - Campo de Entrada Aprimorado
 
 Campo de entrada com ícones e efeitos de foco profissional:
@@ -399,6 +528,7 @@ const MyComponent = () => {
 | **StatBox** | Caixa de estatística gamificada | `components/ui/StatBox.tsx` |
 | **LoadingScreen** | Tela de loading reutilizável | `components/ui/LoadingScreen.tsx` |
 | **LogoutButton** | Botão de logout com confirmação | `components/ui/LogoutButton.tsx` |
+| **SettingsMenuItem** 🆕 | Item de menu reutilizável para configurações (3 tipos) | `components/ui/SettingsMenuItem.tsx` |
 
 ---
 
@@ -529,6 +659,9 @@ npm install && cd backend && npm install && cd ..
 # Rodar migrations
 cd backend && npx prisma migrate deploy && npx prisma generate && cd ..
 
+# Popular banco com badges iniciais (29 badges)
+cd backend && npm run prisma:seed && cd ..
+
 # Iniciar tudo (2 terminais)
 # Terminal 1:
 cd backend && npm run dev
@@ -567,9 +700,30 @@ model User {
 Depois rode:
 ```bash
 cd backend
-npx prisma migrate dev --name add_novocamp
+npx prisma migrate dev --name add_novocampo
 npx prisma generate
 ```
+
+### **Popular banco com badges (Seed)**
+O projeto possui um sistema de seed que popula o banco com 29 badges iniciais.
+
+**Rodar seed:**
+```bash
+cd backend
+npm run prisma:seed
+```
+
+**Badges criados:**
+- 🌱 **BEGINNER** (6 badges): Primeiro Passo, Aprendiz, Aventureiro, Veterano, Mestre, Centurião
+- 🔥 **CONSISTENCY** (5 badges): Persistente (3d), Dedicado (7d), Comprometido (14d), Inabalável (30d), Guerreiro do Ano (365d)
+- 🎯 **MILESTONE** (5 badges): Níveis 5, 10, 20, 50, 100
+- 💎 **ACHIEVEMENT XP** (3 badges): Colecionador (1k), Mestre (5k), Lenda (10k)
+- 🏆 **ACHIEVEMENT Categorias** (8 badges): Atleta, Nutricionista, Hidratado, Mente Sã, Dorminhoco, Social, Produtivo, Meditador
+- ⭐ **SPECIAL** (2 badges): Early Adopter, Beta Tester
+
+**Arquivo:** `backend/prisma/seed.ts`
+
+**IMPORTANTE:** O seed limpa os badges existentes antes de popular. Use com cuidado em produção!
 
 ### **Criar nova tela**
 1. Criar componente em `app/screens/NovaTela.tsx`
@@ -638,6 +792,15 @@ Depois reinicie o TypeScript Server no VS Code:
 - ✅ 11 componentes reutilizáveis de UI (AlertModal, Button, Input, DateInput, Card, Avatar, Tag, InfoRow, StatBox, LoadingScreen, LogoutButton)
 - ✅ 1 componente de Layout (Header)
 - ✅ 4 hooks personalizados (useAlert, useColorScheme, useThemeColor)
+- ✅ **6 Telas Completas**:
+  - 📱 **LoginScreen** - Login e cadastro com validações robustas
+  - 👤 **ProfileScreen** - Perfil com gamificação e estatísticas detalhadas
+  - ✏️ **EditProfileScreen** - Edição de perfil profissional com validação em tempo real
+  - ⚙️ **SettingsScreen** - Configurações organizadas em cards (navegação por tabs)
+  - 🏠 **HomeScreen** - Dashboard principal (tab de perfil)
+  - 🔍 **ExploreScreen** - Exploração de conteúdo (tab futura)
+- ✅ **Navegação por Tabs**: 3 abas principais (Home, Explorar, Configurações)
+- ✅ **Padrão de Cards Consistente**: Todos os cards com maxWidth 500px, border radius 20px, sombras padronizadas
 - ✅ Design gamificado com ícones e cores vibrantes
 - ✅ Sistema de alertas profissional (`AlertModal` + `useAlert` hook)
 - ✅ **AlertModal**: Modal com overlay corrigido cobrindo toda a tela
@@ -649,12 +812,13 @@ Depois reinicie o TypeScript Server no VS Code:
 - ✅ Enter key submete formulários
 - ✅ Erros específicos e informativos
 - ✅ Logout funcionando em todas as plataformas
-- ✅ Design 100% responsivo para mobile
+- ✅ Design 100% responsivo para mobile, tablet e desktop
 - ✅ Redução de ~40% de código via componentização
 - 🎨 Efeitos de foco suaves nos campos de entrada
 - 🔄 Sistema de alertas consistente cross-platform
 - 📱 Design responsivo otimizado para web e mobile
 - ♿ Acessibilidade aprimorada com navegação por teclado
+- 🎯 Background azul claro (#F0F8FF - Alice Blue) consistente em todo o app
 
 ### **Utilitários**
 - ✅ `utils/validators.ts` - 6 validadores (email, username, password, nome, telefone)
@@ -672,14 +836,41 @@ Depois reinicie o TypeScript Server no VS Code:
 - ✅ Logout com confirmação
 
 ### **Banco de Dados**
-- ✅ Sistema de desafios completo (ENUMs + Models)
-- ✅ 4 ENUMs: ChallengeCategory (8 tipos), ChallengeDifficulty (4 níveis), ChallengeFrequency (4 tipos), ChallengeStatus (5 estados)
-- ✅ Model User: id, email, username, name, birthDate, bio, avatar, gamificação, timestamps
-- ✅ Model Challenge: catálogo de desafios com recompensas
-- ✅ Model UserChallenge: relação N:N com tracking de progresso
+
+#### **Sistema de Desafios**
+- ✅ 4 ENUMs de Desafios: 
+  - `ChallengeCategory` (8 tipos): PHYSICAL_ACTIVITY, NUTRITION, HYDRATION, MENTAL_HEALTH, SLEEP, SOCIAL, PRODUCTIVITY, MINDFULNESS
+  - `ChallengeDifficulty` (4 níveis): EASY, MEDIUM, HARD, EXPERT
+  - `ChallengeFrequency` (4 tipos): DAILY, WEEKLY, MONTHLY, ONE_TIME
+  - `ChallengeStatus` (5 estados): PENDING, IN_PROGRESS, COMPLETED, FAILED, SKIPPED
+- ✅ Model **Challenge**: Catálogo de desafios com recompensas (XP e moedas)
+- ✅ Model **UserChallenge**: Relação N:N User↔Challenge com tracking de progresso
+
+#### **Sistema de Badges e Recompensas**
+- ✅ 4 ENUMs de Badges:
+  - `BadgeCategory` (6 tipos): BEGINNER, CONSISTENCY, MILESTONE, SPECIAL, SEASONAL, ACHIEVEMENT
+  - `BadgeRequirementType` (7 tipos): CHALLENGES_COMPLETED, STREAK_DAYS, LEVEL_REACHED, XP_EARNED, SPECIFIC_CHALLENGE, CATEGORY_MASTER, SOCIAL_INTERACTION
+  - `BadgeRarity` (4 níveis): COMMON, RARE, EPIC, LEGENDARY
+  - `RewardType` (4 tipos): XP, COINS, BADGE, ITEM
+- ✅ Model **Badge**: Catálogo de badges disponíveis com requisitos e raridade
+- ✅ Model **UserBadge**: Badges conquistados pelos usuários (N:N User↔Badge)
+- ✅ Model **RewardHistory**: Histórico completo de todas as recompensas ganhas
+- ✅ **Seed de Badges**: Sistema de população inicial com 29 badges
+  - 6 BEGINNER, 5 CONSISTENCY, 5 MILESTONE, 11 ACHIEVEMENT, 2 SPECIAL
+  - Script: `npm run prisma:seed`
+
+#### **Modelo User Completo**
+- ✅ Campos de autenticação: id, email, username, password
+- ✅ Dados pessoais: name (obrigatório), birthDate (obrigatório), bio, avatarUrl
+- ✅ Sistema de gamificação: xp, coins, level, currentStreak, longestStreak
+- ✅ Configurações: notificationsEnabled, profilePublic, dailyReminderTime, lastActiveDate
+- ✅ Relações: userChallenges[], userBadges[], rewardHistory[]
+- ✅ Timestamps: createdAt, updatedAt
+
+#### **Otimizações**
 - ✅ Constraints e índices para performance
-- ✅ 4 migrations versionadas e aplicadas
-- ✅ Campos obrigatórios: name e birthDate
+- ✅ Cascade delete em todas as relações
+- ✅ 6 migrations versionadas e aplicadas
 
 ### **Código e Organização**
 - ✅ 100% TypeScript (frontend + backend)
@@ -691,6 +882,314 @@ Depois reinicie o TypeScript Server no VS Code:
 - ✅ **Documentação Completa**: JSDoc abrangente em todos os componentes
 - ✅ **README Atualizado**: Guias de uso e exemplos para novos componentes
 
+---
+
+## 🗄️ Schema do Banco de Dados (Prisma)
+
+### **Modelos Principais**
+
+#### 1. **User** - Usuários do Sistema
+```prisma
+model User {
+  // Autenticação
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  username             String   @unique
+  password             String
+  
+  // Dados Pessoais
+  name                 String
+  birthDate            DateTime
+  avatarUrl            String?
+  bio                  String?
+  
+  // Gamificação
+  xp                   Int      @default(0)
+  coins                Int      @default(0)
+  level                Int      @default(1)
+  currentStreak        Int      @default(0)
+  longestStreak        Int      @default(0)
+  
+  // Configurações
+  notificationsEnabled Boolean  @default(true)
+  profilePublic        Boolean  @default(false)
+  dailyReminderTime    String?
+  lastActiveDate       DateTime?
+  
+  // Timestamps
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Relações
+  userChallenges       UserChallenge[]
+  userBadges           UserBadge[]
+  rewardHistory        RewardHistory[]
+}
+```
+
+#### 2. **Challenge** - Catálogo de Desafios
+```prisma
+model Challenge {
+  id             String              @id @default(uuid())
+  title          String
+  description    String
+  category       ChallengeCategory
+  difficulty     ChallengeDifficulty
+  frequency      ChallengeFrequency  @default(DAILY)
+  xpReward       Int
+  coinsReward    Int
+  isActive       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  
+  // Relações
+  userChallenges UserChallenge[]
+}
+```
+
+**Exemplos de Challenges:**
+- 🚰 "Beber 2L de água" - DAILY, HYDRATION, EASY → 10 XP, 5 coins
+- 🧘 "Meditar por 10 minutos" - DAILY, MINDFULNESS, MEDIUM → 25 XP, 10 coins
+- 🏋️ "Ir à academia 3x na semana" - WEEKLY, PHYSICAL_ACTIVITY, HARD → 100 XP, 50 coins
+
+#### 3. **UserChallenge** - Desafios do Usuário
+```prisma
+model UserChallenge {
+  id          String          @id @default(uuid())
+  userId      String
+  challengeId String
+  status      ChallengeStatus @default(PENDING)
+  progress    Int             @default(0)
+  assignedAt  DateTime        @default(now())
+  completedAt DateTime?
+  notes       String?
+  
+  // Relações
+  user        User            @relation(...)
+  challenge   Challenge       @relation(...)
+  
+  @@unique([userId, challengeId, assignedAt])
+  @@index([userId, status])
+}
+```
+
+**Status do Desafio:**
+- `PENDING` - Atribuído mas não iniciado
+- `IN_PROGRESS` - Em andamento
+- `COMPLETED` - Concluído com sucesso ✓
+- `FAILED` - Falhou (não completou no prazo)
+- `SKIPPED` - Usuário pulou o desafio
+
+#### 4. **Badge** - Catálogo de Badges
+```prisma
+model Badge {
+  id               String               @id @default(uuid())
+  name             String               @unique
+  description      String
+  imageUrl         String
+  category         BadgeCategory
+  requirementType  BadgeRequirementType
+  requirementValue Int
+  rarity           BadgeRarity          @default(COMMON)
+  order            Int                  @default(0)
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  
+  // Relações
+  userBadges       UserBadge[]
+}
+```
+
+**Exemplos de Badges:**
+- 🎯 "Primeiro Passo" (BEGINNER, COMMON)
+  - Requisito: Completar 1 desafio
+- 🔥 "Guerreiro Semanal" (CONSISTENCY, RARE)
+  - Requisito: Manter streak de 7 dias
+- 💧 "Mestre da Hidratação" (ACHIEVEMENT, EPIC)
+  - Requisito: Completar 100 desafios de hidratação
+- 👑 "Lendário" (MILESTONE, LEGENDARY)
+  - Requisito: Atingir nível 50
+
+#### 5. **UserBadge** - Badges Conquistados
+```prisma
+model UserBadge {
+  id          String   @id @default(uuid())
+  userId      String
+  badgeId     String
+  earnedAt    DateTime @default(now())
+  isDisplayed Boolean  @default(false)
+  
+  // Relações
+  user        User     @relation(...)
+  badge       Badge    @relation(...)
+  
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+```
+
+**Regras:**
+- Cada usuário pode conquistar cada badge apenas **uma vez**
+- `isDisplayed` permite escolher quais badges mostrar no perfil
+
+#### 6. **RewardHistory** - Histórico de Recompensas
+```prisma
+model RewardHistory {
+  id          String     @id @default(uuid())
+  userId      String
+  type        RewardType
+  amount      Int
+  source      String
+  sourceId    String?
+  description String?
+  createdAt   DateTime   @default(now())
+  
+  // Relações
+  user        User       @relation(...)
+  
+  @@index([userId, createdAt])
+}
+```
+
+**Tipos de Recompensas:**
+- `XP` - Pontos de experiência
+- `COINS` - Moedas do jogo
+- `BADGE` - Badge desbloqueado
+- `ITEM` - Item especial
+
+**Exemplos de Rewards:**
+```json
+// Recompensa por completar desafio
+{
+  "type": "XP",
+  "amount": 50,
+  "source": "challenge_completed",
+  "sourceId": "challenge-uuid",
+  "description": "Completou: Beber 2L de água"
+}
+
+// Recompensa de level up
+{
+  "type": "COINS",
+  "amount": 100,
+  "source": "level_up",
+  "description": "Subiu para o nível 5!"
+}
+
+// Badge conquistado
+{
+  "type": "BADGE",
+  "amount": 1,
+  "source": "badge_earned",
+  "sourceId": "badge-uuid",
+  "description": "Conquistou: Primeiro Passo"
+}
+```
+
+---
+
+### **ENUMs do Sistema**
+
+#### **Desafios**
+```prisma
+// Categorias de desafios
+enum ChallengeCategory {
+  PHYSICAL_ACTIVITY  // 🏃 Atividade física
+  NUTRITION          // 🥗 Nutrição
+  HYDRATION          // 💧 Hidratação
+  MENTAL_HEALTH      // 🧠 Saúde mental
+  SLEEP              // 😴 Sono
+  SOCIAL             // 👥 Social
+  PRODUCTIVITY       // 📊 Produtividade
+  MINDFULNESS        // 🧘 Atenção plena
+}
+
+// Dificuldade dos desafios
+enum ChallengeDifficulty {
+  EASY    // 10-20 XP
+  MEDIUM  // 25-50 XP
+  HARD    // 75-150 XP
+  EXPERT  // 200+ XP
+}
+
+// Frequência de repetição
+enum ChallengeFrequency {
+  DAILY      // Todo dia
+  WEEKLY     // Toda semana
+  MONTHLY    // Todo mês
+  ONE_TIME   // Uma vez só
+}
+
+// Status do desafio
+enum ChallengeStatus {
+  PENDING      // Atribuído
+  IN_PROGRESS  // Em andamento
+  COMPLETED    // Concluído ✓
+  FAILED       // Falhou ✗
+  SKIPPED      // Pulado
+}
+```
+
+#### **Badges e Recompensas**
+```prisma
+// Categorias de badges
+enum BadgeCategory {
+  BEGINNER      // 🌱 Iniciante
+  CONSISTENCY   // 🔥 Consistência
+  MILESTONE     // 🎯 Marcos importantes
+  SPECIAL       // ⭐ Especiais
+  SEASONAL      // 🎃 Sazonais
+  ACHIEVEMENT   // 🏆 Conquistas
+}
+
+// Tipos de requisitos
+enum BadgeRequirementType {
+  CHALLENGES_COMPLETED  // Total de desafios completados
+  STREAK_DAYS          // Dias de streak
+  LEVEL_REACHED        // Nível atingido
+  XP_EARNED            // XP total ganho
+  SPECIFIC_CHALLENGE   // Desafio específico
+  CATEGORY_MASTER      // Mestre em categoria
+  SOCIAL_INTERACTION   // Interações sociais
+}
+
+// Raridade dos badges
+enum BadgeRarity {
+  COMMON     // ⚪ Comum (fácil)
+  RARE       // 🔵 Raro (médio)
+  EPIC       // 🟣 Épico (difícil)
+  LEGENDARY  // 🟠 Lendário (muito difícil)
+}
+
+// Tipos de recompensas
+enum RewardType {
+  XP      // Pontos de experiência
+  COINS   // Moedas
+  BADGE   // Badge
+  ITEM    // Item especial
+}
+```
+
+---
+
+### **Diagrama de Relações**
+
+```
+User (1) ←→ (N) UserChallenge (N) ←→ (1) Challenge
+User (1) ←→ (N) UserBadge (N) ←→ (1) Badge
+User (1) ←→ (N) RewardHistory
+```
+
+**Explicação:**
+- Um **usuário** pode ter **vários desafios** atribuídos
+- Um **desafio** pode ser atribuído a **vários usuários**
+- Um **usuário** pode conquistar **vários badges**
+- Um **badge** pode ser conquistado por **vários usuários**
+- Um **usuário** pode ter **várias recompensas** no histórico
+
+---
+
 ## 🚀 Próximos Passos
 
 ### **Sprint 3 - API de Desafios**
@@ -699,25 +1198,93 @@ Depois reinicie o TypeScript Server no VS Code:
 - [ ] Atualizar progresso de desafios
 - [ ] Completar desafios e ganhar recompensas (XP + coins)
 - [ ] Sistema automático de Level Up
+- [ ] Sistema automático de registro de recompensas no RewardHistory
 
-### **Sprint 4 - Interface de Desafios**
+### **Sprint 4 - API de Badges e Recompensas**
+- [ ] Seeds de badges iniciais (Primeiro Passo, Guerreiro Semanal, etc)
+- [ ] Sistema de verificação automática de requisitos
+- [ ] Endpoints de badges (listar disponíveis, listar conquistados)
+- [ ] Endpoint de histórico de recompensas
+- [ ] Sistema de concessão automática de badges
+- [ ] Notificações ao conquistar badges
+
+### **Sprint 5 - Interface de Desafios**
 - [ ] Tela de listagem de desafios disponíveis
 - [ ] Tela de desafios ativos do usuário
 - [ ] Tela de progresso de desafio individual
 - [ ] Animações de conclusão e recompensa
 - [ ] Filtros por categoria e dificuldade
+- [ ] Cards de desafios com ícones e cores por categoria
+
+### **Sprint 6 - Interface de Badges**
+- [ ] Tela de badges conquistados (galeria)
+- [ ] Tela de progresso para próximos badges
+- [ ] Tela de histórico de recompensas
+- [ ] Animação ao conquistar badge
+- [ ] Sistema de badges em destaque no perfil
+- [ ] Cards de badges com raridade e brilho
 
 ### **Futuras Funcionalidades**
 - [ ] Tela de edição de perfil (bio, avatar, configs)
 - [ ] Upload de foto de avatar
-- [ ] Badges/Conquistas (UserBadge)
 - [ ] Customização de avatar (UserAvatarItem)
-- [ ] Histórico de recompensas (RewardHistory)
 - [ ] Feed de atividades (ActivityFeed)
 - [ ] Streak tracking automático (daily check-in)
 - [ ] Notificações push
 - [ ] Sistema de amigos e ranking
 - [ ] Loja de itens com moedas
+- [ ] Desafios personalizados criados pelo usuário
+- [ ] Desafios em equipe/competitivos
+- [ ] Eventos sazonais com badges exclusivos
+
+---
+
+## 📋 Changelog - Atualizações Recentes
+
+### **17 de Outubro de 2025** 🆕
+
+#### **Componente SettingsMenuItem**
+- ✅ Criado componente reutilizável `SettingsMenuItem.tsx`
+- ✅ Suporte a 3 tipos: `clickable`, `toggle`, `info`
+- ✅ Economia de ~73% no código de telas de configurações
+- ✅ Documentação completa com 8 exemplos de uso
+- ✅ Arquivo de exemplos: `SettingsMenuItem.example.tsx`
+
+#### **Refatoração da Tela de Configurações**
+- ✅ Refatorada `SettingsScreen` usando `SettingsMenuItem`
+- ✅ Redução de ~401 para ~397 linhas + componente reutilizável
+- ✅ Removido 6 estilos não utilizados do `settings.styles.ts`:
+  - `menuItem`, `menuItemLast`, `menuItemLeft`
+  - `menuItemText`, `menuItemSubtext`, `dangerMenuItem`
+- ✅ Removido imports não utilizados (`Switch` do React Native)
+- ✅ Código mais limpo, legível e manutenível
+
+#### **Sistema de Badges e Recompensas**
+- ✅ Adicionado sistema completo de badges ao schema do Prisma
+- ✅ 4 ENUMs criados: `BadgeCategory`, `BadgeRarity`, `RewardType`, `RewardReason`
+- ✅ 3 novos models: `Badge`, `UserBadge`, `RewardHistory`
+- ✅ Seed com 29 badges iniciais em 5 categorias
+- ✅ Migrations aplicadas: `20251017145006_add_badges_and_rewards`
+
+#### **Tela de Edição de Perfil**
+- ✅ Criada `EditProfileScreen.tsx` com validações profissionais
+- ✅ Campos: Avatar, Nome, Username, Bio, Data de Nascimento
+- ✅ Validações em tempo real
+- ✅ Backend endpoint: `PUT /user/profile`
+- ✅ Auto-refresh no `ProfileScreen` após edição (useFocusEffect)
+- ✅ Estilos consistentes com padrão de cards (maxWidth 500px, borderRadius 20px)
+
+#### **Melhorias no Sistema de Autenticação**
+- ✅ Movido botão de logout para `SettingsScreen`
+- ✅ Removido `LogoutButton` do `ProfileScreen`
+- ✅ Adicionada seção "Sair da Conta" nas configurações
+- ✅ Confirmação profissional antes do logout (web + mobile)
+
+#### **Componentização e Qualidade de Código**
+- ✅ Removidas todas as referências "@author GitHub Copilot" (7 arquivos)
+- ✅ Análise completa de oportunidades de componentização
+- ✅ 12 componentes de UI disponíveis no projeto
+- ✅ Documentação atualizada no README.md
 
 ---
 

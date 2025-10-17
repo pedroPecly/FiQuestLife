@@ -90,11 +90,48 @@ export const authService = {
           Authorization: `Bearer ${token}`,
         },
       });
-      return { success: true, data: response.data };
+      
+      // Backend retorna { message: '...', user: {...} }
+      // Retornamos apenas o objeto user
+      return { 
+        success: true, 
+        data: response.data.user || response.data 
+      };
     } catch (error: any) {
       return {
         success: false,
         error: error.response?.data?.error || 'Erro ao buscar dados do usuário',
+      };
+    }
+  },
+
+  /**
+   * Atualizar perfil do usuário
+   * @param token Token JWT
+   * @param profileData Dados do perfil a atualizar
+   */
+  async updateProfile(token: string, profileData: {
+    name: string;
+    username: string;
+    bio?: string;
+    birthDate: string;
+  }) {
+    try {
+      const response = await api.put('/user/profile', profileData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      return { 
+        success: true, 
+        data: response.data.user || response.data,
+        message: response.data.message 
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao atualizar perfil',
       };
     }
   },

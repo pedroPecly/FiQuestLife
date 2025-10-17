@@ -6,7 +6,6 @@
  * Input especializado para datas no formato brasileiro (DD/MM/YYYY)
  * Com formatação automática e validação integrada
  *
- * @author GitHub Copilot
  * @created 17 de outubro de 2025
  */
 
