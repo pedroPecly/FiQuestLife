@@ -149,66 +149,173 @@ FiQuestLife/
 ## 🚀 Setup Inicial
 
 ### **1. Pré-requisitos**
-- Node.js v20+
-- npm ou yarn
-- PostgreSQL (local ou Supabase)
-- Expo CLI (`npm install -g @expo/cli`)
+- ✅ Node.js v20+
+- ✅ npm ou yarn
+- ✅ Git
+- ✅ Expo CLI (opcional, será instalado automaticamente)
+- ✅ Conta no Supabase (banco PostgreSQL gratuito)
 
-### **2. Instalar Dependências**
+---
+
+### **2. Clonar e Instalar Dependências**
+
 ```bash
-# Frontend
+# Clone o repositório
+git clone https://github.com/pedroPecly/FiQuestLife.git
+cd FiQuestLife
+
+# Instale dependências do FRONTEND
 npm install
 
-# Backend
+# Instale dependências do BACKEND
 cd backend
 npm install
 cd ..
 ```
 
+---
+
 ### **3. Configurar Banco de Dados**
 
-**Estrutura do arquivo `.env`:**
+#### **3.1. Criar arquivo `.env` no backend**
+
+Crie o arquivo `backend/.env` com as seguintes variáveis:
+
 ```env
 # Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Database URL (Supabase PostgreSQL)
-DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.your-project.supabase.co:5432/postgres"
+# Formato: postgresql://postgres:[PASSWORD]@db.[PROJECT-ID].supabase.co:5432/postgres
+DATABASE_URL="postgresql://postgres:sua_senha_aqui@db.seu-projeto.supabase.co:5432/postgres"
 
-# JWT Secret (usado para autenticação)
-JWT_SECRET="your_jwt_secret_key"
+# JWT Secret (use uma string aleatória forte)
+JWT_SECRET="sua_chave_secreta_jwt_aqui_use_algo_aleatorio"
 
-# Server
+# Server Port
 PORT=3000
 ```
 
-**Localização do arquivo:** `backend/.env`
+💡 **Dica:** Use o arquivo `backend/.env.example` como referência.
 
-Rode as migrations:
+#### **3.2. Sincronizar Schema com o Banco**
+
+**⚠️ IMPORTANTE:** Sempre execute estes comandos ao:
+- Clonar o projeto pela primeira vez
+- Trocar de máquina
+- Fazer `git pull` com mudanças no schema
+
 ```bash
 cd backend
+
+# Opção 1: Aplicar migrations + Regenerar Prisma Client (RECOMENDADO)
 npx prisma migrate deploy
 npx prisma generate
+
+# OU
+
+# Opção 2: Sincronizar direto (mais rápido, sem histórico de migrations)
+npx prisma db push
+
 cd ..
 ```
 
-### **4. ⚠️ Configurar IP Local (IMPORTANTE)**
+**O que cada comando faz:**
+- `prisma migrate deploy` → Aplica migrations pendentes no banco
+- `prisma generate` → Regenera o Prisma Client (código TypeScript)
+- `prisma db push` → Sincroniza schema + regenera client (tudo de uma vez)
 
-**Descubra seu IP local:**
+---
+
+### **4. ⚠️ Configurar IP Local (OBRIGATÓRIO para testar no celular)**
+
+#### **4.1. Descobrir seu IP local**
+
+**Windows:**
 ```bash
-# Windows
 ipconfig
+# Procure por "Endereço IPv4" na sua conexão Wi-Fi
+# Exemplo: 192.168.1.105
+```
 
-# Mac/Linux
+**Mac/Linux:**
+```bash
 ifconfig
+# ou
+ip addr show
 ```
 
-**Edite `services/api.ts` e altere o IP:**
+#### **4.2. Atualizar arquivo `services/api.ts`**
+
 ```typescript
-// services/api.ts
-const API_URL = 'http://192.168.1.XX:3000'; // ← TROCAR PARA SEU IP
+// services/api.ts (linha ~11)
+const API_URL = 'http://192.168.1.XX:3000'; // ← COLOQUE SEU IP AQUI
 ```
+
+💡 **Importante:** O celular e o PC devem estar na **mesma rede Wi-Fi**!
+
+---
+
+### **5. Rodar os Servidores**
+
+Abra **2 terminais** (ou use split terminal no VS Code):
+
+#### **Terminal 1 - Backend:**
+```bash
+cd backend
+npm run dev
+```
+
+✅ Backend rodando em: `http://localhost:3000` ou `http://SEU_IP:3000`
+
+#### **Terminal 2 - Frontend:**
+```bash
+npx expo start
+```
+
+✅ Frontend disponível via:
+- 📱 **Expo Go** (celular)
+- 🌐 **Navegador** (web)
+- 📲 **Emulador** Android/iOS
+
+---
+
+### **6. Testar no Celular**
+
+1. Instale o app **Expo Go** no celular:
+   - [Android - Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)
+   - [iOS - App Store](https://apps.apple.com/app/expo-go/id982107779)
+
+2. Certifique-se que celular e PC estão na **mesma rede Wi-Fi**
+
+3. No terminal do Expo, escaneie o **QR Code** com:
+   - **Android:** Câmera do Expo Go
+   - **iOS:** Câmera nativa (abre o Expo Go automaticamente)
+
+---
+
+### **7. Testar no Navegador**
+
+Após rodar `npx expo start`, pressione `w` no terminal para abrir no navegador.
+
+✅ URL: `http://localhost:8081`
+
+---
+
+## ✅ Checklist de Verificação
+
+Antes de começar a desenvolver, verifique:
+
+- [ ] Backend rodando sem erros (`npm run dev` no terminal)
+- [ ] Frontend rodando (`npx expo start` no terminal)
+- [ ] IP correto configurado em `services/api.ts`
+- [ ] Prisma Client regenerado (`npx prisma generate`)
+- [ ] Banco de dados sincronizado (`npx prisma db push`)
+- [ ] Consegue fazer login/cadastro
+- [ ] Perfil carrega corretamente
+
+---
 
 ### **5. Rodar os Projetos**
 
@@ -758,6 +865,37 @@ npm run prisma:seed
 ### **Botão de Logout não funciona**
 - ✅ Use o componente `LogoutButton` que já inclui confirmação
 - ✅ Ou use `alert.confirm()` do hook `useAlert` para confirmações manuais
+
+### **Erro: "Unknown field `birthDate`" ou campos não encontrados**
+❌ **Causa:** Prisma Client desatualizado (não sincronizado com o schema)
+
+✅ **Solução:** Regenerar o Prisma Client
+
+```bash
+cd backend
+
+# Opção 1: Regenerar apenas o client
+npx prisma generate
+
+# Opção 2: Sincronizar schema + regenerar (RECOMENDADO)
+npx prisma db push
+
+cd ..
+```
+
+**Quando executar:**
+- ✅ Após clonar o projeto
+- ✅ Após fazer `git pull`
+- ✅ Ao trocar de máquina
+- ✅ Após modificar `schema.prisma`
+- ✅ Se aparecer erros tipo "Unknown field" ou "Invalid invocation"
+
+💡 **Dica:** Adicione ao seu fluxo de trabalho:
+```bash
+git pull
+cd backend && npx prisma generate && cd ..
+npm run dev
+```
 
 ### **Prisma Client não atualiza**
 ```bash
