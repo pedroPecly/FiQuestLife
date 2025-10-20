@@ -169,7 +169,7 @@ const ProfileScreen = () => {
           />
 
           <Text style={styles.cardTitle}>
-            {user.username || user.name || 'Aventureiro'}
+            {"@" + user.username || user.name || 'Aventureiro'}
           </Text>
           <Text style={styles.cardSubtitle}>
             Membro desde {getFormattedDate(user.createdAt)}
@@ -188,18 +188,6 @@ const ProfileScreen = () => {
               icon="account-outline"
               label="Nome Completo"
               value={user.name || 'Não informado'}
-            />
-
-            <InfoRow
-              icon="at"
-              label="Nome de Usuário"
-              value={`@${user.username || 'Não informado'}`}
-            />
-
-            <InfoRow
-              icon="email-outline"
-              label="Email"
-              value={user.email || 'Não informado'}
             />
 
             <InfoRow
