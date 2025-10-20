@@ -201,6 +201,7 @@ Crie o arquivo `backend/.env` com as seguintes variáveis:
 # Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Database URL (Supabase PostgreSQL)
 # Formato: postgresql://postgres:[PASSWORD]@db.[PROJECT-ID].supabase.co:5432/postgres
@@ -214,13 +215,6 @@ PORT=3000
 ```
 
 💡 **Dica:** Use o arquivo `backend/.env.example` como referência.
-
-> **📸 Upload de Fotos:**
-> O backend já está configurado com Supabase. Para habilitar upload de fotos de perfil, você precisa apenas **criar o bucket de storage**.
-> 
-> **Guia rápido (5 min):** [`SUPABASE_QUICK_SETUP.md`](./SUPABASE_QUICK_SETUP.md)
-> 
-> ⚠️ Sem o bucket configurado, o upload retornará erro 500. O app funciona normalmente, mas sem upload de fotos.
 
 #### **3.2. Sincronizar Schema com o Banco**
 
@@ -367,12 +361,10 @@ O app agora suporta upload de fotos de perfil através da tela **Editar Perfil**
 
 Para que o upload funcione, você precisa:
 
-1. **Criar bucket no Supabase** (5 minutos)
+1. **Criar bucket no Supabase** (ja criado)
 2. **Adicionar Service Role Key no backend** (já configurado)
 
-📘 **Guia completo:** Veja o comentário em `3.1. Criar arquivo .env` acima ou consulte os guias:
-- `SUPABASE_QUICK_SETUP.md` - Setup rápido do bucket
-- `SETUP_SERVICE_KEY.md` - Como adicionar a Service Role Key
+📘 **Guia completo:** Veja o comentário em `3.1. Criar arquivo .env`
 
 ⚠️ **Sem o bucket configurado:** O app funciona normalmente, mas o upload retornará erro 500. Use avatares com iniciais até configurar.
 
