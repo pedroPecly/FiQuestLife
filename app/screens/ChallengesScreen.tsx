@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { ChallengeCard, LoadingScreen } from '@/components/ui';
+import { useAlert } from '@/hooks/useAlert';
+import { authService } from '@/services/api';
+import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
+import type { User } from '@/types/user';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  RefreshControl,
+    RefreshControl,
+    ScrollView,
+    Text,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChallengeCard, LoadingScreen } from '@/components/ui';
-import challengeService, { UserChallenge, CompleteChallengeResponse } from '@/services/challenge';
-import { authService } from '@/services/api';
-import { useAlert } from '@/hooks/useAlert';
-import type { User } from '@/types/user';
 import { styles } from '../styles/challenges.styles';
 
 export default function ChallengesScreen() {
@@ -24,30 +25,18 @@ export default function ChallengesScreen() {
   // Carregar usuário e desafios
   const loadData = async () => {
     try {
-      console.log('📱 ChallengesScreen - Iniciando loadData...');
-      
       // Token é injetado automaticamente pelo interceptor do axios
       const [userResponse, challengesData] = await Promise.all([
         authService.getMe(),
         challengeService.getDailyChallenges(),
       ]);
 
-      console.log('✅ ChallengesScreen - Dados carregados:', {
-        userSuccess: userResponse.success,
-        challengesCount: challengesData.length,
-      });
-
       if (userResponse.success) {
         setUser(userResponse.data);
       }
       setChallenges(challengesData);
     } catch (error: any) {
-      console.error('❌ Erro ao carregar dados:', error);
-      console.error('❌ Erro detalhes:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      console.error('Erro ao carregar dados:', error);
       alert.error('Erro', error.response?.data?.error || 'Não foi possível carregar os dados');
     } finally {
       setLoading(false);
@@ -55,9 +44,12 @@ export default function ChallengesScreen() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Recarrega dados quando a tela ganhar foco
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   // Pull to refresh
   const onRefresh = useCallback(() => {

@@ -8,6 +8,7 @@ export { InfoRow } from './InfoRow';
 export { Input } from './Input';
 export { LoadingScreen } from './LoadingScreen';
 export { LogoutButton } from './LogoutButton';
+export { ProfileAvatar } from './ProfileAvatar';
 export { SettingsMenuItem } from './SettingsMenuItem';
 export { StatBox } from './StatBox';
 export { Tag } from './Tag';

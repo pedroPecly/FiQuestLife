@@ -131,35 +131,17 @@ export const styles = StyleSheet.create({
     marginBottom: 25,
     textAlign: 'center',
   },
+
   // ==========================================
-  // 👤 AVATAR (Foto/Iniciais do Usuário)
+  // 👤 AVATAR
   // ==========================================
   
-  /** Container do avatar */
+  /** Container do avatar centralizado */
   avatarContainer: {
+    alignItems: 'center',
     marginBottom: 20,
-    alignItems: 'center',
   },
 
-  /**
-   * Avatar circular do usuário
-   * - Exibe foto ou iniciais do nome
-   */
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50, // Faz o círculo perfeito
-    backgroundColor: '#E0E0E0', // Cinza claro de fundo
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  /** Texto das iniciais dentro do avatar */
-  avatarText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
   // ==========================================
   // ℹ️ INFORMAÇÕES DO USUÁRIO (Email, Username, etc)
   // ==========================================

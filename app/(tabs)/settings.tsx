@@ -14,18 +14,18 @@
  */
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
@@ -50,11 +50,13 @@ export default function SettingsScreen() {
   const { alert, isVisible, alertConfig, hideAlert } = useAlert();
 
   // ==========================================
-  // LIFECYCLE
+  // LIFECYCLE - Recarrega ao focar na tela
   // ==========================================
-  useEffect(() => {
-    loadUserData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
 
   // ==========================================
   // DATA LOADING
@@ -99,12 +101,41 @@ export default function SettingsScreen() {
   };
 
   const handleToggleProfilePublic = async (value: boolean) => {
-    setProfilePublic(value);
-    // TODO: Salvar no backend
-    alert.success(
-      'Atualizado',
-      value ? 'Seu perfil agora é público' : 'Seu perfil agora é privado'
-    );
+    try {
+      setSaving(true);
+      setProfilePublic(value);
+
+      // Atualiza no backend
+      const result = await authService.updateProfile({
+        profilePublic: value,
+      });
+
+      if (result.success && result.data) {
+        // Atualiza usuário local
+        setUser(result.data);
+        
+        // Atualiza também no storage
+        const token = await authStorage.getToken();
+        if (token) {
+          await authStorage.saveAuth(token, result.data);
+        }
+
+        alert.success(
+          'Atualizado!',
+          value ? 'Seu perfil agora é público' : 'Seu perfil agora é privado'
+        );
+      } else {
+        // Reverte o toggle em caso de erro
+        setProfilePublic(!value);
+        alert.error('Erro', 'Não foi possível atualizar a privacidade do perfil.');
+      }
+    } catch (error) {
+      // Reverte o toggle em caso de erro
+      setProfilePublic(!value);
+      alert.error('Erro', 'Erro ao atualizar privacidade do perfil.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSetReminder = () => {
@@ -346,7 +377,7 @@ export default function SettingsScreen() {
             icon="information"
             iconColor="#2196F3"
             label="Versão"
-            subtitle="1.0.0 (Beta)"
+            subtitle="1.3 (Beta)"
           />
 
           <SettingsMenuItem

@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import {
-  UserChallenge,
-  CATEGORY_COLORS,
-  CATEGORY_LABELS,
-  CATEGORY_ICONS,
-  DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
+    CATEGORY_COLORS,
+    CATEGORY_ICONS,
+    CATEGORY_LABELS,
+    DIFFICULTY_COLORS,
+    DIFFICULTY_LABELS,
+    UserChallenge,
 } from '@/services/challenge';
+import React from 'react';
+import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ChallengeCardProps {
   userChallenge: UserChallenge;

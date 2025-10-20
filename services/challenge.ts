@@ -139,7 +139,6 @@ class ChallengeService {
   async getDailyChallenges(): Promise<UserChallenge[]> {
     try {
       const response = await api.get('/challenges/daily');
-      console.log('✅ getDailyChallenges - Resposta:', response.data);
       return response.data.data; // Backend retorna { success, data, message }
     } catch (error) {
       console.error('Erro ao buscar desafios diários:', error);

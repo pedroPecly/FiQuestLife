@@ -3,12 +3,12 @@
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    View
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  View
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar } from '../../components/ui/Avatar';
@@ -176,7 +176,11 @@ const ProfileScreen = () => {
           </Text>
 
           <View style={styles.avatarContainer}>
-            <Avatar initials={getInitials()} />
+            <Avatar 
+              initials={getInitials()}
+              imageUrl={user.avatarUrl}
+              size={80}
+            />
           </View>
 
           <View style={styles.infoContainer}>

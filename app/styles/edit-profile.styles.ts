@@ -118,27 +118,6 @@ export const styles = StyleSheet.create({
     }),
   },
 
-  avatar: {
-    marginBottom: 8,
-  },
-
-  changeAvatarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#E8F5E9',
-  },
-
-  changeAvatarText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4CAF50',
-  },
-
   // ==========================================
   // FORM CARD (Padrão Card Branco)
   // ==========================================

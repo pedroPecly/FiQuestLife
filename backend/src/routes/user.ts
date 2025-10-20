@@ -110,44 +110,69 @@ user.put('/profile', authMiddleware, async (c) => {
     const body = await c.req.json();
 
     // Validações
-    const { name, username, bio, birthDate } = body;
+    const { name, username, bio, birthDate, profilePublic, notificationsEnabled, dailyReminderTime } = body;
 
-    // Validar campos obrigatórios
-    if (!name || name.trim().length < 3) {
-      return c.json({ error: 'Nome deve ter pelo menos 3 caracteres' }, 400);
+    // Preparar objeto de atualização (apenas campos enviados)
+    const updateData: any = {};
+
+    // Validar e adicionar name se fornecido
+    if (name !== undefined) {
+      if (name.trim().length < 3) {
+        return c.json({ error: 'Nome deve ter pelo menos 3 caracteres' }, 400);
+      }
+      updateData.name = name.trim();
     }
 
-    if (!username || username.trim().length < 3) {
-      return c.json({ error: 'Username deve ter pelo menos 3 caracteres' }, 400);
+    // Validar e adicionar username se fornecido
+    if (username !== undefined) {
+      if (username.trim().length < 3) {
+        return c.json({ error: 'Username deve ter pelo menos 3 caracteres' }, 400);
+      }
+
+      // Validar formato do username (apenas letras, números e underscore)
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return c.json({ error: 'Username deve conter apenas letras, números e _' }, 400);
+      }
+
+      // Verificar se o username já está em uso por outro usuário
+      const existingUser = await prisma.user.findUnique({
+        where: { username: username.trim() },
+      });
+
+      if (existingUser && existingUser.id !== userData.userId) {
+        return c.json({ error: 'Username já está em uso por outro usuário' }, 409);
+      }
+
+      updateData.username = username.trim();
     }
 
-    // Validar formato do username (apenas letras, números e underscore)
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      return c.json({ error: 'Username deve conter apenas letras, números e _' }, 400);
+    // Adicionar bio se fornecido
+    if (bio !== undefined) {
+      updateData.bio = bio?.trim() || null;
     }
 
-    if (!birthDate) {
-      return c.json({ error: 'Data de nascimento é obrigatória' }, 400);
+    // Adicionar birthDate se fornecido
+    if (birthDate !== undefined) {
+      updateData.birthDate = new Date(birthDate);
     }
 
-    // Verificar se o username já está em uso por outro usuário
-    const existingUser = await prisma.user.findUnique({
-      where: { username: username.trim() },
-    });
+    // Adicionar configurações se fornecidas
+    if (profilePublic !== undefined) {
+      updateData.profilePublic = profilePublic;
+    }
 
-    if (existingUser && existingUser.id !== userData.userId) {
-      return c.json({ error: 'Username já está em uso por outro usuário' }, 409);
+    if (notificationsEnabled !== undefined) {
+      updateData.notificationsEnabled = notificationsEnabled;
+    }
+
+    if (dailyReminderTime !== undefined) {
+      updateData.dailyReminderTime = dailyReminderTime;
     }
 
     // Atualizar perfil
     const updatedUser = await prisma.user.update({
       where: { id: userData.userId },
-      data: {
-        name: name.trim(),
-        username: username.trim(),
-        bio: bio?.trim() || null,
-        birthDate: new Date(birthDate),
-      },
+      data: updateData,
       select: {
         id: true,
         email: true,
@@ -179,6 +204,122 @@ user.put('/profile', authMiddleware, async (c) => {
     console.error('Erro ao atualizar perfil:', error);
     return c.json({ 
       error: 'Erro ao atualizar perfil. Tente novamente.' 
+    }, 500);
+  }
+});
+
+/**
+ * POST /user/avatar
+ * Upload de foto de perfil (avatar)
+ * 
+ * Precisa enviar o token no header:
+ * Authorization: Bearer SEU_TOKEN_AQUI
+ * 
+ * Body (multipart/form-data):
+ * - avatar: arquivo de imagem (JPG, PNG, WEBP)
+ */
+user.post('/avatar', authMiddleware, async (c) => {
+  try {
+    // @ts-ignore
+    const userData = c.get('user') as { userId: string; email: string };
+    
+    // Parse do FormData
+    const body = await c.req.parseBody();
+    const avatarFile = body['avatar'];
+
+    if (!avatarFile || typeof avatarFile === 'string') {
+      return c.json({ error: 'Arquivo de imagem não fornecido' }, 400);
+    }
+
+    // Validar tipo de arquivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(avatarFile.type)) {
+      return c.json({ 
+        error: 'Tipo de arquivo inválido. Use JPG, PNG ou WEBP.' 
+      }, 400);
+    }
+
+    // Validar tamanho (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB em bytes
+    if (avatarFile.size > maxSize) {
+      return c.json({ 
+        error: 'Arquivo muito grande. Tamanho máximo: 5MB' 
+      }, 400);
+    }
+
+    // Importa o cliente do Supabase
+    const { supabase } = await import('../lib/supabase.js');
+
+    // Gera nome único para o arquivo
+    const fileExt = avatarFile.name.split('.').pop();
+    const fileName = `${userData.userId}-${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    // Converte File para Buffer para upload
+    const arrayBuffer = await avatarFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Faz upload para o Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('user-avatars')
+      .upload(filePath, buffer, {
+        contentType: avatarFile.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('❌ Erro ao fazer upload no Supabase:');
+      console.error('   Mensagem:', uploadError.message);
+      console.error('   Detalhes:', JSON.stringify(uploadError, null, 2));
+      console.error('   Bucket:', 'user-avatars');
+      console.error('   Path:', filePath);
+      return c.json({ 
+        error: `Erro ao fazer upload da imagem: ${uploadError.message}` 
+      }, 500);
+    }
+
+    // Gera URL pública da imagem
+    const { data: urlData } = supabase.storage
+      .from('user-avatars')
+      .getPublicUrl(filePath);
+
+    const avatarUrl = urlData.publicUrl;
+
+    // Atualiza o avatarUrl do usuário no banco
+    const updatedUser = await prisma.user.update({
+      where: { id: userData.userId },
+      data: { avatarUrl },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        birthDate: true,
+        bio: true,
+        avatarUrl: true,
+        xp: true,
+        coins: true,
+        level: true,
+        currentStreak: true,
+        longestStreak: true,
+        lastActiveDate: true,
+        notificationsEnabled: true,
+        dailyReminderTime: true,
+        profilePublic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return c.json({
+      message: 'Foto de perfil atualizada com sucesso!',
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.error('Erro ao fazer upload do avatar:', error);
+    return c.json({ 
+      error: 'Erro ao atualizar foto de perfil. Tente novamente.' 
     }, 500);
   }
 });

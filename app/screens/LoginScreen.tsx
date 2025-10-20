@@ -4,13 +4,13 @@ import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { AlertModal } from '../../components/ui/AlertModal';
@@ -105,8 +105,6 @@ const LoginScreen = () => {
     try {
       const result = await authService.login(identifier, password);
       
-      console.log('Login result:', result); // Debug
-      
       if (result.success) {
         // Salva o token e dados do usuário
         await authStorage.saveAuth(result.data.token, result.data.user);
@@ -115,7 +113,6 @@ const LoginScreen = () => {
         router.replace('/(tabs)');
       } else {
         // Exibe erro específico do servidor
-        console.log('Erro do servidor:', result.error); // Debug
         alert.error(
           'Erro no Login',
           result.error || 'Email/usuário ou senha inválidos!'
@@ -244,8 +241,7 @@ const LoginScreen = () => {
           value={isLogin ? identifier : email}
           onChangeText={isLogin ? setIdentifier : setEmail}
           editable={!loading}
-          returnKeyType={isLogin ? "next" : "next"}
-          onSubmitEditing={() => {}}
+          returnKeyType="next"
         />
 
         {!isLogin && (
@@ -258,7 +254,6 @@ const LoginScreen = () => {
               onChangeText={setUsername}
               editable={!loading}
               returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
 
             <Input
@@ -269,7 +264,6 @@ const LoginScreen = () => {
               onChangeText={setName}
               editable={!loading}
               returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
 
             <DateInput
@@ -278,7 +272,6 @@ const LoginScreen = () => {
               placeholder="Data de nascimento (DD/MM/YYYY) - obrigatório"
               editable={!loading}
               returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
           </>
         )}
@@ -291,7 +284,6 @@ const LoginScreen = () => {
           onChangeText={setPassword}
           editable={!loading}
           returnKeyType={isLogin ? "done" : "next"}
-          onSubmitEditing={isLogin ? handleLogin : () => {}}
         />
 
         {!isLogin && (
@@ -303,7 +295,6 @@ const LoginScreen = () => {
             onChangeText={setConfirmPassword}
             editable={!loading}
             returnKeyType="done"
-            onSubmitEditing={handleRegister}
           />
         )}
 

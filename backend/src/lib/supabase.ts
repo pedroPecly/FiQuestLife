@@ -25,12 +25,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Pega as variáveis de ambiente do arquivo .env
-// O ! no final é pra falar pro TypeScript: "confia, essa variável existe!"
-const supabaseUrl = process.env.SUPABASE_URL!;        // URL do seu projeto
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!; // Chave pública (pode expor)
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Chave privada com permissões de admin
 
-// Cria e exporta o cliente do Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Cria e exporta o cliente do Supabase usando Service Role Key
+// Isso dá permissões administrativas para fazer uploads no Storage
+export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 /**
  * ============================================

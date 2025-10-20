@@ -8,9 +8,15 @@
  * - Username
  * - Bio (opcional)
  * - Data de nascimento
- * - Avatar (futuro: upload de imagem)
+ * - Avatar (upload de foto de perfil)
+ * 
+ * Features:
+ * - Upload de foto via galeria ou câmera
+ * - Validações de formulário em tempo real
+ * - Integração com Supabase Storage
  * 
  * @created 17 de outubro de 2025
+ * @updated 20 de outubro de 2025 - Adicionado upload de foto
  */
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -28,11 +34,12 @@ import {
   View,
 } from 'react-native';
 import { AlertModal } from '../../components/ui';
-import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { DateInput } from '../../components/ui/DateInput';
 import { Input } from '../../components/ui/Input';
+import { ProfileAvatar } from '../../components/ui/ProfileAvatar';
 import { useAlert } from '../../hooks/useAlert';
+import { useImagePicker } from '../../hooks/useImagePicker';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import type { User } from '../../types/user';
@@ -47,6 +54,7 @@ export const EditProfileScreen = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Form fields
   const [name, setName] = useState('');
@@ -60,6 +68,7 @@ export const EditProfileScreen = () => {
   const [birthDateError, setBirthDateError] = useState('');
 
   const { alert, isVisible, alertConfig, hideAlert } = useAlert();
+  const { pickImageFromGallery, loading: pickingImage } = useImagePicker();
 
   // ==========================================
   // HELPER FUNCTIONS
@@ -82,6 +91,50 @@ export const EditProfileScreen = () => {
     
     // Pega primeira letra do primeiro e último nome
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  // ==========================================
+  // AVATAR UPLOAD
+  // ==========================================
+  
+  /**
+   * Função para selecionar e fazer upload da foto de perfil
+   */
+  const handleChangeAvatar = async () => {
+    try {
+      // Abre o seletor de imagens
+      const image = await pickImageFromGallery();
+      
+      if (!image) {
+        return; // Usuário cancelou
+      }
+
+      setUploadingAvatar(true);
+
+      // Faz upload da imagem
+      const result = await authService.uploadAvatar(image.uri);
+
+      if (result.success) {
+        // Atualiza o usuário local com a nova foto
+        const updatedUser = result.data;
+        setUser(updatedUser);
+        
+        // Atualiza também no storage
+        const token = await authStorage.getToken();
+        if (token) {
+          await authStorage.saveAuth(token, updatedUser);
+        }
+        
+        alert.success('Sucesso!', result.message || 'Foto atualizada com sucesso!');
+      } else {
+        alert.error('Erro', result.error || 'Não foi possível atualizar a foto.');
+      }
+    } catch (error) {
+      console.error('Erro ao trocar avatar:', error);
+      alert.error('Erro', 'Erro ao atualizar foto de perfil.');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   // ==========================================
@@ -108,8 +161,6 @@ export const EditProfileScreen = () => {
       const result = await authService.getMe();
 
       if (result.success && result.data) {
-        console.log('✅ Dados do usuário carregados:', result.data);
-        
         setUser(result.data);
         setName(result.data.name || '');
         setUsername(result.data.username || '');
@@ -117,16 +168,13 @@ export const EditProfileScreen = () => {
         
         // Formatar data de nascimento
         const formattedDate = formatDateForDisplay(result.data.birthDate);
-        console.log('📅 Data original:', result.data.birthDate);
-        console.log('📅 Data formatada:', formattedDate);
         setBirthDate(formattedDate);
       } else {
-        console.error('❌ Erro ao carregar dados:', result);
         alert.error('Erro', 'Não foi possível carregar seus dados.');
         router.back();
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar perfil:', error);
+      console.error('Erro ao carregar perfil:', error);
       alert.error('Erro', 'Erro ao carregar perfil.');
       router.back();
     } finally {
@@ -248,20 +296,7 @@ export const EditProfileScreen = () => {
   // ==========================================
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -274,18 +309,15 @@ export const EditProfileScreen = () => {
         >
           {/* Avatar Section */}
           <View style={styles.avatarSection}>
-            <Avatar 
+            <ProfileAvatar
               initials={getInitials(name)}
-              size={100} 
+              imageUrl={user?.avatarUrl}
+              size={100}
+              onPress={handleChangeAvatar}
+              loading={uploadingAvatar || pickingImage}
+              showHint={true}
+              hintText="Toque para alterar"
             />
-            <TouchableOpacity
-              style={styles.changeAvatarButton}
-              activeOpacity={0.7}
-              onPress={() => alert.info('Em Breve', 'Upload de foto estará disponível em breve!')}
-            >
-              <MaterialCommunityIcons name="camera" size={20} color="#4CAF50" />
-              <Text style={styles.changeAvatarText}>Alterar Foto</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Form Section */}

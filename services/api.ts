@@ -36,14 +36,9 @@ api.interceptors.request.use(
       // Busca o token do AsyncStorage
       const token = await authStorage.getToken();
       
-      console.log('🔑 Interceptor - Token encontrado:', token ? '✅ Sim' : '❌ Não');
-      
       // Se existe token, adiciona no header Authorization
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('🔐 Interceptor - Header adicionado:', config.headers.Authorization.substring(0, 20) + '...');
-      } else {
-        console.warn('⚠️ Interceptor - Nenhum token encontrado no AsyncStorage');
       }
       
       return config;
@@ -53,7 +48,6 @@ api.interceptors.request.use(
     }
   },
   (error) => {
-    console.error('❌ Erro no interceptor (reject):', error);
     return Promise.reject(error);
   }
 );
@@ -139,13 +133,16 @@ export const authService = {
   /**
    * Atualizar perfil do usuário
    * Token JWT é injetado automaticamente pelo interceptor
-   * @param profileData Dados do perfil a atualizar
+   * @param profileData Dados do perfil a atualizar (todos opcionais)
    */
   async updateProfile(profileData: {
-    name: string;
-    username: string;
+    name?: string;
+    username?: string;
     bio?: string;
-    birthDate: string;
+    birthDate?: string;
+    profilePublic?: boolean;
+    notificationsEnabled?: boolean;
+    dailyReminderTime?: string;
   }) {
     try {
       const response = await api.put('/user/profile', profileData);
@@ -159,6 +156,48 @@ export const authService = {
       return {
         success: false,
         error: error.response?.data?.error || 'Erro ao atualizar perfil',
+      };
+    }
+  },
+
+  /**
+   * Upload de foto de perfil (avatar)
+   * Token JWT é injetado automaticamente pelo interceptor
+   * @param imageUri URI local da imagem selecionada
+   */
+  async uploadAvatar(imageUri: string) {
+    try {
+      // Cria FormData para upload multipart
+      const formData = new FormData();
+      
+      // Extrai extensão do arquivo
+      const uriParts = imageUri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+      
+      // Adiciona a imagem ao FormData
+      // @ts-ignore - FormData aceita File/Blob no React Native
+      formData.append('avatar', {
+        uri: imageUri,
+        name: `avatar.${fileType}`,
+        type: `image/${fileType}`,
+      });
+
+      const response = await api.post('/user/avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      return { 
+        success: true, 
+        data: response.data.user || response.data,
+        message: response.data.message || 'Foto atualizada com sucesso!'
+      };
+    } catch (error: any) {
+      console.error('Erro ao fazer upload do avatar:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao fazer upload da foto',
       };
     }
   },
