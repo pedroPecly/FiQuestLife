@@ -60,6 +60,12 @@ export const styles = StyleSheet.create({
     width: 40,
   },
 
+  // Header Simples (sem botão voltar, sem fundo)
+  headerSimple: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+
   // ==========================================
   // LOADING
   // ==========================================

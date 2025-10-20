@@ -298,6 +298,11 @@ export const EditProfileScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
+      {/* Header Simples */}
+      <View style={styles.headerSimple}>
+        <Text style={styles.headerTitle}>Editar Perfil</Text>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
