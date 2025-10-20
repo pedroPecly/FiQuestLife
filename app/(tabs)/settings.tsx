@@ -69,7 +69,8 @@ export default function SettingsScreen() {
         return;
       }
 
-      const result = await authService.getMe(token);
+      // Token é injetado automaticamente pelo interceptor
+      const result = await authService.getMe();
 
       if (result.success && result.data) {
         setUser(result.data);

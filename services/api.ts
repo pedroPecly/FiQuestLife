@@ -5,9 +5,11 @@
  * 
  * Centraliza todas as chamadas HTTP para o backend
  * Usa Axios para fazer requisições
+ * Inclui interceptor para adicionar token JWT automaticamente
  */
 
 import axios from 'axios';
+import { authStorage } from './auth';
 
 // URL base da API (mude conforme necessário)
 // Em produção, use a URL real do servidor
@@ -22,6 +24,39 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+/**
+ * ============================================
+ * INTERCEPTOR - ADICIONA TOKEN JWT AUTOMATICAMENTE
+ * ============================================
+ */
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      // Busca o token do AsyncStorage
+      const token = await authStorage.getToken();
+      
+      console.log('🔑 Interceptor - Token encontrado:', token ? '✅ Sim' : '❌ Não');
+      
+      // Se existe token, adiciona no header Authorization
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔐 Interceptor - Header adicionado:', config.headers.Authorization.substring(0, 20) + '...');
+      } else {
+        console.warn('⚠️ Interceptor - Nenhum token encontrado no AsyncStorage');
+      }
+      
+      return config;
+    } catch (error) {
+      console.error('❌ Erro no interceptor:', error);
+      return config;
+    }
+  },
+  (error) => {
+    console.error('❌ Erro no interceptor (reject):', error);
+    return Promise.reject(error);
+  }
+);
 
 /**
  * Serviço de Autenticação
@@ -81,15 +116,11 @@ export const authService = {
 
   /**
    * Buscar dados do usuário logado
-   * @param token Token JWT
+   * Token JWT é injetado automaticamente pelo interceptor
    */
-  async getMe(token: string) {
+  async getMe() {
     try {
-      const response = await api.get('/user/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get('/user/me');
       
       // Backend retorna { message: '...', user: {...} }
       // Retornamos apenas o objeto user
@@ -107,21 +138,17 @@ export const authService = {
 
   /**
    * Atualizar perfil do usuário
-   * @param token Token JWT
+   * Token JWT é injetado automaticamente pelo interceptor
    * @param profileData Dados do perfil a atualizar
    */
-  async updateProfile(token: string, profileData: {
+  async updateProfile(profileData: {
     name: string;
     username: string;
     bio?: string;
     birthDate: string;
   }) {
     try {
-      const response = await api.put('/user/profile', profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.put('/user/profile', profileData);
       
       return { 
         success: true, 

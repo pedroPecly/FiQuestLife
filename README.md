@@ -36,32 +36,37 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 FiQuestLife/
 ├── app/                        # 📱 Frontend (React Native + Expo Router)
 │   ├── (tabs)/                # Navegação em abas (file-based routing)
-│   │   ├── _layout.tsx       # Layout das tabs (Home, Explorar, Configurações)
+│   │   ├── _layout.tsx       # Layout das tabs (Home, Desafios, Explorar, Configurações)
 │   │   ├── index.tsx         # Tab Home (ProfileScreen)
+│   │   ├── challenges.tsx    # 🆕 Tab Desafios (ChallengesScreen)
 │   │   ├── explore.tsx       # Tab Explorar
 │   │   └── settings.tsx      # ⚙️ Tab Configurações (5 seções organizadas em cards)
 │   ├── screens/               # 📱 Componentes das telas
 │   │   ├── index.ts          # Barrel export
 │   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
 │   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
+│   │   ├── ChallengesScreen.tsx # 🆕 Tela de desafios diários (completa em Sprint 6)
 │   │   └── EditProfileScreen.tsx # ✏️ Edição de perfil profissional
 │   ├── styles/                # 🎨 Estilos separados por tela
 │   │   ├── index.ts          # Barrel export
 │   │   ├── login.styles.ts   # Estilos do LoginScreen
 │   │   ├── profile.styles.ts # Estilos do ProfileScreen
 │   │   ├── edit-profile.styles.ts # Estilos do EditProfileScreen
-│   │   └── settings.styles.ts # Estilos do SettingsScreen
+│   │   ├── settings.styles.ts # Estilos do SettingsScreen
+│   │   └── challenges.styles.ts # 🆕 Estilos do ChallengesScreen
 │   ├── _layout.tsx           # Layout raiz do app
 │   ├── index.tsx             # Rota inicial (redirect)
-│   └── edit-profile.tsx      # Rota para EditProfileScreen
+│   ├── edit-profile.tsx      # Rota para EditProfileScreen
+│   └── challenges.tsx        # 🆕 Rota para ChallengesScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 12 componentes de UI
+│   ├── ui/                   # 13 componentes de UI
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
 │   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Card.tsx          # Container com sombra e padding
+│   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com badges e botão de completar
 │   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
 │   │   ├── Input.tsx         # Input com ícone e multiline + efeitos foco
@@ -90,7 +95,8 @@ FiQuestLife/
 │
 ├── services/                  # 🌐 Comunicação com API
 │   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
-│   └── auth.ts               # Gerenciamento de token JWT + AsyncStorage
+│   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
+│   └── challenge.ts          # 🆕 Serviço de desafios (interfaces + funções API)
 │
 ├── constants/                 # 🎨 Constantes e Temas
 │   ├── responsive.ts         # Breakpoints e helpers responsivos
@@ -101,24 +107,32 @@ FiQuestLife/
 │
 ├── backend/                   # 🔧 Backend (Node.js + Hono)
 │   ├── src/
-│   │   ├── controllers/      # 🎯 Lógica de negócio
-│   │   │   ├── auth.controller.ts   # Login, Register, Profile
-│   │   │   └── health.controller.ts # Health check
+│   │   ├── controllers/      # 🎯 Controladores da API
+│   │   │   ├── auth.controller.ts       # Login, Register, Profile
+│   │   │   ├── health.controller.ts     # Health check
+│   │   │   ├── challenge.controller.ts  # 🆕 Gerenciamento de desafios (4 endpoints)
+│   │   │   └── badge.controller.ts      # 🆕 Gerenciamento de badges (3 endpoints)
+│   │   ├── services/         # 🔧 Lógica de Negócio
+│   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
+│   │   │   └── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
 │   │   ├── routes/           # 🛣️ Definição de rotas
-│   │   │   ├── auth.ts       # Rotas de autenticação
-│   │   │   ├── user.ts       # Rotas de usuário (protegidas)
-│   │   │   └── health.ts     # Health check
+│   │   │   ├── auth.ts                  # Rotas de autenticação
+│   │   │   ├── user.ts                  # Rotas de usuário (protegidas)
+│   │   │   ├── health.ts                # Health check
+│   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
+│   │   │   └── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
 │   │   ├── middlewares/      # 🔒 Middlewares
-│   │   │   ├── auth.middleware.ts   # Validação JWT
-│   │   │   └── error.middleware.ts  # Tratamento de erros
+│   │   │   ├── auth.middleware.ts       # Validação JWT
+│   │   │   └── error.middleware.ts      # Tratamento de erros
 │   │   ├── lib/              # 🔧 Clientes e utilitários
-│   │   │   ├── prisma.ts     # Prisma Client
-│   │   │   └── supabase.ts   # Supabase Client
-│   │   └── index.ts          # Entry point do servidor
+│   │   │   ├── prisma.ts                # Prisma Client
+│   │   │   └── supabase.ts              # Supabase Client
+│   │   └── index.ts          # Entry point do servidor (rotas registradas)
 │   ├── prisma/
-│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados
-│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges iniciais)
-│   │   ├── migrations/       # Histórico de mudanças do DB
+│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (8 models)
+│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges)
+│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (43 desafios em 8 categorias)
+│   │   ├── migrations/       # Histórico de mudanças do DB (6 migrations)
 │   │   │   ├── migration_lock.toml
 │   │   │   ├── 20251016122028_add_username/
 │   │   │   ├── 20251016131113_add_gamification_fields/
@@ -130,7 +144,7 @@ FiQuestLife/
 │   │       └── clear-database.sql # Script para limpar DB
 │   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
 │   ├── .env.example          # Exemplo de variáveis de ambiente
-│   ├── package.json          # Dependências do backend
+│   ├── package.json          # Dependências do backend + scripts de seed
 │   └── tsconfig.json         # Configuração TypeScript do backend
 │
 ├── .expo/                     # Cache do Expo (não versionado)
@@ -141,6 +155,8 @@ FiQuestLife/
 ├── eslint.config.js          # Configuração ESLint
 ├── package.json               # Dependências do frontend
 ├── tsconfig.json              # Configuração TypeScript do frontend
+├── commit-message.txt         # 📝 Mensagem de commit das últimas features
+├── roadmap_fiquestlife.md     # 🗺️ Roadmap de implementação (atualizado)
 └── README.md                  # 📖 Este arquivo
 ```
 
@@ -703,6 +719,7 @@ const MyComponent = () => {
 
 ## 🔐 API Endpoints
 
+### **Autenticação**
 | Método | Rota              | Auth | Descrição                         |
 |--------|-------------------|------|-----------------------------------|
 | GET    | `/`               | ❌   | Health check (status da API)      |
@@ -711,6 +728,22 @@ const MyComponent = () => {
 | POST   | `/auth/login`     | ❌   | Login (email ou username)         |
 | GET    | `/auth/me`        | ✅   | Perfil do usuário logado          |
 | GET    | `/user/me`        | ✅   | Perfil do usuário logado (alias)  |
+| PUT    | `/user/profile`   | ✅   | Atualizar perfil do usuário       |
+
+### **Desafios (Challenges)** 🆕
+| Método | Rota                         | Auth | Descrição                                    |
+|--------|------------------------------|------|----------------------------------------------|
+| GET    | `/challenges/daily`          | ✅   | Buscar ou atribuir 5 desafios diários        |
+| POST   | `/challenges/:id/complete`   | ✅   | Completar desafio e receber recompensas      |
+| GET    | `/challenges/history`        | ✅   | Histórico de desafios completados (limit=50) |
+| GET    | `/challenges/all`            | ✅   | Listar todos os desafios disponíveis         |
+
+### **Badges (Conquistas)** 🆕
+| Método | Rota                | Auth | Descrição                                         |
+|--------|---------------------|------|---------------------------------------------------|
+| GET    | `/badges/all`       | ✅   | Listar todos os badges disponíveis                |
+| GET    | `/badges/user`      | ✅   | Badges conquistados pelo usuário                  |
+| GET    | `/badges/progress`  | ✅   | Progresso de todos os badges + summary            |
 
 ### **Exemplo de Requisição**
 
@@ -757,6 +790,135 @@ POST /auth/login
 
 ---
 
+### **Exemplos de Requisições - Desafios** 🆕
+
+**Buscar desafios diários:**
+```bash
+GET /challenges/daily
+Authorization: Bearer SEU_TOKEN_JWT
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "user-challenge-uuid",
+      "userId": "user-uuid",
+      "challengeId": "challenge-uuid",
+      "status": "PENDING",
+      "assignedAt": "2025-10-20T08:00:00.000Z",
+      "progress": 0,
+      "challenge": {
+        "id": "challenge-uuid",
+        "title": "Caminhada de 30 minutos",
+        "description": "Faça uma caminhada ao ar livre por pelo menos 30 minutos",
+        "category": "PHYSICAL_ACTIVITY",
+        "difficulty": "EASY",
+        "xpReward": 50,
+        "coinsReward": 10
+      }
+    }
+    // ... mais 4 desafios
+  ],
+  "message": "5 desafios diários"
+}
+```
+
+**Completar desafio:**
+```bash
+POST /challenges/:userChallengeId/complete
+Authorization: Bearer SEU_TOKEN_JWT
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "data": {
+    "challenge": {
+      "id": "user-challenge-uuid",
+      "status": "COMPLETED",
+      "completedAt": "2025-10-20T14:30:00.000Z",
+      "progress": 100
+    },
+    "userStats": {
+      "xp": 150,
+      "coins": 30,
+      "level": 1,
+      "currentStreak": 5,
+      "longestStreak": 12
+    },
+    "leveledUp": false,
+    "newLevel": 1,
+    "newBadges": []
+  },
+  "message": "Desafio completado com sucesso!"
+}
+```
+
+---
+
+### **Exemplos de Requisições - Badges** 🆕
+
+**Buscar progresso de badges:**
+```bash
+GET /badges/progress
+Authorization: Bearer SEU_TOKEN_JWT
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "badge-uuid",
+      "name": "Primeiro Passo",
+      "description": "Complete seu primeiro desafio!",
+      "imageUrl": "🎯",
+      "category": "BEGINNER",
+      "rarity": "COMMON",
+      "requirementType": "CHALLENGES_COMPLETED",
+      "requirementValue": 1,
+      "earned": true,
+      "earnedAt": "2025-10-20T10:15:00.000Z",
+      "progress": {
+        "current": 5,
+        "required": 1,
+        "percentage": 100
+      }
+    },
+    {
+      "id": "badge-uuid-2",
+      "name": "Persistente",
+      "description": "Mantenha um streak de 3 dias",
+      "imageUrl": "🔥",
+      "category": "CONSISTENCY",
+      "rarity": "COMMON",
+      "requirementType": "STREAK_DAYS",
+      "requirementValue": 3,
+      "earned": false,
+      "progress": {
+        "current": 2,
+        "required": 3,
+        "percentage": 66
+      }
+    }
+    // ... mais badges
+  ],
+  "summary": {
+    "earned": 3,
+    "total": 29,
+    "percentage": 10
+  },
+  "message": "3/29 badges conquistados"
+}
+```
+
+---
+
 ## 📝 Comandos Rápidos
 
 ```bash
@@ -769,17 +931,20 @@ cd backend && npx prisma migrate deploy && npx prisma generate && cd ..
 # Popular banco com badges iniciais (29 badges)
 cd backend && npm run prisma:seed && cd ..
 
+# Popular banco com desafios (43 desafios em 8 categorias) 🆕
+cd backend && npm run prisma:seed-challenges && cd ..
+
 # Iniciar tudo (2 terminais)
-# Terminal 1:
+# Terminal 1 - Backend:
 cd backend && npm run dev
 
-# Terminal 2:
+# Terminal 2 - Frontend:
 npx expo start
 
 # Limpar cache do Expo
 npx expo start -c
 
-# Visualizar banco
+# Visualizar banco de dados
 cd backend && npx prisma studio
 ```
 
@@ -831,6 +996,46 @@ npm run prisma:seed
 **Arquivo:** `backend/prisma/seed.ts`
 
 **IMPORTANTE:** O seed limpa os badges existentes antes de popular. Use com cuidado em produção!
+
+---
+
+### **Popular banco com desafios (Seed)** 🆕
+O projeto possui um sistema de seed para popular o banco com 43 desafios distribuídos em 8 categorias.
+
+**Rodar seed de desafios:**
+```bash
+cd backend
+npm run prisma:seed-challenges
+```
+
+**Desafios criados por categoria:**
+- 💪 **PHYSICAL_ACTIVITY** (8): Caminhada, 10k passos, Treino de força, Corrida 5km, Alongamento, Yoga, Escadas, Dança
+- 🥗 **NUTRITION** (6): 5 porções frutas/vegetais, Café saudável, Zero açúcar, Refeição caseira, Proteína, Evitar fast food
+- 💧 **HYDRATION** (4): 2L água, Água ao acordar, Zero refrigerante, Chá/infusão
+- 🧠 **MENTAL_HEALTH** (4): Gratidão, Momento sem telas, Tempo natureza, Journaling
+- 😴 **SLEEP** (3): 8 horas sono, Rotina noturna, Dormir antes 23h
+- 👥 **SOCIAL** (3): Ligar amigo/familiar, Ato bondade, Encontro presencial
+- 🎯 **PRODUCTIVITY** (4): Planejar dia, Pomodoro, Organizar espaço, Aprender novo
+- 🧘 **MINDFULNESS** (4): Meditar 10min, Respiração consciente, Refeição consciente, Body scan
+
+**Distribuição de dificuldades:**
+- **EASY** (16 desafios): 30-60 XP, 6-12 coins
+- **MEDIUM** (22 desafios): 70-120 XP, 14-25 coins  
+- **HARD** (5 desafios): 120-150 XP, 24-30 coins
+
+**Arquivo:** `backend/prisma/seed-challenges.ts`
+
+**IMPORTANTE:** O seed limpa os desafios existentes antes de popular. Execute apenas durante desenvolvimento!
+
+**Ordem recomendada de seeds:**
+```bash
+cd backend
+npm run prisma:seed              # 1º - Badges (29)
+npm run prisma:seed-challenges   # 2º - Desafios (43)
+cd ..
+```
+
+---
 
 ### **Criar nova tela**
 1. Criar componente em `app/screens/NovaTela.tsx`
@@ -908,10 +1113,100 @@ Depois reinicie o TypeScript Server no VS Code:
 
 ---
 
+## � Sistema de Gamificação 🆕
+
+### **Mecânicas Implementadas**
+
+#### **Sistema de Level**
+- Fórmula: `level = Math.floor(totalXP / 1000) + 1`
+- **1000 XP por nível**
+  - Nível 1: 0-999 XP
+  - Nível 2: 1000-1999 XP
+  - Nível 3: 2000-2999 XP
+  - E assim por diante...
+- Detecção automática de level up
+- Registro no histórico de recompensas
+
+#### **Sistema de Streaks (Dias Consecutivos)**
+- **Incrementa:** Se última atividade foi ontem
+- **Mantém:** Se última atividade foi hoje
+- **Reseta:** Se passou 2+ dias sem atividade
+- Tracking de `currentStreak` e `longestStreak`
+- Timezone handling para cálculo preciso de dias
+
+#### **Sistema de Desafios**
+- **43 desafios** distribuídos em 8 categorias:
+  - 💪 **PHYSICAL_ACTIVITY** (8 desafios)
+  - 🥗 **NUTRITION** (6 desafios)
+  - 💧 **HYDRATION** (4 desafios)
+  - 🧠 **MENTAL_HEALTH** (4 desafios)
+  - 😴 **SLEEP** (3 desafios)
+  - 👥 **SOCIAL** (3 desafios)
+  - 🎯 **PRODUCTIVITY** (4 desafios)
+  - 🧘 **MINDFULNESS** (4 desafios)
+- **3 dificuldades:**
+  - **EASY:** 30-60 XP, 6-12 coins
+  - **MEDIUM:** 70-120 XP, 14-25 coins
+  - **HARD:** 120-150 XP, 24-30 coins
+- **5 desafios diários aleatórios** atribuídos automaticamente
+- Frequências: DAILY, WEEKLY, MONTHLY, ONE_TIME
+
+#### **Sistema de Badges (Conquistas Automáticas)**
+- **29 badges** em 5 categorias:
+  - 🌱 **BEGINNER** (6): Progresso inicial (1, 5, 10, 25, 50, 100 desafios)
+  - 🔥 **CONSISTENCY** (5): Streaks (3, 7, 14, 30, 365 dias)
+  - 🎯 **MILESTONE** (5): Níveis (5, 10, 20, 50, 100)
+  - 💎 **ACHIEVEMENT** (11): XP total + Mestres de categoria
+  - ⭐ **SPECIAL** (2): Early Adopter, Beta Tester (manuais)
+- **4 raridades:** COMMON, RARE, EPIC, LEGENDARY
+- **6 tipos de requisitos:**
+  - `CHALLENGES_COMPLETED` - Total de desafios
+  - `STREAK_DAYS` - Dias consecutivos
+  - `LEVEL_REACHED` - Nível alcançado
+  - `XP_EARNED` - XP total ganho
+  - `CATEGORY_MASTER` - Desafios por categoria
+  - `SPECIFIC_CHALLENGE` / `SOCIAL_INTERACTION` - Badges especiais
+- **Verificação automática** ao completar desafios
+- Cálculo de progresso em tempo real
+
+#### **Histórico de Recompensas**
+- Registro automático de todas as ações:
+  - XP ganho por desafio
+  - Coins ganhas por desafio
+  - Level ups
+  - Badges conquistados
+- Tracking completo com fonte e descrição
+
+### **Fluxo de Completar Desafio**
+1. Usuário completa desafio
+2. Sistema atualiza XP e coins
+3. Sistema calcula novo level
+4. Sistema atualiza streak
+5. Sistema verifica badges automaticamente
+6. Sistema registra tudo no histórico
+7. Retorna: stats atualizadas + levelUp + novos badges
+
+---
+
 ## 🎯 Funcionalidades Implementadas
 
-### **Autenticação**
-- ✅ Sistema de autenticação JWT (7 dias)
+### **Backend - API REST Completa**
+- ✅ **Sistema de autenticação JWT** (7 dias de validade)
+- ✅ **4 endpoints de autenticação e perfil**
+- ✅ **4 endpoints de desafios** 🆕
+- ✅ **3 endpoints de badges** 🆕
+- ✅ **Service Layer completo:**
+  - 8 funções de challenge service (457 linhas)
+  - 3 funções de badge service (168 linhas)
+- ✅ **Sistema de gamificação:**
+  - Level system (1000 XP/nível)
+  - Streak system (dias consecutivos)
+  - Badge automation (6 tipos de requisitos)
+  - Reward history tracking
+- ✅ **Seed de dados:**
+  - 29 badges seedados
+  - 43 desafios seedados
+
 ### **Autenticação e Cadastro**
 - ✅ Login com email OU username
 - ✅ Cadastro com validações completas:
@@ -1330,40 +1625,70 @@ User (1) ←→ (N) RewardHistory
 
 ## 🚀 Próximos Passos
 
-### **Sprint 3 - API de Desafios**
-- [ ] Endpoints CRUD de desafios (criar, listar, editar, deletar)
-- [ ] Atribuir desafios ao usuário
-- [ ] Atualizar progresso de desafios
-- [ ] Completar desafios e ganhar recompensas (XP + coins)
-- [ ] Sistema automático de Level Up
-- [ ] Sistema automático de registro de recompensas no RewardHistory
+### **Sprint 3 - API de Desafios** ✅ CONCLUÍDA (20/10/2025)
+- ✅ Service layer completo (8 funções, 457 linhas)
+- ✅ Controller com 4 endpoints REST (137 linhas)
+- ✅ Routes protegidas com authMiddleware (48 linhas)
+- ✅ Atribuir 5 desafios diários aleatórios
+- ✅ Completar desafios e ganhar recompensas (XP + coins)
+- ✅ Sistema automático de Level Up (1000 XP/nível)
+- ✅ Sistema automático de Streaks (dias consecutivos)
+- ✅ Sistema automático de concessão de badges
+- ✅ Sistema de registro de recompensas no RewardHistory
 
-### **Sprint 4 - API de Badges e Recompensas**
-- [ ] Seeds de badges iniciais (Primeiro Passo, Guerreiro Semanal, etc)
-- [ ] Sistema de verificação automática de requisitos
-- [ ] Endpoints de badges (listar disponíveis, listar conquistados)
-- [ ] Endpoint de histórico de recompensas
-- [ ] Sistema de concessão automática de badges
-- [ ] Notificações ao conquistar badges
+### **Sprint 4 - API de Badges e Recompensas** ✅ CONCLUÍDA (20/10/2025)
+- ✅ Service layer completo (3 funções, 168 linhas)
+- ✅ Controller com 3 endpoints REST (122 linhas)
+- ✅ Routes protegidas com authMiddleware (45 linhas)
+- ✅ Seeds de 29 badges iniciais em 5 categorias
+- ✅ Sistema de verificação automática de requisitos (6 tipos)
+- ✅ Endpoint de progresso de badges com cálculo em tempo real
+- ✅ Sistema de concessão automática ao completar desafios
 
-### **Sprint 5 - Interface de Desafios**
-- [ ] Tela de listagem de desafios disponíveis
-- [ ] Tela de desafios ativos do usuário
-- [ ] Tela de progresso de desafio individual
-- [ ] Animações de conclusão e recompensa
-- [ ] Filtros por categoria e dificuldade
+### **Sprint 5 - Seed de Desafios** ✅ CONCLUÍDA (20/10/2025)
+- ✅ Seed de 43 desafios em 8 categorias (448 linhas)
+- ✅ Distribuição balanceada de dificuldades (EASY, MEDIUM, HARD)
+- ✅ Script npm: `npm run prisma:seed-challenges`
+- ✅ Desafios variados e realistas para cada categoria
+
+### **Sprint 6 - Interface de Desafios (Frontend)** ✅ CONCLUÍDA
+- ✅ Criar `services/challenge.ts` (cliente API com interfaces e funções)
+- ✅ Criar componente `ChallengeCard.tsx` com badges coloridos
+- ✅ Criar tela `app/screens/ChallengesScreen.tsx`
+- ✅ Criar rota `app/(tabs)/challenges.tsx`
+- ✅ Adicionar tab "Desafios" no layout (ícone troféu)
+- ✅ Implementar visualização de desafios diários (lista com cards)
+- ✅ Header com saudação e stats (nível, XP, coins, streak)
+- ✅ Card de progresso com porcentagem (X/5 desafios)
+- ✅ Implementar botão de completar desafio (loading individual)
+- ✅ Atualização de stats em tempo real após completar
+- ✅ Feedback visual de level up (alert com mensagem)
+- ✅ Toast de novos badges conquistados
+- ✅ Pull-to-refresh para atualizar desafios
+- ✅ Estado vazio com ícone e instrução
+- ✅ Overlay verde em desafios completos
+- ✅ Cores por categoria (8 categorias mapeadas)
+- ✅ Cores por dificuldade (EASY, MEDIUM, HARD, EXPERT)
+
+### **Sprint 7 - Interface de Badges (Frontend)** 🚧 PRÓXIMA
+- [ ] Criar `services/badge.ts` (cliente API)
+- [ ] Criar componente `BadgeCard.tsx`
+- [ ] Criar tela `app/(tabs)/badges.tsx` (galeria)
+- [ ] Modal de detalhes do badge
+- [ ] Filtros (Todos, Conquistados, Bloqueados)
+- [ ] Barra de progresso para badges não conquistados
+- [ ] Cores por raridade (COMMON, RARE, EPIC, LEGENDARY)
+
+### **Sprint 8 - Atualizar ProfileScreen**
+- [ ] Adicionar seção "Badges em Destaque"
+- [ ] Grid horizontal com 3-5 badges mais recentes
+- [ ] Botão "Ver Todos" → navega para BadgesScreen
+- [ ] Atualização automática de stats com `useFocusEffect`
 - [ ] Cards de desafios com ícones e cores por categoria
 
-### **Sprint 6 - Interface de Badges**
-- [ ] Tela de badges conquistados (galeria)
-- [ ] Tela de progresso para próximos badges
-- [ ] Tela de histórico de recompensas
-- [ ] Animação ao conquistar badge
-- [ ] Sistema de badges em destaque no perfil
-- [ ] Cards de badges com raridade e brilho
-
 ### **Futuras Funcionalidades**
-- [ ] Tela de edição de perfil (bio, avatar, configs)
+- [ ] Tela de histórico de recompensas
+- [ ] Animação ao conquistar badge (confetti/lottie)
 - [ ] Upload de foto de avatar
 - [ ] Customização de avatar (UserAvatarItem)
 - [ ] Feed de atividades (ActivityFeed)
@@ -1379,7 +1704,91 @@ User (1) ←→ (N) RewardHistory
 
 ## 📋 Changelog - Atualizações Recentes
 
-### **17 de Outubro de 2025** 🆕
+### **20 de Outubro de 2025** 🆕
+
+#### **Frontend de Desafios - SPRINT 6 ✅ CONCLUÍDA**
+- ✅ `services/challenge.ts` com interfaces e funções de API (191 linhas):
+  - Interfaces: Challenge, UserChallenge, CompleteChallengeResponse
+  - Types: ChallengeCategory, ChallengeDifficulty, ChallengeStatus, ChallengeFrequency
+  - Mapeamentos de cores por categoria (8 categorias)
+  - Mapeamentos de cores e labels por dificuldade (4 níveis)
+  - Funções: getDailyChallenges, completeChallenge, getChallengeHistory, getAllChallenges
+- ✅ `components/ui/ChallengeCard.tsx` (186 linhas):
+  - Badge de categoria colorido com ícone (8 cores)
+  - Badge de dificuldade colorido (4 cores)
+  - Título e descrição estilizados
+  - Row de recompensas (⭐ XP + 💰 coins)
+  - Botão com 3 estados (ativo, loading, completo)
+  - Overlay verde em desafios completos
+- ✅ `app/screens/ChallengesScreen.tsx` (258 linhas):
+  - Header com saudação e stats (nível, XP, coins, streak)
+  - Card de progresso com porcentagem e barra visual
+  - Lista de desafios com ChallengeCard
+  - Pull-to-refresh funcional
+  - handleCompleteChallenge com atualização em tempo real
+  - Feedback de level up e novos badges (alert)
+  - Estado vazio com instruções
+- ✅ `app/(tabs)/challenges.tsx` - Nova tab "Desafios" com ícone troféu
+- ✅ `app/(tabs)/_layout.tsx` - Adicionada tab no layout (4 tabs agora)
+- ✅ `app/styles/challenges.styles.ts` - Estilos completos (138 linhas)
+- ✅ Integração completa com backend (4 endpoints de desafios)
+
+**Métricas do Sprint 6:**
+- 📦 6 arquivos criados (776 linhas)
+- 🔄 3 arquivos atualizados
+- 🎨 1 novo componente de UI (ChallengeCard)
+- 📱 1 nova tela (ChallengesScreen)
+- 🗺️ 1 nova tab na navegação
+- 🌐 4 funções de API integradas
+- 🎯 17 funcionalidades implementadas
+
+---
+
+#### **API de Desafios (Backend) - SPRINT 3 ✅ CONCLUÍDA**
+- ✅ `challenge.service.ts` com 8 funções implementadas (457 linhas):
+  - `assignDailyChallenges` - Atribui 5 desafios aleatórios diários
+  - `getUserDailyChallenges` - Busca desafios do dia
+  - `completeChallenge` - Completa desafio e dá recompensas
+  - `updateUserStats` - Atualiza XP/coins e calcula level
+  - `checkAndUpdateStreak` - Gerencia dias consecutivos
+  - `checkAndAwardBadges` - Verifica e concede badges automaticamente
+  - `getChallengeHistory` - Histórico de desafios completados
+  - `getAllChallenges` - Lista todos os desafios
+- ✅ `challenge.controller.ts` com 4 endpoints REST (137 linhas)
+- ✅ `challenge.routes.ts` protegido com authMiddleware (48 linhas)
+- ✅ Sistema de level: `Math.floor(totalXP / 1000) + 1`
+- ✅ Sistema de streaks com timezone handling
+- ✅ Badge automation com 6 tipos de requisitos
+- ✅ Reward History registrando XP, COINS e BADGES
+
+#### **API de Badges (Backend) - SPRINT 4 ✅ CONCLUÍDA**
+- ✅ `badge.service.ts` com 3 funções implementadas (168 linhas):
+  - `getAllBadges` - Lista todos os badges disponíveis
+  - `getUserBadges` - Badges conquistados pelo usuário
+  - `getBadgesProgress` - Calcula progresso de todos os badges
+- ✅ `badge.controller.ts` com 3 endpoints REST (122 linhas)
+- ✅ `badge.routes.ts` protegido com authMiddleware (45 linhas)
+- ✅ Cálculo de progresso automático (current/required/percentage)
+- ✅ Summary com percentual de badges conquistados
+
+#### **Seed de Desafios - SPRINT 5 ✅ CONCLUÍDA**
+- ✅ `seed-challenges.ts` com 43 desafios em 8 categorias (448 linhas)
+- ✅ Distribuição balanceada: EASY (16), MEDIUM (22), HARD (5)
+- ✅ 8 categorias: PHYSICAL_ACTIVITY, NUTRITION, HYDRATION, MENTAL_HEALTH, SLEEP, SOCIAL, PRODUCTIVITY, MINDFULNESS
+- ✅ Script npm adicionado: `npm run prisma:seed-challenges`
+- ✅ Recompensas variadas: EASY (30-60 XP), MEDIUM (70-120 XP), HARD (120-150 XP)
+
+#### **Documentação Atualizada**
+- ✅ README.md atualizado com estrutura completa do projeto
+- ✅ Novos endpoints de desafios e badges documentados
+- ✅ Seção de sistema de gamificação adicionada
+- ✅ Exemplos de requisições e respostas da API
+- ✅ Guia de seeds (badges e desafios)
+- ✅ roadmap_fiquestlife.md atualizado com status das Sprints 3, 4 e 5
+
+---
+
+### **17 de Outubro de 2025**
 
 #### **Componente SettingsMenuItem**
 - ✅ Criado componente reutilizável `SettingsMenuItem.tsx`
@@ -1391,15 +1800,13 @@ User (1) ←→ (N) RewardHistory
 #### **Refatoração da Tela de Configurações**
 - ✅ Refatorada `SettingsScreen` usando `SettingsMenuItem`
 - ✅ Redução de ~401 para ~397 linhas + componente reutilizável
-- ✅ Removido 6 estilos não utilizados do `settings.styles.ts`:
-  - `menuItem`, `menuItemLast`, `menuItemLeft`
-  - `menuItemText`, `menuItemSubtext`, `dangerMenuItem`
+- ✅ Removido 6 estilos não utilizados do `settings.styles.ts`
 - ✅ Removido imports não utilizados (`Switch` do React Native)
 - ✅ Código mais limpo, legível e manutenível
 
 #### **Sistema de Badges e Recompensas**
 - ✅ Adicionado sistema completo de badges ao schema do Prisma
-- ✅ 4 ENUMs criados: `BadgeCategory`, `BadgeRarity`, `RewardType`, `RewardReason`
+- ✅ 4 ENUMs criados: `BadgeCategory`, `BadgeRarity`, `RewardType`, `BadgeRequirementType`
 - ✅ 3 novos models: `Badge`, `UserBadge`, `RewardHistory`
 - ✅ Seed com 29 badges iniciais em 5 categorias
 - ✅ Migrations aplicadas: `20251017145006_add_badges_and_rewards`

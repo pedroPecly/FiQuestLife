@@ -104,7 +104,8 @@ export const EditProfileScreen = () => {
         return;
       }
 
-      const result = await authService.getMe(token);
+      // Token é injetado automaticamente pelo interceptor
+      const result = await authService.getMe();
 
       if (result.success && result.data) {
         console.log('✅ Dados do usuário carregados:', result.data);
@@ -195,7 +196,8 @@ export const EditProfileScreen = () => {
       }
 
       // Chamar API para atualizar perfil
-      const result = await authService.updateProfile(token, {
+      // Token é injetado automaticamente pelo interceptor
+      const result = await authService.updateProfile({
         name: name.trim(),
         username: username.trim(),
         bio: bio.trim() || undefined,

@@ -37,8 +37,13 @@ export const authStorage = {
   async getToken() {
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
+      console.log('🔑 authStorage.getToken() -', token ? 'Token encontrado ✅' : 'Token NÃO encontrado ❌');
+      if (token) {
+        console.log('🔑 Token preview:', token.substring(0, 30) + '...');
+      }
       return token;
     } catch (error) {
+      console.error('❌ Erro ao buscar token:', error);
       return null;
     }
   },

@@ -2,6 +2,7 @@ export { AlertModal } from './AlertModal';
 export { Avatar } from './Avatar';
 export { Button } from './Button';
 export { Card } from './Card';
+export { default as ChallengeCard } from './ChallengeCard';
 export { DateInput } from './DateInput';
 export { InfoRow } from './InfoRow';
 export { Input } from './Input';

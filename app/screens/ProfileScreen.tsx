@@ -52,7 +52,8 @@ const ProfileScreen = () => {
       }
 
       // Busca dados do usuário no backend
-      const result = await authService.getMe(token);
+      // Token é injetado automaticamente pelo interceptor
+      const result = await authService.getMe();
       
       if (result.success) {
         setUser(result.data); // result.data já é o objeto user após a correção no api.ts

@@ -19,6 +19,8 @@ import { logger } from 'hono/logger'; // Mostra logs no terminal de cada requisi
 // Importa nossas coisas personalizadas
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.js';
+import badgeRoutes from './routes/badge.routes.js';
+import challengeRoutes from './routes/challenge.routes.js';
 import healthRoutes from './routes/health.js';
 import userRoutes from './routes/user.js';
 
@@ -51,6 +53,12 @@ app.get('/', (c) => {
       register: '/auth/register - Cadastro de novo usuário',
       login: '/auth/login - Login com email ou username',
       profile: '/auth/me ou /user/me - Perfil completo (requer token)',
+      dailyChallenges: '/challenges/daily - Desafios diários (requer token)',
+      completeChallenge: '/challenges/:id/complete - Completar desafio (requer token)',
+      challengeHistory: '/challenges/history - Histórico de desafios (requer token)',
+      badgesAll: '/badges/all - Todos os badges disponíveis (requer token)',
+      badgesUser: '/badges/user - Badges conquistados (requer token)',
+      badgesProgress: '/badges/progress - Progresso de badges (requer token)',
     },
     docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
     authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
@@ -66,6 +74,12 @@ app.route('/auth', authRoutes);
 
 // Registra as rotas de usuário protegidas (/user/me)
 app.route('/user', userRoutes);
+
+// Registra as rotas de desafios (/challenges/daily, /challenges/:id/complete)
+app.route('/challenges', challengeRoutes);
+
+// Registra as rotas de badges (/badges/all, /badges/user, /badges/progress)
+app.route('/badges', badgeRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS
