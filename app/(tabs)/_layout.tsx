@@ -13,12 +13,12 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E0E0E0',
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: Platform.select({ web: 70, default: 85 }),
+          paddingBottom: Platform.select({ web: 12, default: 25 }),
+          paddingTop: Platform.select({ web: 12, default: 15 }),
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: Platform.select({ web: 12, default: 11 }),
           fontWeight: '600',
         },
         // Animações de transição entre tabs

@@ -314,6 +314,7 @@ export const EditProfileScreen = () => {
         >
           {/* Avatar Section */}
           <View style={styles.avatarSection}>
+            <Text style={styles.label}>Foto de Perfil</Text>
             <ProfileAvatar
               initials={getInitials(name)}
               imageUrl={user?.avatarUrl}
