@@ -320,6 +320,54 @@ Após rodar `npx expo start`, pressione `w` no terminal para abrir no navegador.
 
 ---
 
+## 🔄 Manutenção de Dependências
+
+O projeto inclui scripts automatizados para manter as dependências do Expo sempre atualizadas e compatíveis.
+
+### **Scripts Disponíveis**
+
+```bash
+# Atualizar todas as dependências do Expo automaticamente
+npm run update-deps
+
+# Verificar a saúde do projeto e dependências
+npm run check-deps
+```
+
+### **Quando Executar**
+
+Execute `npm run update-deps` regularmente:
+- ✅ Sempre que ver avisos de compatibilidade ao iniciar o projeto
+- ✅ Após atualizar a versão do Expo SDK
+- ✅ Semanalmente como manutenção preventiva
+- ✅ Antes de fazer deploy ou build de produção
+
+### **Como Funciona**
+
+O comando `update-deps` usa o `expo install --fix` que automaticamente:
+- Verifica todas as dependências instaladas
+- Compara com as versões recomendadas para o SDK atual
+- Atualiza apenas os pacotes que precisam de ajuste
+- Mantém a compatibilidade entre todos os pacotes
+
+### **VS Code Tasks**
+
+O projeto também inclui tasks do VS Code para facilitar:
+
+1. Pressione `Ctrl + Shift + P` (ou `Cmd + Shift + P` no Mac)
+2. Digite "Tasks: Run Task"
+3. Selecione "Atualizar Dependências Expo"
+
+### **Dica de Segurança**
+
+Sempre faça commit das alterações antes de atualizar dependências. Em caso de problemas:
+```bash
+git checkout package.json package-lock.json
+npm install
+```
+
+---
+
 ## ✅ Checklist de Verificação
 
 Antes de começar a desenvolver, verifique:

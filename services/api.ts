@@ -14,7 +14,12 @@ import { authStorage } from './auth';
 // URL base da API (mude conforme necessário)
 // Em produção, use a URL real do servidor
 // No desenvolvimento local, use o IP da sua máquina (não localhost!)
-const API_URL = 'http://192.168.1.12:3000'; // IP local configurado
+// 
+// ⚠️ ATENÇÃO: O IP pode mudar quando você reinicia o PC ou roteador!
+// Se o login parar de funcionar, verifique seu IP atual:
+// Windows: Execute 'ipconfig' no terminal e procure por "Endereço IPv4"
+// Mac/Linux: Execute 'ifconfig' ou 'ip addr show'
+const API_URL = 'http://192.168.1.11:3000'; // IP local configurado
 
 // Cria instância do Axios com configurações padrão
 const api = axios.create({
