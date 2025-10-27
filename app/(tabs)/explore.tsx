@@ -3,13 +3,13 @@ import { Card } from '@/components/ui/Card';
 import { Tag } from '@/components/ui/Tag';
 import React from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  View,
 } from 'react-native';
+import { styles } from '../styles/explore.styles';
 
 export default function ExploreScreen() {
   return (
@@ -51,36 +51,4 @@ export default function ExploreScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-    lineHeight: 24,
-  },
-  featureList: {
-    gap: 12,
-  },
-  featureItem: {
-    fontSize: 16,
-    color: '#444',
-    lineHeight: 24,
-  },
-});
 

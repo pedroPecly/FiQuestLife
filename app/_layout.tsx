@@ -1,8 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { useNotifications } from '../hooks/useNotifications';
 
 export default function RootLayout() {
+  // Inicializa sistema de notificações globalmente
+  useNotifications();
+  
   return (
     <>
       {/* O Stack é o navegador que empilha suas telas */}

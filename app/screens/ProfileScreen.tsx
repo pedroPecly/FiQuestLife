@@ -12,15 +12,11 @@ import {
   View
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
-import { Avatar } from '../../components/ui/Avatar';
-import { Card } from '../../components/ui/Card';
-import { InfoRow } from '../../components/ui/InfoRow';
-import { StatBox } from '../../components/ui/StatBox';
-import { Tag } from '../../components/ui/Tag';
+import { Avatar, BadgeItem, Card, InfoRow, StatBox } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
-import { getRarityEmoji, getUserBadges, RARITY_COLORS } from '../../services/badge';
+import { getUserBadges } from '../../services/badge';
 import type { User } from '../../types/user';
 import { styles } from '../styles/profile.styles';
 
@@ -93,19 +89,6 @@ const ProfileScreen = () => {
       // Não mostra alert para não incomodar o usuário
     } finally {
       setLoadingBadges(false);
-    }
-  };
-
-  // Formata a data de conquista do badge
-  const formatBadgeDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-      });
-    } catch {
-      return '';
     }
   };
 
@@ -200,10 +183,10 @@ const ProfileScreen = () => {
 
         {/* CARD DE PERFIL */}
         <Card style={styles.profileCard}>
-          <Tag
+          {/*<Tag
             icon="shield-star"
             text="Perfil do Aventureiro"
-          />
+          />*/}
 
           <Text style={styles.cardTitle}>
             {"@" + user.username || user.name || 'Aventureiro'}
@@ -301,24 +284,15 @@ const ProfileScreen = () => {
               contentContainerStyle={styles.badgesScrollContainer}
             >
               {recentBadges.map((userBadge) => (
-                <TouchableOpacity
+                <BadgeItem
                   key={userBadge.id}
-                  style={[
-                    styles.badgeMiniCard,
-                    { borderColor: RARITY_COLORS[userBadge.badge.rarity as keyof typeof RARITY_COLORS] }
-                  ]}
+                  icon={userBadge.badge.icon}
+                  name={userBadge.badge.name}
+                  earnedAt={userBadge.earnedAt}
+                  rarity={userBadge.badge.rarity}
+                  variant="mini"
                   onPress={() => router.push('/(tabs)/badges')}
-                >
-                  <Text style={styles.badgeMiniIcon}>
-                    {getRarityEmoji(userBadge.badge.rarity)}
-                  </Text>
-                  <Text style={styles.badgeMiniName} numberOfLines={1}>
-                    {userBadge.badge.name}
-                  </Text>
-                  <Text style={styles.badgeMiniDate}>
-                    {formatBadgeDate(userBadge.earnedAt)}
-                  </Text>
-                </TouchableOpacity>
+                />
               ))}
             </ScrollView>
           ) : (
@@ -331,6 +305,7 @@ const ProfileScreen = () => {
             </View>
           )}
         </Card>
+
       </ScrollView>
     </SafeAreaView>
   );

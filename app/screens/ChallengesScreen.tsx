@@ -2,6 +2,11 @@ import { ChallengeCard, LoadingScreen } from '@/components/ui';
 import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
+import {
+    cancelStreakReminder,
+    notifyBadgeEarned,
+    notifyLevelUp,
+} from '@/services/notifications';
 import type { User } from '@/types/user';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
@@ -66,6 +71,9 @@ export default function ChallengesScreen() {
         userChallengeId
       );
 
+      // Cancela lembrete de streak (usuário já completou algo hoje)
+      await cancelStreakReminder();
+
       // Atualizar desafio na lista local
       setChallenges((prev) =>
         prev.map((item) =>
@@ -87,13 +95,21 @@ export default function ChallengesScreen() {
       // Construir mensagem de sucesso
       let successMessage = `+${response.userChallenge.challenge.xpReward} XP\n+${response.userChallenge.challenge.coinsReward} coins!`;
 
+      // Notificar level up
       if (response.leveledUp && response.newLevel) {
         successMessage += `\n\n🎉 Parabéns! Você subiu para o nível ${response.newLevel}!`;
+        await notifyLevelUp(response.newLevel);
       }
 
+      // Notificar badges conquistados
       if (response.newBadges && response.newBadges.length > 0) {
         const badgeNames = response.newBadges.map((b) => b.name).join(', ');
         successMessage += `\n\n🏆 Novos distintivos: ${badgeNames}`;
+        
+        // Notifica cada badge
+        for (const badge of response.newBadges) {
+          await notifyBadgeEarned(badge.name, badge.rarity);
+        }
       }
 
       // Mostrar feedback de sucesso

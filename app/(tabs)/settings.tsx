@@ -1,9 +1,9 @@
 /**
  * ============================================
- * SETTINGS SCREEN - TELA DE CONFIGURAÇÕES
+ * USER SCREEN - TELA DE USUÁRIO
  * ============================================
  * 
- * Tela profissional de configurações com:
+ * Tela de perfil e configurações do usuário com:
  * - Notificações
  * - Perfil público/privado
  * - Lembrete diário
@@ -11,26 +11,31 @@
  * - Gerenciamento de dados
  * 
  * @created 17 de outubro de 2025
+ * @updated 27 de outubro de 2025 - Renomeada de Settings para User
  */
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
+import {
+  getNotificationsEnabled,
+  setNotificationsEnabled as saveNotificationsPreference,
+} from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/settings.styles';
 
@@ -76,7 +81,11 @@ export default function SettingsScreen() {
 
       if (result.success && result.data) {
         setUser(result.data);
-        setNotificationsEnabled(result.data.notificationsEnabled);
+        
+        // Carrega preferência de notificações do AsyncStorage
+        const notifEnabled = await getNotificationsEnabled();
+        setNotificationsEnabled(notifEnabled);
+        
         setProfilePublic(result.data.profilePublic);
         setDailyReminder(result.data.dailyReminderTime || '');
       } else {
@@ -95,9 +104,23 @@ export default function SettingsScreen() {
   // HANDLERS
   // ==========================================
   const handleToggleNotifications = async (value: boolean) => {
-    setNotificationsEnabled(value);
-    // TODO: Salvar no backend
-    alert.success('Atualizado', `Notificações ${value ? 'ativadas' : 'desativadas'}`);
+    try {
+      setNotificationsEnabled(value);
+      
+      // Salva preferência e agenda/cancela notificações
+      await saveNotificationsPreference(value);
+      
+      alert.success(
+        'Notificações',
+        value 
+          ? 'Notificações ativadas! Você receberá lembretes diários às 9h e 21h.' 
+          : 'Notificações desativadas. Você não receberá mais lembretes.'
+      );
+    } catch (error) {
+      console.error('Erro ao atualizar notificações:', error);
+      setNotificationsEnabled(!value); // Reverte se falhar
+      alert.error('Erro', 'Não foi possível atualizar as notificações.');
+    }
   };
 
   const handleToggleProfilePublic = async (value: boolean) => {
@@ -276,7 +299,7 @@ export default function SettingsScreen() {
 
       {/* Header Simples */}
       <View style={styles.headerSimple}>
-        <Text style={styles.headerTitle}>Configurações</Text>
+        <Text style={styles.headerTitle}>Meu Perfil</Text>
       </View>
 
       <ScrollView
