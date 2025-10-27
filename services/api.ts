@@ -19,7 +19,7 @@ import { authStorage } from './auth';
 // Se o login parar de funcionar, verifique seu IP atual:
 // Windows: Execute 'ipconfig' no terminal e procure por "Endereço IPv4"
 // Mac/Linux: Execute 'ifconfig' ou 'ip addr show'
-const API_URL = 'http://192.168.1.11:3000'; // IP local configurado
+const API_URL = 'http://192.168.1.6:3000'; // IP local configurado
 
 // Cria instância do Axios com configurações padrão
 const api = axios.create({

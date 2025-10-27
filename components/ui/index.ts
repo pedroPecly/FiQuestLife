@@ -1,5 +1,6 @@
 export { AlertModal } from './AlertModal';
 export { Avatar } from './Avatar';
+export { BadgeCard } from './BadgeCard';
 export { Button } from './Button';
 export { Card } from './Card';
 export { default as ChallengeCard } from './ChallengeCard';

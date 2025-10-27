@@ -37,6 +37,22 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+  /**
+   * Card de Perfil (primeiro card)
+   * Adiciona espaçamento inferior para separar do próximo card
+   */
+  profileCard: {
+    marginBottom: 16,
+  },
+
+  /**
+   * Card de Badges (segundo card)
+   * Sem margin adicional (último elemento antes do fim do scroll)
+   */
+  badgesCard: {
+    // Sem marginBottom - é o último card
+  },
+
   // ==========================================
   // 🎯 HEADER (Saudação e Nome do App)
   // ==========================================
@@ -338,5 +354,147 @@ export const styles = StyleSheet.create({
     ...Platform.select({
       web: { userSelect: 'none' },
     }),
+  },
+
+  // ==========================================
+  // 🏆 SEÇÃO DE BADGES EM DESTAQUE
+  // ==========================================
+
+  /** Header da seção de badges */
+  badgesSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20, // Aumentado de 16 para 20 - mais espaço visual
+  },
+
+  /** Título da seção de badges */
+  badgesSectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+  },
+
+  /** Subtítulo da seção de badges */
+  badgesSectionSubtitle: {
+    fontSize: 13,
+    color: '#666',
+  },
+
+  /** Botão "Ver Todos" */
+  viewAllButton: {
+    paddingVertical: 8, // Aumentado de 6 para 8 - botão mais confortável
+    paddingHorizontal: 16, // Aumentado de 12 para 16 - mais espaço
+    borderRadius: 10, // Aumentado de 8 para 10 - mais arredondado
+    backgroundColor: '#20B2AA',
+    ...Platform.select({
+      web: { cursor: 'pointer' },
+    }),
+  },
+
+  /** Texto do botão "Ver Todos" */
+  viewAllButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFF',
+    ...Platform.select({
+      web: { userSelect: 'none' },
+    }),
+  },
+
+  /** Container de loading dos badges */
+  badgesLoadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /** Container do scroll horizontal de badges */
+  badgesScrollContainer: {
+    paddingVertical: 12, // Aumentado de 8 para 12 - mais espaço superior/inferior
+    paddingRight: 20, // Adiciona padding à direita para o último card não ficar grudado
+    gap: 12,
+  },
+
+  /** Card miniatura de badge */
+  badgeMiniCard: {
+    width: 110, // Aumentado de 100 para 110 - mais espaço interno
+    padding: 14, // Aumentado de 12 para 14 - mais confortável
+    borderRadius: 16, // Aumentado de 12 para 16 - mais arredondado (padrão do app)
+    backgroundColor: '#FFF',
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease', // Adiciona transição suave
+      },
+    }),
+  },
+
+  /** Ícone do badge miniatura */
+  badgeMiniIcon: {
+    fontSize: 36, // Aumentado de 32 para 36 - ícone mais visível
+    marginBottom: 8,
+  },
+
+  /** Nome do badge miniatura */
+  badgeMiniName: {
+    fontSize: 13, // Aumentado de 12 para 13 - mais legível
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+
+  /** Data de conquista do badge */
+  badgeMiniDate: {
+    fontSize: 11, // Aumentado de 10 para 11 - mais legível
+    color: '#999',
+    textAlign: 'center',
+  },
+
+  /** Container quando não há badges */
+  noBadgesContainer: {
+    paddingVertical: 50, // Aumentado de 40 para 50 - mais espaço visual
+    paddingHorizontal: 20, // Adiciona padding lateral
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /** Ícone de "sem badges" */
+  noBadgesIcon: {
+    fontSize: 56, // Aumentado de 48 para 56 - ícone maior e mais visível
+    marginBottom: 16, // Aumentado de 12 para 16 - mais espaço
+    opacity: 0.4, // Reduzido de 0.5 para 0.4 - mais sutil
+  },
+
+  /** Texto de "sem badges" */
+  noBadgesText: {
+    fontSize: 16, // Aumentado de 15 para 16 - mais legível
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8, // Aumentado de 4 para 8 - mais espaço entre textos
+    textAlign: 'center',
+  },
+
+  /** Subtexto de "sem badges" */
+  noBadgesSubtext: {
+    fontSize: 14, // Aumentado de 13 para 14 - mais legível
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 20, // Adiciona altura de linha para melhor leitura
   },
 });

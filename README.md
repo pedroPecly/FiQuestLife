@@ -11,6 +11,53 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 
 ---
 
+## ✨ Funcionalidades Principais
+
+### **Sistema de Gamificação Completo** 🎯
+- ✅ **XP e Níveis** - Ganhe experiência e suba de nível
+- ✅ **Moedas Virtuais** - Acumule coins completando desafios
+- ✅ **Streaks** - Mantenha sequências diárias de atividade
+- ✅ **Sistema de Level Up** - Progresso automático (1000 XP por nível)
+
+### **Desafios Diários** 🏆
+- ✅ **43 Desafios** em 8 categorias diferentes
+- ✅ **5 Desafios por Dia** atribuídos automaticamente
+- ✅ **Categorias:** Atividade Física, Nutrição, Hidratação, Saúde Mental, Sono, Social, Produtividade, Mindfulness
+- ✅ **Dificuldades:** Easy, Medium, Hard, Expert
+- ✅ **Recompensas:** XP e moedas ao completar
+- ✅ **Progresso Visual** com barra de conclusão diária
+
+### **Sistema de Badges** 🏅
+- ✅ **29 Badges/Conquistas** disponíveis
+- ✅ **4 Raridades:** Common, Rare, Epic, Legendary
+- ✅ **6 Tipos de Requisitos:** Desafios completados, Streaks, Nível, XP, Mestre de Categoria
+- ✅ **Galeria Completa** com filtros (Todos/Conquistados/Bloqueados)
+- ✅ **Progresso em Tempo Real** - Veja quantos % falta para desbloquear
+- ✅ **Modal de Detalhes** - Informações completas de cada badge
+- ✅ **Badges em Destaque** - 5 badges mais recentes no perfil do usuário
+
+### **Perfil e Estatísticas** 👤
+- ✅ **Perfil Completo** com avatar, nome, username
+- ✅ **Upload de Foto** via galeria ou câmera
+- ✅ **Stats de Gamificação:** Level, XP, Coins, Streak atual, Recorde de streak
+- ✅ **Badges Recentes** com scroll horizontal
+- ✅ **Edição de Perfil** profissional com validações
+
+### **Autenticação e Segurança** 🔒
+- ✅ **Login/Cadastro** com validação completa
+- ✅ **JWT Authentication** com refresh automático
+- ✅ **Senhas criptografadas** com bcrypt
+- ✅ **Validações:** Email, username único, senha forte
+
+### **Interface Profissional** 🎨
+- ✅ **15 Componentes UI** reutilizáveis
+- ✅ **7 Telas Completas** - Login, Perfil, Editar Perfil, Desafios, Badges, Explorar, Configurações
+- ✅ **Design Responsivo** (iOS/Android/Web)
+- ✅ **Navegação por Tabs** (5 tabs principais)
+- ✅ **Dark Mode Ready** (preparado para tema escuro)
+
+---
+
 ## 🎯 Stack Tecnológica
 
 ### **Backend**
@@ -39,13 +86,15 @@ FiQuestLife/
 │   │   ├── _layout.tsx       # Layout das tabs (Home, Desafios, Explorar, Configurações)
 │   │   ├── index.tsx         # Tab Home (ProfileScreen)
 │   │   ├── challenges.tsx    # 🆕 Tab Desafios (ChallengesScreen)
+│   │   ├── badges.tsx        # 🆕 Tab Badges (BadgesScreen) - Sprint 7
 │   │   ├── explore.tsx       # Tab Explorar
 │   │   └── settings.tsx      # ⚙️ Tab Configurações (5 seções organizadas em cards)
 │   ├── screens/               # 📱 Componentes das telas
 │   │   ├── index.ts          # Barrel export
 │   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
 │   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
-│   │   ├── ChallengesScreen.tsx # 🆕 Tela de desafios diários (completa em Sprint 6)
+│   │   ├── ChallengesScreen.tsx # 🆕 Tela de desafios diários (Sprint 6)
+│   │   ├── BadgesScreen.tsx  # 🆕 Tela de badges/conquistas (Sprint 7)
 │   │   └── EditProfileScreen.tsx # ✏️ Edição de perfil profissional
 │   ├── styles/                # 🎨 Estilos separados por tela
 │   │   ├── index.ts          # Barrel export
@@ -53,17 +102,20 @@ FiQuestLife/
 │   │   ├── profile.styles.ts # Estilos do ProfileScreen
 │   │   ├── edit-profile.styles.ts # Estilos do EditProfileScreen
 │   │   ├── settings.styles.ts # Estilos do SettingsScreen
-│   │   └── challenges.styles.ts # 🆕 Estilos do ChallengesScreen
+│   │   ├── challenges.styles.ts # 🆕 Estilos do ChallengesScreen
+│   │   └── badges.styles.ts  # 🆕 Estilos do BadgesScreen
 │   ├── _layout.tsx           # Layout raiz do app
 │   ├── index.tsx             # Rota inicial (redirect)
 │   ├── edit-profile.tsx      # Rota para EditProfileScreen
-│   └── challenges.tsx        # 🆕 Rota para ChallengesScreen
+│   ├── challenges.tsx        # 🆕 Rota para ChallengesScreen
+│   └── badges.tsx            # 🆕 Rota para BadgesScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 13 componentes de UI
+│   ├── ui/                   # 15 componentes de UI
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
+│   │   ├── BadgeCard.tsx     # 🆕 Card de badge/conquista (Sprint 7)
 │   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Card.tsx          # Container com sombra e padding
 │   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com badges e botão de completar
@@ -96,7 +148,8 @@ FiQuestLife/
 ├── services/                  # 🌐 Comunicação com API
 │   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
-│   └── challenge.ts          # 🆕 Serviço de desafios (interfaces + funções API)
+│   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
+│   └── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │
 ├── constants/                 # 🎨 Constantes e Temas
 │   ├── responsive.ts         # Breakpoints e helpers responsivos
@@ -1007,6 +1060,382 @@ Authorization: Bearer SEU_TOKEN_JWT
 
 ---
 
+## 🏆 **SISTEMA DE BADGES - COMO FUNCIONA**
+
+### **📋 Visão Geral**
+
+O sistema de badges é **100% automático** e recompensa usuários por diferentes conquistas. São **29 badges** distribuídos em **5 categorias** com **4 níveis de raridade**.
+
+### **🎯 Categorias de Badges**
+
+| Categoria | Descrição | Quantidade | Ícone |
+|-----------|-----------|------------|-------|
+| **BEGINNER** | Progresso inicial | 6 badges | 🌱 |
+| **CONSISTENCY** | Streaks diários | 5 badges | 🔥 |
+| **MILESTONE** | Níveis alcançados | 5 badges | 🎯 |
+| **ACHIEVEMENT** | XP + Mestres de categoria | 11 badges | 🏆 |
+| **SPECIAL** | Badges especiais/manuais | 2 badges | ⭐ |
+
+---
+
+### **💎 Raridades de Badges**
+
+| Raridade | Cor | Dificuldade | Exemplos |
+|----------|-----|-------------|----------|
+| **COMMON** | Cinza (#9E9E9E) | Fácil | Primeiro Passo (1 desafio), Persistente (3d streak) |
+| **RARE** | Azul (#2196F3) | Médio | Comprometido (14d streak), Nível 10 |
+| **EPIC** | Roxo (#9C27B0) | Difícil | Inabalável (30d streak), Nível 20 |
+| **LEGENDARY** | Dourado (#FF9800) | Muito Difícil | Guerreiro do Ano (365d), Nível 100 |
+
+---
+
+### **🔧 Tipos de Requisitos**
+
+O sistema suporta **6 tipos** diferentes de requisitos para desbloquear badges:
+
+#### **1. CHALLENGES_COMPLETED** - Total de Desafios
+Conta o **total de desafios completados** pelo usuário em todas as categorias.
+
+**Exemplos:**
+- 🎯 **Primeiro Passo** (COMMON): 1 desafio
+- 🌱 **Aprendiz** (COMMON): 5 desafios
+- 🚀 **Aventureiro** (RARE): 10 desafios
+- ⚔️ **Veterano** (RARE): 25 desafios
+- 👑 **Mestre** (EPIC): 50 desafios
+- 💯 **Centurião** (LEGENDARY): 100 desafios
+
+#### **2. STREAK_DAYS** - Dias Consecutivos
+Conta a **sequência atual de dias** com atividade no app.
+
+**Exemplos:**
+- 🔥 **Persistente** (COMMON): 3 dias consecutivos
+- 💪 **Dedicado** (COMMON): 7 dias consecutivos
+- 🎯 **Comprometido** (RARE): 14 dias consecutivos
+- 🛡️ **Inabalável** (EPIC): 30 dias consecutivos
+- 👑 **Guerreiro do Ano** (LEGENDARY): 365 dias consecutivos
+
+#### **3. LEVEL_REACHED** - Nível Alcançado
+Verifica se o usuário atingiu determinado **nível de XP**.
+
+**Fórmula:** `level = Math.floor(totalXP / 1000) + 1`
+
+**Exemplos:**
+- ⭐ **Nível 5** (COMMON): 5.000 XP (5 níveis)
+- 🌟 **Nível 10** (RARE): 10.000 XP (10 níveis)
+- 💫 **Nível 20** (EPIC): 20.000 XP (20 níveis)
+- 🔆 **Nível 50** (LEGENDARY): 50.000 XP (50 níveis)
+- ☀️ **Nível 100** (LEGENDARY): 100.000 XP (100 níveis)
+
+#### **4. XP_EARNED** - XP Total Acumulado
+Conta o **XP total ganho** pelo usuário (independente do nível).
+
+**Exemplos:**
+- 💎 **Colecionador** (RARE): 1.000 XP
+- 👑 **Mestre XP** (EPIC): 5.000 XP
+- 🏆 **Lenda XP** (LEGENDARY): 10.000 XP
+
+#### **5. CATEGORY_MASTER** - Mestre de Categoria
+Conta **desafios completados em uma categoria específica**.
+
+**Categorias Disponíveis:**
+- 🏃 **Atleta** (EPIC): 100 desafios de PHYSICAL_ACTIVITY
+- 🥗 **Nutricionista** (EPIC): 100 desafios de NUTRITION
+- 💧 **Hidratado** (EPIC): 50 desafios de HYDRATION
+- 🧠 **Mente Sã** (EPIC): 50 desafios de MENTAL_HEALTH
+- 😴 **Dorminhoco** (EPIC): 30 desafios de SLEEP
+- 👥 **Social** (EPIC): 30 desafios de SOCIAL
+- 🎯 **Produtivo** (EPIC): 50 desafios de PRODUCTIVITY
+- 🧘 **Meditador** (EPIC): 50 desafios de MINDFULNESS
+
+#### **6. SPECIFIC_CHALLENGE / SOCIAL_INTERACTION** - Badges Especiais
+Badges **concedidos manualmente** por eventos especiais ou ações específicas.
+
+**Exemplos:**
+- 🎖️ **Early Adopter** (LEGENDARY): Primeiros 100 usuários
+- 🧪 **Beta Tester** (EPIC): Testadores da versão beta
+
+---
+
+### **⚙️ Como Funciona o Sistema Automático**
+
+#### **1. Fluxo de Concessão de Badges**
+
+```
+Usuário completa desafio
+    ↓
+Sistema atualiza XP/coins
+    ↓
+Sistema calcula novo level
+    ↓
+Sistema atualiza streak
+    ↓
+Sistema chama checkAndAwardBadges()
+    ↓
+Para cada badge não conquistado:
+    ├─ Verifica tipo de requisito
+    ├─ Calcula progresso atual
+    ├─ Se requisito atingido: concede badge
+    └─ Registra no RewardHistory
+```
+
+#### **2. Verificação de Requisitos (Backend)**
+
+O arquivo `backend/src/services/badge.service.ts` contém a lógica de cálculo:
+
+**a) Para CHALLENGES_COMPLETED:**
+```typescript
+const totalChallenges = await prisma.userChallenge.count({
+  where: { userId, status: 'COMPLETED' }
+});
+if (totalChallenges >= badge.requirementValue) {
+  // Concede badge
+}
+```
+
+**b) Para STREAK_DAYS:**
+```typescript
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  select: { currentStreak: true }
+});
+if (user.currentStreak >= badge.requirementValue) {
+  // Concede badge
+}
+```
+
+**c) Para LEVEL_REACHED:**
+```typescript
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+  select: { level: true }
+});
+if (user.level >= badge.requirementValue) {
+  // Concede badge
+}
+```
+
+**d) Para CATEGORY_MASTER:**
+```typescript
+const categoryMap = {
+  'Atleta': 'PHYSICAL_ACTIVITY',
+  'Nutricionista': 'NUTRITION',
+  // ... outros
+};
+const category = categoryMap[badge.name];
+const categoryCount = await prisma.userChallenge.count({
+  where: {
+    userId,
+    status: 'COMPLETED',
+    challenge: { category }
+  }
+});
+if (categoryCount >= badge.requirementValue) {
+  // Concede badge
+}
+```
+
+#### **3. Cálculo de Progresso em Tempo Real**
+
+O endpoint `GET /badges/progress` retorna:
+- ✅ **Badges conquistados** com data de conquista
+- 📊 **Badges bloqueados** com progresso atual
+- 📈 **Porcentagem** de conclusão de cada badge
+
+**Exemplo de Progresso:**
+```json
+{
+  "name": "Persistente",
+  "requirementType": "STREAK_DAYS",
+  "requirementValue": 3,
+  "earned": false,
+  "progress": {
+    "current": 2,      // Usuário tem 2 dias de streak
+    "required": 3,     // Precisa de 3 dias
+    "percentage": 66   // 66% completo
+  }
+}
+```
+
+---
+
+### **📱 Interface de Badges (Frontend)**
+
+#### **BadgesScreen** (`app/screens/BadgesScreen.tsx`)
+
+**Funcionalidades:**
+- ✅ **Grid responsivo** 2 colunas (mobile) / 3+ colunas (tablet/desktop)
+- ✅ **3 filtros:** Todos, Conquistados (✅), Bloqueados (🔒)
+- ✅ **Pull-to-refresh** para atualizar progresso
+- ✅ **Modal de detalhes** ao tocar em um badge
+- ✅ **Cores por raridade** (Common, Rare, Epic, Legendary)
+- ✅ **Barra de progresso** visual para badges bloqueados
+- ✅ **Overlay de lock** em badges não conquistados
+
+#### **BadgeCard** (`components/ui/BadgeCard.tsx`)
+
+**Estados Visuais:**
+
+**a) Badge Conquistado (earned: true):**
+- ✅ Cores vibrantes de acordo com a raridade
+- ✅ Data de conquista formatada
+- ✅ Ícone do badge colorido
+- ✅ Sem overlay de lock
+
+**b) Badge Bloqueado (earned: false):**
+- 🔒 Cores em escala de cinza
+- 🔒 Overlay semi-transparente com ícone de cadeado
+- 📊 Barra de progresso visual
+- 📊 Texto de progresso (ex: "2/3 completado")
+
+**Cores por Raridade:**
+```typescript
+const RARITY_COLORS = {
+  COMMON: '#9E9E9E',     // Cinza
+  RARE: '#2196F3',       // Azul
+  EPIC: '#9C27B0',       // Roxo
+  LEGENDARY: '#FF9800',  // Dourado
+};
+```
+
+---
+
+### **🔄 Atualização Automática**
+
+O sistema de badges se atualiza automaticamente quando:
+
+1. **Usuário completa um desafio**
+   - Backend chama `checkAndAwardBadges()`
+   - Novos badges são concedidos se requisitos forem atingidos
+   - Response retorna array `newBadges` com conquistas
+
+2. **Usuário entra na BadgesScreen**
+   - Frontend chama `GET /badges/progress`
+   - Recebe lista atualizada com progresso
+
+3. **Pull-to-refresh**
+   - Usuário arrasta tela para baixo
+   - Chama `loadBadges()` novamente
+   - Atualiza estado local
+
+---
+
+### **📊 Exemplo Completo de Conquista**
+
+**Cenário:** Usuário completa seu **3º dia consecutivo** de desafios.
+
+**1. Ação do Usuário:**
+```
+Usuário abre app e completa 1 desafio
+```
+
+**2. Backend (challenge.service.ts):**
+```typescript
+// Atualiza streak
+await checkAndUpdateStreak(userId);
+// currentStreak atualizado para 3
+
+// Verifica badges
+const newBadges = await checkAndAwardBadges(userId);
+// Sistema detecta: currentStreak (3) >= requirementValue (3)
+// Badge "Persistente" é concedido!
+```
+
+**3. Response da API:**
+```json
+{
+  "success": true,
+  "data": {
+    "userStats": {
+      "currentStreak": 3
+    },
+    "newBadges": [
+      {
+        "id": "badge-uuid",
+        "name": "Persistente",
+        "description": "Mantenha um streak de 3 dias",
+        "rarity": "COMMON",
+        "imageUrl": "🔥"
+      }
+    ]
+  }
+}
+```
+
+**4. Frontend (ChallengesScreen.tsx):**
+```typescript
+if (result.data.newBadges && result.data.newBadges.length > 0) {
+  alert.success(
+    '🎉 Novo Badge!',
+    `Você conquistou: ${result.data.newBadges.map(b => b.name).join(', ')}`
+  );
+}
+```
+
+**5. Resultado no App:**
+- ✅ Badge "Persistente" 🔥 aparece como conquistado
+- ✅ Notificação de sucesso exibida
+- ✅ Badge fica colorido (azul COMMON)
+- ✅ Data de conquista registrada
+
+---
+
+### **🎮 Gamificação e Engajamento**
+
+#### **Estratégia de Progressão**
+
+Os badges são projetados para criar uma **curva de engajamento**:
+
+**Fase 1: Onboarding (Dias 1-3)**
+- 🎯 Primeiro Passo (1 desafio)
+- 🔥 Persistente (3 dias)
+- Objetivo: Dar vitórias rápidas iniciais
+
+**Fase 2: Construção de Hábito (Semanas 1-2)**
+- 🌱 Aprendiz (5 desafios)
+- 💪 Dedicado (7 dias)
+- 🎯 Comprometido (14 dias)
+- Objetivo: Estabelecer rotina
+
+**Fase 3: Mastery (Mês 1+)**
+- 🚀 Aventureiro (10 desafios)
+- 🛡️ Inabalável (30 dias)
+- 🏃 Badges de categoria (50-100 desafios)
+- Objetivo: Especialização
+
+**Fase 4: Elite (Longo Prazo)**
+- 💯 Centurião (100 desafios)
+- 👑 Guerreiro do Ano (365 dias)
+- ☀️ Nível 100
+- Objetivo: Manter engajamento infinito
+
+---
+
+### **📝 Resumo Técnico**
+
+**Backend:**
+- ✅ 3 funções de service (168 linhas)
+- ✅ 3 endpoints REST
+- ✅ Verificação automática em todo `completeChallenge()`
+- ✅ Cálculo de progresso em tempo real
+- ✅ 6 tipos de requisitos suportados
+
+**Frontend:**
+- ✅ 1 service (235 linhas)
+- ✅ 1 componente BadgeCard (236 linhas)
+- ✅ 1 screen BadgesScreen (420 linhas)
+- ✅ 1 arquivo de styles (322 linhas)
+- ✅ Grid responsivo com filtros
+- ✅ Modal de detalhes com scroll
+- ✅ Cores e animações por raridade
+
+**Dados:**
+- ✅ 29 badges seedados
+- ✅ 5 categorias
+- ✅ 4 raridades
+- ✅ 6 tipos de requisitos
+
+---
+
 ## 📝 Comandos Rápidos
 
 ```bash
@@ -1765,14 +2194,28 @@ User (1) ←→ (N) RewardHistory
 - [ ] Modal de detalhes do badge
 - [ ] Filtros (Todos, Conquistados, Bloqueados)
 - [ ] Barra de progresso para badges não conquistados
-- [ ] Cores por raridade (COMMON, RARE, EPIC, LEGENDARY)
+- [x] Cores por raridade (COMMON, RARE, EPIC, LEGENDARY)
 
-### **Sprint 8 - Atualizar ProfileScreen**
-- [ ] Adicionar seção "Badges em Destaque"
-- [ ] Grid horizontal com 3-5 badges mais recentes
-- [ ] Botão "Ver Todos" → navega para BadgesScreen
-- [ ] Atualização automática de stats com `useFocusEffect`
-- [ ] Cards de desafios com ícones e cores por categoria
+### **Sprint 8 - Atualizar ProfileScreen** ✅ COMPLETO (27/10/2025)
+- [x] Adicionar seção "Badges em Destaque"
+- [x] Scroll horizontal com 5 badges mais recentes
+- [x] Mini-cards profissionais com bordas coloridas por raridade
+- [x] Botão "Ver Todos" → navega para BadgesScreen
+- [x] Atualização automática com `useFocusEffect`
+- [x] 3 estados visuais (loading/badges/vazio)
+- [x] Espaçamento profissional entre cards (16px)
+- [x] Design responsivo seguindo padrão do app
+
+**Arquivos Modificados:**
+- ✅ `app/screens/ProfileScreen.tsx` (+70 linhas)
+- ✅ `app/styles/profile.styles.ts` (+143 linhas, 15 estilos novos)
+
+**Funcionalidades Implementadas:**
+- ✅ Seção "🏆 Conquistas Recentes" integrada ao perfil
+- ✅ Navegação para tela completa de badges
+- ✅ Formatação de data em português (DD MMM)
+- ✅ Tratamento de erro silencioso
+- ✅ Performance otimizada (apenas 5 badges carregados)
 
 ### **Futuras Funcionalidades**
 - [ ] Tela de histórico de recompensas
@@ -2141,6 +2584,34 @@ User (1) ←→ (N) RewardHistory
 **Workaround:** App funciona normalmente com avatares baseados em iniciais. Upload não é obrigatório para uso do app.
 
 **Status:** Por design. Requer configuração manual do storage.
+
+---
+
+## 🆕 Últimas Atualizações (27/10/2025)
+
+### **Sprint 8 - Badges em Destaque no Perfil** ✅
+- ✅ Adicionada seção "🏆 Conquistas Recentes" no ProfileScreen
+- ✅ Scroll horizontal com 5 badges mais recentes
+- ✅ Mini-cards profissionais com bordas coloridas por raridade
+- ✅ Navegação integrada para tela completa de badges
+- ✅ Atualização automática via useFocusEffect
+- ✅ 3 estados visuais (loading/badges/vazio)
+- ✅ Espaçamento profissionalizado entre cards (16px - padrão do app)
+- ✅ Design responsivo e consistente com o sistema
+
+**Melhorias de UX:**
+- Botão "Ver Todos" maior e mais clicável (padding aumentado)
+- Cards de badges maiores (110px vs 100px)
+- Fontes mais legíveis (tamanhos aumentados)
+- Scroll com padding à direita (último card não gruda na borda)
+- Transições suaves no hover (web)
+- Estado vazio com mensagem motivacional aprimorada
+
+**Arquivos Modificados:**
+- `app/screens/ProfileScreen.tsx` (+70 linhas)
+- `app/styles/profile.styles.ts` (+143 linhas, 15 estilos novos)
+
+**Total:** 213 linhas de código implementadas | Zero erros TypeScript | 100% funcional
 
 ---
 

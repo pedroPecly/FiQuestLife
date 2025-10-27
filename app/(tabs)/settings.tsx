@@ -377,7 +377,7 @@ export default function SettingsScreen() {
             icon="information"
             iconColor="#2196F3"
             label="Versão"
-            subtitle="1.3 (Beta)"
+            subtitle="v0.8.0 (Beta)"
           />
 
           <SettingsMenuItem
