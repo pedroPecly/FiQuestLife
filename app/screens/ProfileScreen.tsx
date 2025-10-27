@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar } from '../../components/ui/Avatar';
-import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { InfoRow } from '../../components/ui/InfoRow';
 import { StatBox } from '../../components/ui/StatBox';
@@ -21,8 +20,7 @@ import { Tag } from '../../components/ui/Tag';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
-import { getUserBadges, RARITY_COLORS, getRarityEmoji } from '../../services/badge';
-import type { BadgeWithProgress } from '../../services/badge';
+import { getRarityEmoji, getUserBadges, RARITY_COLORS } from '../../services/badge';
 import type { User } from '../../types/user';
 import { styles } from '../styles/profile.styles';
 
@@ -228,12 +226,6 @@ const ProfileScreen = () => {
               label="Nome Completo"
               value={user.name || 'Não informado'}
             />
-
-            <InfoRow
-              icon="calendar-outline"
-              label="Data de Nascimento"
-              value={user.birthDate ? getFormattedDate(user.birthDate) : 'Não informado'}
-            />
           </View>
 
           <View style={styles.statsContainer}>
@@ -285,20 +277,18 @@ const ProfileScreen = () => {
         {/* SEÇÃO DE BADGES EM DESTAQUE */}
         <Card style={styles.badgesCard}>
           <View style={styles.badgesSectionHeader}>
-            <View>
-              <Text style={styles.badgesSectionTitle}>🏆 Conquistas Recentes</Text>
-              <Text style={styles.badgesSectionSubtitle}>
-                Suas últimas conquistas desbloqueadas
-              </Text>
-            </View>
-            
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/badges')}
-              style={styles.viewAllButton}
-            >
-              <Text style={styles.viewAllButtonText}>Ver Todos</Text>
-            </TouchableOpacity>
+            <Text style={styles.badgesSectionTitle}>🏆 Conquistas Recentes</Text>
+            <Text style={styles.badgesSectionSubtitle}>
+              Suas últimas conquistas desbloqueadas
+            </Text>
           </View>
+          
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/badges')}
+            style={styles.viewAllButton}
+          >
+            <Text style={styles.viewAllButtonText}>Ver Todos</Text>
+          </TouchableOpacity>
 
           {loadingBadges ? (
             <View style={styles.badgesLoadingContainer}>

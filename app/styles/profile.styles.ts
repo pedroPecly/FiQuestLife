@@ -362,10 +362,8 @@ export const styles = StyleSheet.create({
 
   /** Header da seção de badges */
   badgesSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20, // Aumentado de 16 para 20 - mais espaço visual
+    marginBottom: 16,
   },
 
   /** Título da seção de badges */
@@ -374,20 +372,23 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#333',
     marginBottom: 4,
+    textAlign: 'center',
   },
 
   /** Subtítulo da seção de badges */
   badgesSectionSubtitle: {
     fontSize: 13,
     color: '#666',
+    textAlign: 'center',
   },
 
   /** Botão "Ver Todos" */
   viewAllButton: {
-    paddingVertical: 8, // Aumentado de 6 para 8 - botão mais confortável
-    paddingHorizontal: 16, // Aumentado de 12 para 16 - mais espaço
-    borderRadius: 10, // Aumentado de 8 para 10 - mais arredondado
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
     backgroundColor: '#20B2AA',
+    marginBottom: 16,
     ...Platform.select({
       web: { cursor: 'pointer' },
     }),
@@ -412,8 +413,9 @@ export const styles = StyleSheet.create({
 
   /** Container do scroll horizontal de badges */
   badgesScrollContainer: {
-    paddingVertical: 12, // Aumentado de 8 para 12 - mais espaço superior/inferior
-    paddingRight: 20, // Adiciona padding à direita para o último card não ficar grudado
+    paddingVertical: 8, // Espaçamento vertical interno do scroll
+    paddingLeft: 0, // Alinha com a borda do card (Card já tem padding 25)
+    paddingRight: 25, // Mesma margem do Card para simetria
     gap: 12,
   },
 
@@ -468,8 +470,8 @@ export const styles = StyleSheet.create({
 
   /** Container quando não há badges */
   noBadgesContainer: {
-    paddingVertical: 50, // Aumentado de 40 para 50 - mais espaço visual
-    paddingHorizontal: 20, // Adiciona padding lateral
+    paddingVertical: 40, // Espaçamento vertical
+    paddingHorizontal: 0, // Remove padding - Card já tem padding 25
     alignItems: 'center',
     justifyContent: 'center',
   },
