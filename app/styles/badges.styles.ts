@@ -156,7 +156,7 @@ export const styles = StyleSheet.create({
     padding: 24,
     width: '100%',
     maxWidth: 400,
-    maxHeight: '80%',
+    height: 600,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -179,52 +179,67 @@ export const styles = StyleSheet.create({
   // MODAL BADGE ICON
   // ==========================================
   modalIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: '#E5E7EB',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     marginBottom: 20,
-    marginTop: 20,
+    marginTop: 24,
+    borderWidth: 4,
+    borderColor: '#F3F4F6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
 
   modalIconEmoji: {
-    fontSize: 60,
+    fontSize: 70,
   },
 
   // ==========================================
   // MODAL TEXT
   // ==========================================
   modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
     color: '#1F2937',
     textAlign: 'center',
     marginBottom: 12,
+    letterSpacing: 0.3,
   },
 
   modalRarityBadge: {
     alignSelf: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   modalRarityText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
 
   modalDescription: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#4B5563',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 24,
     marginBottom: 24,
+    paddingHorizontal: 8,
   },
 
   // ==========================================
@@ -263,18 +278,25 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: '#D1FAE5',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     marginTop: 8,
+    borderWidth: 2,
+    borderColor: '#10B981',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   modalEarnedText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#059669',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   // ==========================================
@@ -282,40 +304,51 @@ export const styles = StyleSheet.create({
   // ==========================================
   modalProgressSection: {
     marginTop: 8,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
 
   modalProgressTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 8,
   },
 
   modalProgressText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#6B7280',
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: 14,
   },
 
   modalProgressBarBackground: {
     width: '100%',
-    height: 12,
+    height: 14,
     backgroundColor: '#E5E7EB',
-    borderRadius: 6,
+    borderRadius: 7,
     overflow: 'hidden',
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
   },
 
   modalProgressBarFill: {
     height: '100%',
-    borderRadius: 6,
+    borderRadius: 7,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
 
   modalProgressHint: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#8B5CF6',
-    fontStyle: 'italic',
+    fontWeight: '600',
     textAlign: 'center',
   },
 });

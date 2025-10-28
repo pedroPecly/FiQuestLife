@@ -13,34 +13,22 @@
  * @created 27 de outubro de 2025
  */
 
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
-    Modal,
     RefreshControl,
     SafeAreaView,
-    ScrollView,
     StatusBar,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { BadgeCard } from '../../components/ui';
+import { BadgeCard, BadgeDetailModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import type { BadgeWithProgress } from '../../services/badge';
-import {
-    CATEGORY_ICONS,
-    CATEGORY_LABELS,
-    formatBadgeProgress,
-    getBadgesProgress,
-    getRarityEmoji,
-    RARITY_COLORS,
-    RARITY_LABELS,
-    REQUIREMENT_TYPE_LABELS,
-} from '../../services/badge';
+import { getBadgesProgress } from '../../services/badge';
 import { styles } from '../styles/badges.styles';
 
 // ==========================================
@@ -239,137 +227,11 @@ export const BadgesScreen = () => {
       />
 
       {/* Modal de Detalhes */}
-      {selectedBadge && (
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={closeBadgeDetails}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={closeBadgeDetails}
-          >
-            <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalContent}>
-                {/* Close Button */}
-                <TouchableOpacity style={styles.closeButton} onPress={closeBadgeDetails}>
-                  <MaterialCommunityIcons name="close" size={24} color="#6B7280" />
-                </TouchableOpacity>
-
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {/* Badge Icon */}
-                  <View
-                    style={[
-                      styles.modalIcon,
-                      selectedBadge.earned && {
-                        backgroundColor: RARITY_COLORS[selectedBadge.rarity],
-                      },
-                    ]}
-                  >
-                    {selectedBadge.earned ? (
-                      <Text style={styles.modalIconEmoji}>
-                        {CATEGORY_ICONS[selectedBadge.category]}
-                      </Text>
-                    ) : (
-                      <MaterialCommunityIcons name="lock" size={60} color="#9CA3AF" />
-                    )}
-                  </View>
-
-                  {/* Badge Name */}
-                  <Text style={styles.modalTitle}>{selectedBadge.name}</Text>
-
-                  {/* Rarity Badge */}
-                  <View
-                    style={[
-                      styles.modalRarityBadge,
-                      {
-                        backgroundColor: selectedBadge.earned
-                          ? RARITY_COLORS[selectedBadge.rarity]
-                          : '#E5E7EB',
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.modalRarityText,
-                        !selectedBadge.earned && { color: '#6B7280' },
-                      ]}
-                    >
-                      {getRarityEmoji(selectedBadge.rarity)}{' '}
-                      {RARITY_LABELS[selectedBadge.rarity]}
-                    </Text>
-                  </View>
-
-                  {/* Description */}
-                  <Text style={styles.modalDescription}>{selectedBadge.description}</Text>
-
-                  {/* Info Section */}
-                  <View style={styles.modalInfoSection}>
-                    <View style={styles.modalInfoRow}>
-                      <Text style={styles.modalInfoLabel}>Categoria:</Text>
-                      <Text style={styles.modalInfoValue}>
-                        {CATEGORY_ICONS[selectedBadge.category]}{' '}
-                        {CATEGORY_LABELS[selectedBadge.category]}
-                      </Text>
-                    </View>
-
-                    <View style={styles.modalInfoRow}>
-                      <Text style={styles.modalInfoLabel}>Requisito:</Text>
-                      <Text style={styles.modalInfoValue}>
-                        {REQUIREMENT_TYPE_LABELS[selectedBadge.requirementType]}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Earned or Progress */}
-                  {selectedBadge.earned && selectedBadge.earnedAt ? (
-                    <View style={styles.modalEarnedContainer}>
-                      <MaterialCommunityIcons
-                        name="check-circle"
-                        size={24}
-                        color="#10B981"
-                      />
-                      <Text style={styles.modalEarnedText}>
-                        Conquistado em{' '}
-                        {new Date(selectedBadge.earnedAt).toLocaleDateString('pt-BR')}
-                      </Text>
-                    </View>
-                  ) : (
-                    selectedBadge.progress && (
-                      <View style={styles.modalProgressSection}>
-                        <Text style={styles.modalProgressTitle}>Progresso</Text>
-                        <Text style={styles.modalProgressText}>
-                          {formatBadgeProgress(selectedBadge)}
-                        </Text>
-
-                        {/* Progress Bar */}
-                        <View style={styles.modalProgressBarBackground}>
-                          <View
-                            style={[
-                              styles.modalProgressBarFill,
-                              {
-                                width: `${selectedBadge.progress.percentage}%`,
-                                backgroundColor: RARITY_COLORS[selectedBadge.rarity],
-                              },
-                            ]}
-                          />
-                        </View>
-
-                        <Text style={styles.modalProgressHint}>
-                          Complete mais {selectedBadge.progress.required - selectedBadge.progress.current}{' '}
-                          para desbloquear!
-                        </Text>
-                      </View>
-                    )
-                  )}
-                </ScrollView>
-              </View>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
-      )}
+      <BadgeDetailModal
+        badge={selectedBadge}
+        visible={modalVisible}
+        onClose={closeBadgeDetails}
+      />
     </SafeAreaView>
   );
 };

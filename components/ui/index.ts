@@ -1,6 +1,7 @@
 export { AlertModal } from './AlertModal';
 export { Avatar } from './Avatar';
 export { BadgeCard } from './BadgeCard';
+export { BadgeDetailModal } from './BadgeDetailModal';
 export { BadgeItem } from './BadgeItem';
 export type { BadgeItemProps } from './BadgeItem';
 export { Button } from './Button';
