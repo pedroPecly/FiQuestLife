@@ -182,7 +182,10 @@ export async function scheduleStreakReminder(): Promise<void> {
       content: {
         title: '🔥 Não perca sua sequência!',
         body: 'Complete pelo menos um desafio hoje para manter seu streak!',
-        data: { type: 'STREAK_REMINDER' },
+        data: { 
+          type: 'STREAK_REMINDER',
+          saveToFeed: true, // Flag para salvar no feed ao receber
+        },
         sound: true,
         badge: 1,
       },
@@ -252,6 +255,15 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
 
     const emoji = rarityEmojis[rarity] || '🏆';
 
+    // Salva no feed local IMEDIATAMENTE
+    await saveNotification({
+      type: 'BADGE_EARNED',
+      title: `${emoji} Badge Conquistado!`,
+      body: `Parabéns! Você desbloqueou "${badgeName}"`,
+      data: { badgeName, rarity },
+    });
+
+    // Envia notificação push
     await Notifications.scheduleNotificationAsync({
       content: {
         title: `${emoji} Badge Conquistado!`,
@@ -275,6 +287,15 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
  */
 export async function notifyLevelUp(newLevel: number): Promise<void> {
   try {
+    // Salva no feed local IMEDIATAMENTE
+    await saveNotification({
+      type: 'LEVEL_UP',
+      title: '🎉 Level Up!',
+      body: `Incrível! Você subiu para o nível ${newLevel}!`,
+      data: { level: newLevel },
+    });
+
+    // Envia notificação push
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '🎉 Level Up!',
@@ -298,6 +319,15 @@ export async function notifyLevelUp(newLevel: number): Promise<void> {
  */
 export async function notifyChallengesAssigned(count: number = 5): Promise<void> {
   try {
+    // Salva no feed local IMEDIATAMENTE
+    await saveNotification({
+      type: 'CHALLENGE_ASSIGNED',
+      title: '🎯 Novos Desafios!',
+      body: `${count} novos desafios foram atribuídos para você hoje!`,
+      data: { count },
+    });
+
+    // Envia notificação push
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '🎯 Novos Desafios!',

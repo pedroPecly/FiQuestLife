@@ -15,13 +15,14 @@
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { saveNotification } from '../services/notificationCenter';
 import {
-    addNotificationReceivedListener,
-    addNotificationResponseListener,
-    getNotificationsEnabled,
-    requestNotificationPermissions,
-    scheduleDailyReminder,
-    scheduleStreakReminder,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  getNotificationsEnabled,
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  scheduleStreakReminder,
 } from '../services/notifications';
 
 export function useNotifications() {
@@ -35,16 +36,41 @@ export function useNotifications() {
 
     // Listener para notificações recebidas (app aberto)
     notificationListener.current = addNotificationReceivedListener(
-      (notification) => {
-        console.log('📬 Notificação recebida:', notification.request.content.title);
-        // Pode atualizar UI aqui se necessário
+      async (notification) => {
+        const content = notification.request.content;
+        console.log('📬 Notificação recebida:', content.title);
+        
+        // Se a notificação tem flag saveToFeed, salva no feed local
+        if (content.data?.saveToFeed && content.data?.type) {
+          await saveNotification({
+            type: content.data.type as any,
+            title: content.title || '',
+            body: content.body || '',
+            data: content.data,
+          });
+          console.log('💾 Notificação salva no feed local');
+        }
       }
     );
 
     // Listener para quando usuário toca na notificação
-    responseListener.current = addNotificationResponseListener((response) => {
+    responseListener.current = addNotificationResponseListener(async (response) => {
       const data = response.notification.request.content.data;
+      const content = response.notification.request.content;
       console.log('👆 Usuário tocou na notificação:', data?.type);
+      
+      // Salva notificações agendadas quando usuário interage com elas
+      // (Para o caso de notificações que chegaram quando app estava fechado)
+      if (data?.saveToFeed && data?.type) {
+        await saveNotification({
+          type: data.type as any,
+          title: content.title || '',
+          body: content.body || '',
+          data: data,
+        });
+        console.log('💾 Notificação agendada salva no feed ao tocar');
+      }
+      
       handleNotificationTap(data);
     });
 

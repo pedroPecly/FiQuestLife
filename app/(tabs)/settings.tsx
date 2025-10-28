@@ -18,23 +18,23 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import {
-  getNotificationsEnabled,
-  setNotificationsEnabled as saveNotificationsPreference,
+    getNotificationsEnabled,
+    setNotificationsEnabled as saveNotificationsPreference,
 } from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/settings.styles';
@@ -400,7 +400,7 @@ export default function SettingsScreen() {
             icon="information"
             iconColor="#2196F3"
             label="Versão"
-            subtitle="v0.8.0 (Beta)"
+            subtitle="v0.9.5 (Beta)"
           />
 
           <SettingsMenuItem
