@@ -324,4 +324,55 @@ user.post('/avatar', authMiddleware, async (c) => {
   }
 });
 
+/**
+ * DELETE /user/avatar
+ * Remove foto de perfil do usuário
+ * 
+ * Precisa enviar o token no header:
+ * Authorization: Bearer SEU_TOKEN_AQUI
+ */
+user.delete('/avatar', authMiddleware, async (c) => {
+  try {
+    // @ts-ignore
+    const userData = c.get('user') as { userId: string; email: string };
+
+    // Atualiza o avatarUrl do usuário para null
+    const updatedUser = await prisma.user.update({
+      where: { id: userData.userId },
+      data: { avatarUrl: null },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        birthDate: true,
+        bio: true,
+        avatarUrl: true,
+        xp: true,
+        coins: true,
+        level: true,
+        currentStreak: true,
+        longestStreak: true,
+        lastActiveDate: true,
+        notificationsEnabled: true,
+        dailyReminderTime: true,
+        profilePublic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return c.json({
+      message: 'Foto de perfil removida com sucesso!',
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.error('Erro ao remover avatar:', error);
+    return c.json({ 
+      error: 'Erro ao remover foto de perfil. Tente novamente.' 
+    }, 500);
+  }
+});
+
 export default user;

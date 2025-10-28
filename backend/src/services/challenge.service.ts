@@ -180,8 +180,8 @@ export const completeChallenge = async (userId: string, userChallengeId: string)
   });
 
   return {
-    challenge: updatedChallenge,
-    userStats: updatedUser,
+    userChallenge: updatedChallenge,
+    stats: updatedUser,
     leveledUp,
     newLevel,
     newBadges,

@@ -3,18 +3,18 @@ import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
 import {
-    cancelStreakReminder,
-    notifyBadgeEarned,
-    notifyLevelUp,
+  cancelStreakReminder,
+  notifyBadgeEarned,
+  notifyLevelUp,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    RefreshControl,
-    ScrollView,
-    Text,
-    View,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/challenges.styles';
@@ -71,15 +71,20 @@ export default function ChallengesScreen() {
         userChallengeId
       );
 
-      // Cancela lembrete de streak (usuário já completou algo hoje)
-      await cancelStreakReminder();
-
       // Atualizar desafio na lista local
-      setChallenges((prev) =>
-        prev.map((item) =>
-          item.id === userChallengeId ? { ...item, status: 'COMPLETED' as const } : item
-        )
+      const updatedChallenges = challenges.map((item) =>
+        item.id === userChallengeId ? { ...item, status: 'COMPLETED' as const } : item
       );
+      setChallenges(updatedChallenges);
+
+      // Verifica se completou TODOS os desafios diários
+      const allCompleted = updatedChallenges.every((c) => c.status === 'COMPLETED');
+      
+      if (allCompleted) {
+        // Cancela lembrete de streak (completou todos os desafios!)
+        await cancelStreakReminder();
+        console.log('🎉 Todos os desafios completados! Lembrete de streak cancelado.');
+      }
 
       // Atualizar stats do usuário local
       if (user) {
@@ -95,8 +100,12 @@ export default function ChallengesScreen() {
       // Construir mensagem de sucesso
       let successMessage = `+${response.userChallenge.challenge.xpReward} XP\n+${response.userChallenge.challenge.coinsReward} coins!`;
 
+      console.log('📊 Response completa:', JSON.stringify(response, null, 2));
+      console.log('🎯 leveledUp:', response.leveledUp, '| newLevel:', response.newLevel);
+
       // Notificar level up
       if (response.leveledUp && response.newLevel) {
+        console.log('🚀 Chamando notifyLevelUp com nível:', response.newLevel);
         successMessage += `\n\n🎉 Parabéns! Você subiu para o nível ${response.newLevel}!`;
         await notifyLevelUp(response.newLevel);
       }
@@ -104,7 +113,7 @@ export default function ChallengesScreen() {
       // Notificar badges conquistados
       if (response.newBadges && response.newBadges.length > 0) {
         const badgeNames = response.newBadges.map((b) => b.name).join(', ');
-        successMessage += `\n\n🏆 Novos distintivos: ${badgeNames}`;
+        successMessage += `\n\n🏆 Novas conquistas: ${badgeNames}`;
         
         // Notifica cada badge
         for (const badge of response.newBadges) {

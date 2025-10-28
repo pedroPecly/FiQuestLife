@@ -88,8 +88,8 @@ export const BadgesScreen = () => {
       // Aplica filtro atual
       applyFilter('all', response.badges);
     } catch (error: any) {
-      console.error('❌ Erro ao carregar badges:', error);
-      alert.error('Erro', error.message || 'Não foi possível carregar os badges.');
+      console.error('❌ Erro ao carregar conquistas:', error);
+      alert.error('Erro', error.message || 'Não foi possível carregar as conquistas.');
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ export const BadgesScreen = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🏆 Conquistas</Text>
         <Text style={styles.headerSubtitle}>
-          {earnedCount}/{totalCount} badges conquistados
+          {earnedCount}/{totalCount} conquistas desbloqueadas
         </Text>
       </View>
 
@@ -226,12 +226,12 @@ export const BadgesScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={styles.emptyTitle}>Nenhum badge encontrado</Text>
+            <Text style={styles.emptyTitle}>Nenhuma conquista encontrada</Text>
             <Text style={styles.emptySubtitle}>
               {filter === 'earned'
-                ? 'Complete desafios para conquistar badges!'
+                ? 'Complete desafios para conquistar conquistas!'
                 : filter === 'locked'
-                ? 'Todos os badges foram conquistados! 🎉'
+                ? 'Todas as conquistas foram conquistadas! 🎉'
                 : 'Puxe para baixo para atualizar'}
             </Text>
           </View>

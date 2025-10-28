@@ -11,15 +11,18 @@
 import axios from 'axios';
 import { authStorage } from './auth';
 
-// URL base da API (mude conforme necessário)
-// Em produção, use a URL real do servidor
-// No desenvolvimento local, use o IP da sua máquina (não localhost!)
-// 
+// URL base da API - Agora usando variável de ambiente
+// Configure no arquivo .env na raiz do projeto
+// EXPO_PUBLIC_API_URL=http://SEU_IP:3000/api
+//
 // ⚠️ ATENÇÃO: O IP pode mudar quando você reinicia o PC ou roteador!
-// Se o login parar de funcionar, verifique seu IP atual:
+// Se o login parar de funcionar, atualize o .env com seu IP atual:
 // Windows: Execute 'ipconfig' no terminal e procure por "Endereço IPv4"
 // Mac/Linux: Execute 'ifconfig' ou 'ip addr show'
-const API_URL = 'http://192.168.1.6:3000'; // IP local configurado
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.6:3000';
+
+// Log para debug (remove em produção)
+console.log('🌐 API URL configurada:', API_URL);
 
 // Cria instância do Axios com configurações padrão
 const api = axios.create({
@@ -203,6 +206,28 @@ export const authService = {
       return {
         success: false,
         error: error.response?.data?.error || 'Erro ao fazer upload da foto',
+      };
+    }
+  },
+
+  /**
+   * Remove foto de perfil do usuário
+   * Token JWT é injetado automaticamente pelo interceptor
+   */
+  async removeAvatar() {
+    try {
+      const response = await api.delete('/user/avatar');
+      
+      return { 
+        success: true, 
+        data: response.data.user || response.data,
+        message: response.data.message || 'Foto removida com sucesso!'
+      };
+    } catch (error: any) {
+      console.error('Erro ao remover avatar:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Erro ao remover foto de perfil',
       };
     }
   },

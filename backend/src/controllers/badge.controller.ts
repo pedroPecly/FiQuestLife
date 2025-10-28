@@ -13,9 +13,9 @@
 
 import type { Context } from 'hono';
 import {
-    getAllBadges,
-    getBadgesProgress,
-    getUserBadges,
+  getAllBadges,
+  getBadgesProgress,
+  getUserBadges,
 } from '../services/badge.service.js';
 
 /**
@@ -30,7 +30,7 @@ export const getAllBadgesController = async (c: Context) => {
       return c.json({ error: 'Unauthorized' }, 401);
     }
     
-    const userId = user.userId;
+    //const userId = user.userId;
 
     const badges = await getAllBadges();
 
@@ -69,7 +69,7 @@ export const getUserBadgesController = async (c: Context) => {
 
     return c.json({
       success: true,
-      data: userBadges,
+      badges: userBadges,
       message: `${userBadges.length} badges conquistados`,
     });
   } catch (error) {
@@ -101,16 +101,15 @@ export const getBadgesProgressController = async (c: Context) => {
     const badgesWithProgress = await getBadgesProgress(userId);
 
     const earned = badgesWithProgress.filter((b) => b.earned).length;
+    const locked = badgesWithProgress.filter((b) => !b.earned).length;
     const total = badgesWithProgress.length;
 
     return c.json({
       success: true,
-      data: badgesWithProgress,
-      summary: {
-        earned,
-        total,
-        percentage: Math.round((earned / total) * 100),
-      },
+      badges: badgesWithProgress,
+      earned,
+      locked,
+      total,
       message: `${earned}/${total} badges conquistados`,
     });
   } catch (error) {

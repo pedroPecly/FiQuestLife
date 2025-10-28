@@ -298,7 +298,7 @@ const ProfileScreen = () => {
           ) : (
             <View style={styles.noBadgesContainer}>
               <Text style={styles.noBadgesIcon}>🔒</Text>
-              <Text style={styles.noBadgesText}>Nenhum badge conquistado ainda</Text>
+              <Text style={styles.noBadgesText}>Nenhuma conquista conquistada ainda</Text>
               <Text style={styles.noBadgesSubtext}>
                 Complete desafios para desbloquear conquistas!
               </Text>

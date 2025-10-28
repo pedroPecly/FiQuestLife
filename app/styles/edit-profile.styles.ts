@@ -124,6 +124,23 @@ export const styles = StyleSheet.create({
     }),
   },
 
+  removeAvatarButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#FFEBEE',
+  },
+
+  removeAvatarText: {
+    fontSize: 14,
+    color: '#F44336',
+    fontWeight: '500',
+  },
+
   // ==========================================
   // FORM CARD (Padrão Card Branco)
   // ==========================================

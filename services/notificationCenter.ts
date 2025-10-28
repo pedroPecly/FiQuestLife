@@ -13,6 +13,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authService } from './api';
 import type { NotificationType } from './notifications';
 
 // ==========================================
@@ -34,8 +35,25 @@ export interface InAppNotification {
 // CONSTANTES
 // ==========================================
 
-const STORAGE_KEY = 'notification_history';
+const STORAGE_KEY_PREFIX = 'notification_history_';
 const MAX_NOTIFICATIONS = 50;
+
+/**
+ * Gera a chave de storage para o usuário atual
+ */
+const getStorageKey = async (): Promise<string> => {
+  try {
+    const user = await authService.getMe();
+    if (user.success && user.data?.id) {
+      return `${STORAGE_KEY_PREFIX}${user.data.id}`;
+    }
+    // Fallback para chave genérica (não deveria acontecer)
+    return STORAGE_KEY_PREFIX + 'guest';
+  } catch (error) {
+    console.error('Erro ao obter userId para storage:', error);
+    return STORAGE_KEY_PREFIX + 'guest';
+  }
+};
 
 // Ícones por tipo de notificação
 export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
@@ -64,6 +82,7 @@ export const NOTIFICATION_COLORS: Record<NotificationType, string> = {
  */
 export const saveNotification = async (notification: Omit<InAppNotification, 'id' | 'timestamp' | 'read'>): Promise<void> => {
   try {
+    const storageKey = await getStorageKey();
     const history = await getNotificationHistory();
     
     const newNotification: InAppNotification = {
@@ -80,7 +99,7 @@ export const saveNotification = async (notification: Omit<InAppNotification, 'id
     // Limita a 50 notificações
     const limitedHistory = history.slice(0, MAX_NOTIFICATIONS);
 
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(limitedHistory));
+    await AsyncStorage.setItem(storageKey, JSON.stringify(limitedHistory));
   } catch (error) {
     console.error('Erro ao salvar notificação:', error);
   }
@@ -91,7 +110,8 @@ export const saveNotification = async (notification: Omit<InAppNotification, 'id
  */
 export const getNotificationHistory = async (): Promise<InAppNotification[]> => {
   try {
-    const stored = await AsyncStorage.getItem(STORAGE_KEY);
+    const storageKey = await getStorageKey();
+    const stored = await AsyncStorage.getItem(storageKey);
     if (!stored) return [];
     
     return JSON.parse(stored);
@@ -122,12 +142,13 @@ export const getUnreadCount = async (): Promise<number> => {
  */
 export const markAsRead = async (notificationId: string): Promise<void> => {
   try {
+    const storageKey = await getStorageKey();
     const history = await getNotificationHistory();
     const updated = history.map(n => 
       n.id === notificationId ? { ...n, read: true } : n
     );
     
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
   } catch (error) {
     console.error('Erro ao marcar notificação como lida:', error);
   }
@@ -138,10 +159,11 @@ export const markAsRead = async (notificationId: string): Promise<void> => {
  */
 export const markAllAsRead = async (): Promise<void> => {
   try {
+    const storageKey = await getStorageKey();
     const history = await getNotificationHistory();
     const updated = history.map(n => ({ ...n, read: true }));
     
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
   } catch (error) {
     console.error('Erro ao marcar todas como lidas:', error);
   }
@@ -152,7 +174,8 @@ export const markAllAsRead = async (): Promise<void> => {
  */
 export const clearAllNotifications = async (): Promise<void> => {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    const storageKey = await getStorageKey();
+    await AsyncStorage.removeItem(storageKey);
   } catch (error) {
     console.error('Erro ao limpar notificações:', error);
   }
@@ -163,10 +186,11 @@ export const clearAllNotifications = async (): Promise<void> => {
  */
 export const deleteNotification = async (notificationId: string): Promise<void> => {
   try {
+    const storageKey = await getStorageKey();
     const history = await getNotificationHistory();
     const filtered = history.filter(n => n.id !== notificationId);
     
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    await AsyncStorage.setItem(storageKey, JSON.stringify(filtered));
   } catch (error) {
     console.error('Erro ao deletar notificação:', error);
   }

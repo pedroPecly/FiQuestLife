@@ -1,0 +1,78 @@
+🎨 feat: Melhorias de UX e configuração profissional
+
+## 🚀 Novidades
+
+### 1. Função de Remover Foto de Perfil
+- ✅ Botão "Remover foto" na tela de editar perfil
+- ✅ Aparece apenas quando usuário tem foto
+- ✅ Endpoint DELETE /user/avatar no backend
+- ✅ Design consistente com tema do app (vermelho suave)
+- ✅ Atualização automática da UI após remoção
+
+### 2. Variáveis de Ambiente no Frontend
+- ✅ Criado arquivo .env.example com template
+- ✅ API_URL agora usa EXPO_PUBLIC_API_URL
+- ✅ Facilita configuração em diferentes ambientes
+- ✅ .env adicionado ao .gitignore
+- ✅ Log de debug para verificar URL carregada
+
+## 🐛 Correções
+
+### 3. Sistema de Notificações
+- ✅ Corrigido isolamento por usuário (AsyncStorage com userId)
+- ✅ Removida duplicação em CHALLENGE_ASSIGNED
+- ✅ Removida duplicação em BADGE_EARNED
+- ✅ Removida duplicação em LEVEL_UP
+- ✅ STREAK_REMINDER agora cancela apenas ao completar TODOS os desafios
+- ✅ Melhorada lógica de verificação de desafios completados
+
+### 4. API de Badges
+- ✅ Endpoint /badges/user agora retorna 'badges' ao invés de 'data'
+- ✅ Endpoint /badges/progress retorna estrutura correta (badges, earned, locked, total)
+- ✅ Badges agora aparecem corretamente no ProfileScreen
+- ✅ Badges agora aparecem corretamente no BadgesScreen
+
+### 5. Tradução e Consistência
+- ✅ Substituído "badge" por "conquista" em textos visíveis
+- ✅ Mantidos nomes técnicos em inglês (variáveis, funções)
+- ✅ Melhorada experiência em português
+
+### 6. Backend - Challenge Service
+- ✅ Corrigido retorno de completeChallenge (userChallenge e stats)
+- ✅ Logs adicionados para debug de level up
+
+## 📁 Arquivos Modificados
+
+**Frontend:**
+- `app/screens/EditProfileScreen.tsx` - Função de remover foto
+- `app/styles/edit-profile.styles.ts` - Estilos do botão remover
+- `services/api.ts` - Configuração com variável de ambiente
+- `services/notificationCenter.ts` - Isolamento por usuário
+- `services/notifications.ts` - Correções de duplicação
+- `app/screens/ChallengesScreen.tsx` - Lógica de streak melhorada
+- `app/screens/ProfileScreen.tsx` - Textos em português
+- `app/screens/BadgesScreen.tsx` - Textos em português
+- `.env` - Variável de ambiente criada
+- `.env.example` - Template de configuração
+- `.gitignore` - Proteção do .env
+
+**Backend:**
+- `backend/src/routes/user.ts` - Endpoint DELETE /avatar
+- `backend/src/controllers/badge.controller.ts` - Estrutura de retorno corrigida
+- `backend/src/services/challenge.service.ts` - Retorno padronizado
+
+## 🎯 Impacto
+
+✅ Melhor UX - Usuário pode remover foto indesejada
+✅ Configuração mais profissional - Variáveis de ambiente
+✅ Notificações sem duplicação - Sistema limpo
+✅ Badges funcionando corretamente - Gamificação completa
+✅ Internacionalização - Textos em português
+✅ Código mais limpo - Padrões consistentes
+
+## 📝 Observações
+
+- Configure o .env com seu IP local antes de rodar
+- Notificações agora isoladas por conta de usuário
+- Sistema de streak melhorado (cancela só quando completar todos)
+- Backend precisa ser reiniciado para aplicar mudanças de avatar

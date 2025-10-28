@@ -326,9 +326,29 @@ cd ..
 
 ---
 
-### **4. ⚠️ Configurar IP Local (OBRIGATÓRIO para testar no celular)**
+### **4. Configurar Variáveis de Ambiente do Frontend** 🔐
 
-#### **4.1. Descobrir seu IP local**
+#### **4.1. Criar arquivo `.env` na raiz do projeto**
+
+Crie o arquivo `.env` na raiz (mesma pasta do `package.json` do frontend):
+
+```env
+# ============================================
+# FIQUEST LIFE - VARIÁVEIS DE AMBIENTE
+# ============================================
+
+# API Backend - AJUSTE PARA SEU IP LOCAL
+EXPO_PUBLIC_API_URL=http://192.168.1.XX:3000
+```
+
+💡 **Importante:**
+- Substitua `192.168.1.XX` pelo seu IP local (veja próxima seção)
+- **NÃO** adicione `/api` no final da URL
+- Use o prefixo `EXPO_PUBLIC_` para que a variável seja acessível no app
+
+📋 **Use o arquivo `.env.example` como referência**
+
+#### **4.2. Descobrir seu IP local**
 
 **Windows:**
 ```bash
@@ -344,14 +364,20 @@ ifconfig
 ip addr show
 ```
 
-#### **4.2. Atualizar arquivo `services/api.ts`**
+#### **4.3. Exemplo de `.env` configurado:**
 
-```typescript
-// services/api.ts (linha ~11)
-const API_URL = 'http://192.168.1.XX:3000'; // ← COLOQUE SEU IP AQUI
+```env
+# Se seu IP é 192.168.1.105
+EXPO_PUBLIC_API_URL=http://192.168.1.105:3000
 ```
 
-💡 **Importante:** O celular e o PC devem estar na **mesma rede Wi-Fi**!
+💡 **Dica:** Seu IP pode mudar ao reiniciar o PC ou roteador. Se o login parar de funcionar, atualize o `.env` com o IP atual!
+
+⚠️ **Observações importantes:**
+- O arquivo `.env` está no `.gitignore` e **não será commitado**
+- Cada desenvolvedor cria seu próprio `.env` com seu IP local
+- Em produção, você usaria uma URL real (ex: `https://api.fiquestlife.com`)
+- Celular e PC devem estar na **mesma rede Wi-Fi**
 
 ---
 
@@ -455,12 +481,130 @@ Antes de começar a desenvolver, verifique:
 
 - [ ] Backend rodando sem erros (`npm run dev` no terminal)
 - [ ] Frontend rodando (`npx expo start` no terminal)
-- [ ] IP correto configurado em `services/api.ts`
+- [ ] Arquivo `.env` criado na raiz com `EXPO_PUBLIC_API_URL`
+- [ ] IP correto configurado no `.env`
 - [ ] Prisma Client regenerado (`npx prisma generate`)
 - [ ] Banco de dados sincronizado (`npx prisma db push`)
 - [ ] Consegue fazer login/cadastro
 - [ ] Perfil carrega corretamente
 - [ ] (Opcional) Supabase Storage configurado para upload de fotos
+
+---
+
+## 🐛 Troubleshooting - Problemas Comuns
+
+### **❌ Erro "Network Error" ou "Not Found (404)" ao fazer login**
+
+**Sintomas:**
+- Login não funciona
+- Erro de rede ao tentar logar
+- "Request failed with status code 404"
+
+**Causas Comuns:**
+1. IP no `.env` está incorreto ou desatualizado
+2. Backend não está rodando
+3. Celular e PC em redes Wi-Fi diferentes
+4. Firewall bloqueando a porta 3000
+
+**Soluções:**
+
+```bash
+# 1. Verifique se o backend está rodando
+cd backend
+npm run dev
+# Deve mostrar: ✅ Servidor rodando em http://localhost:3000
+
+# 2. Verifique seu IP atual
+# Windows:
+ipconfig
+# Mac/Linux:
+ifconfig
+
+# 3. Atualize o .env com o IP correto
+EXPO_PUBLIC_API_URL=http://SEU_IP_ATUAL:3000
+
+# 4. Reinicie o app Expo
+# No terminal do Expo, pressione 'r' para reload
+# Ou feche e abra o Expo Go novamente
+```
+
+**Log de Debug:**
+- Quando o app inicia, você deve ver no console: `🌐 API URL configurada: http://192.168.1.XX:3000`
+- Se a URL estiver errada, atualize o `.env`
+
+---
+
+### **❌ Variável de ambiente não está sendo carregada**
+
+**Sintoma:**
+- `EXPO_PUBLIC_API_URL` retorna `undefined`
+- App usa fallback `http://192.168.1.6:3000`
+
+**Solução:**
+
+```bash
+# 1. Certifique-se que o .env está na RAIZ do projeto
+# (mesma pasta que package.json do frontend)
+
+# 2. Use o prefixo EXPO_PUBLIC_
+EXPO_PUBLIC_API_URL=http://192.168.1.XX:3000
+
+# 3. Reinicie COMPLETAMENTE o Expo
+# Pressione Ctrl+C para parar
+# Depois rode novamente:
+npx expo start --clear
+```
+
+⚠️ **Importante:** Variáveis de ambiente são carregadas apenas quando o Expo inicia. Mudanças no `.env` exigem reiniciar o servidor.
+
+---
+
+### **❌ IP mudou e o app parou de funcionar**
+
+**Sintoma:**
+- Funcionava antes, mas agora não conecta
+- Erro de rede após reiniciar PC/roteador
+
+**Causa:**
+- Seu IP local mudou (comum após reiniciar PC ou roteador)
+
+**Solução:**
+
+```bash
+# 1. Descubra seu novo IP
+ipconfig  # Windows
+ifconfig  # Mac/Linux
+
+# 2. Atualize o .env
+EXPO_PUBLIC_API_URL=http://NOVO_IP:3000
+
+# 3. Reinicie o Expo
+npx expo start
+```
+
+💡 **Dica:** Para evitar isso, configure um IP estático no seu roteador.
+
+---
+
+### **❌ Erro ".env not found" no git**
+
+**Sintoma:**
+- Ao clonar o projeto, não há arquivo `.env`
+- Variável `EXPO_PUBLIC_API_URL` undefined
+
+**Solução:**
+
+```bash
+# O .env está no .gitignore (não vai pro GitHub)
+# Crie manualmente:
+
+# 1. Copie o exemplo
+cp .env.example .env
+
+# 2. Edite com seu IP
+# .env
+EXPO_PUBLIC_API_URL=http://SEU_IP:3000
+```
 
 ---
 

@@ -240,8 +240,8 @@ export async function cancelAllScheduledNotifications(): Promise<void> {
 // ==========================================
 
 /**
- * Notifica imediatamente quando usuário conquista badge
- * @param badgeName Nome do badge conquistado
+ * Notifica imediatamente quando usuário conquista conquista
+ * @param badgeName Nome da conquista conquistada
  * @param rarity Raridade (COMMON, RARE, EPIC, LEGENDARY)
  */
 export async function notifyBadgeEarned(badgeName: string, rarity: string): Promise<void> {
@@ -255,18 +255,10 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
 
     const emoji = rarityEmojis[rarity] || '🏆';
 
-    // Salva no feed local IMEDIATAMENTE
-    await saveNotification({
-      type: 'BADGE_EARNED',
-      title: `${emoji} Badge Conquistado!`,
-      body: `Parabéns! Você desbloqueou "${badgeName}"`,
-      data: { badgeName, rarity },
-    });
-
-    // Envia notificação push
+    // Envia notificação push (será salva automaticamente pelo listener)
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: `${emoji} Badge Conquistado!`,
+        title: `${emoji} Conquista Desbloqueada!`,
         body: `Parabéns! Você desbloqueou "${badgeName}"`,
         data: { type: 'BADGE_EARNED', badgeName, rarity },
         sound: true,
@@ -275,9 +267,9 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
       trigger: null, // Envia imediatamente
     });
 
-    console.log(`✅ Notificação de badge enviada: ${badgeName}`);
+    console.log(`✅ Notificação de conquista enviada: ${badgeName}`);
   } catch (error) {
-    console.error('❌ Erro ao notificar badge:', error);
+    console.error('❌ Erro ao notificar conquista:', error);
   }
 }
 
@@ -287,15 +279,7 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
  */
 export async function notifyLevelUp(newLevel: number): Promise<void> {
   try {
-    // Salva no feed local IMEDIATAMENTE
-    await saveNotification({
-      type: 'LEVEL_UP',
-      title: '🎉 Level Up!',
-      body: `Incrível! Você subiu para o nível ${newLevel}!`,
-      data: { level: newLevel },
-    });
-
-    // Envia notificação push
+    // Envia notificação push (será salva automaticamente pelo listener)
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '🎉 Level Up!',
@@ -319,15 +303,7 @@ export async function notifyLevelUp(newLevel: number): Promise<void> {
  */
 export async function notifyChallengesAssigned(count: number = 5): Promise<void> {
   try {
-    // Salva no feed local IMEDIATAMENTE
-    await saveNotification({
-      type: 'CHALLENGE_ASSIGNED',
-      title: '🎯 Novos Desafios!',
-      body: `${count} novos desafios foram atribuídos para você hoje!`,
-      data: { count },
-    });
-
-    // Envia notificação push
+    // Envia notificação push (será salva automaticamente pelo listener)
     await Notifications.scheduleNotificationAsync({
       content: {
         title: '🎯 Novos Desafios!',

@@ -137,6 +137,38 @@ export const EditProfileScreen = () => {
     }
   };
 
+  /**
+   * Função para remover foto de perfil
+   */
+  const handleRemoveAvatar = async () => {
+    try {
+      setUploadingAvatar(true);
+
+      const result = await authService.removeAvatar();
+
+      if (result.success) {
+        // Atualiza o usuário local removendo a foto
+        const updatedUser = result.data;
+        setUser(updatedUser);
+        
+        // Atualiza também no storage
+        const token = await authStorage.getToken();
+        if (token) {
+          await authStorage.saveAuth(token, updatedUser);
+        }
+        
+        alert.success('Sucesso!', 'Foto de perfil removida com sucesso!');
+      } else {
+        alert.error('Erro', result.error || 'Não foi possível remover a foto.');
+      }
+    } catch (error) {
+      console.error('Erro ao remover avatar:', error);
+      alert.error('Erro', 'Erro ao remover foto de perfil.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   // ==========================================
   // LIFECYCLE
   // ==========================================
@@ -324,6 +356,18 @@ export const EditProfileScreen = () => {
               showHint={true}
               hintText="Toque para alterar"
             />
+            
+            {/* Botão de remover foto (só aparece se tiver foto) */}
+            {user?.avatarUrl && !uploadingAvatar && (
+              <TouchableOpacity
+                style={styles.removeAvatarButton}
+                onPress={handleRemoveAvatar}
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons name="delete-outline" size={16} color="#F44336" />
+                <Text style={styles.removeAvatarText}>Remover foto</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Form Section */}
