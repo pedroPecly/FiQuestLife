@@ -15,26 +15,28 @@
  */
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import {
-    getNotificationsEnabled,
-    setNotificationsEnabled as saveNotificationsPreference,
+  getNotificationsEnabled,
+  setNotificationsEnabled as saveNotificationsPreference,
 } from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/settings.styles';
@@ -46,6 +48,7 @@ export default function SettingsScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const navigation = useNavigation();
 
   // Settings state
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -222,27 +225,72 @@ export default function SettingsScreen() {
   };
 
   const handleLogout = async () => {
+    const doLogout = async () => {
+      try {
+        console.log('🔄 Iniciando processo de logout...');
+        
+        // 1. Marca flag de logout manual para prevenir auto-login
+        await AsyncStorage.setItem('@FiQuestLife:manual_logout', 'true');
+        console.log('✅ Flag de logout manual marcada');
+        
+        // 2. Limpa todos os caches
+        await AsyncStorage.removeItem('friend_requests_cache');
+        console.log('✅ Cache de friend requests limpo');
+        
+        // 3. Faz o logout (remove token e dados do usuário)
+        await authStorage.logout();
+        console.log('✅ Token e dados do usuário removidos');
+        
+        // 4. Limpa o estado local
+        setUser(null);
+        
+        // 5. Aguarda para garantir que o AsyncStorage foi atualizado
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        console.log('🔄 Tentando navegar para login...');
+        
+        // 6. Acessa o navegador raiz (Stack) e reseta para a tela de login
+        try {
+          const rootNavigation = navigation.getParent();
+          if (rootNavigation) {
+            rootNavigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'index' }],
+              })
+            );
+            console.log('✅ Navegação raiz resetada com sucesso');
+          } else {
+            throw new Error('rootNavigation não encontrado');
+          }
+        } catch (error) {
+          console.error('❌ Erro ao resetar navegação raiz:', error);
+          
+          // Fallback: tenta navegar diretamente
+          try {
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: 'index',
+              })
+            );
+            console.log('✅ Tentou navigate direto como fallback');
+          } catch (e2) {
+            console.error('❌ Erro ao navegar:', e2);
+          }
+        }
+        
+        console.log('✅ Logout realizado com sucesso');
+      } catch (error) {
+        console.error('❌ Erro ao fazer logout:', error);
+        alert.error('Erro', 'Não foi possível sair. Tente novamente.');
+      }
+    };
+
     if (Platform.OS === 'web') {
       alert.confirm(
         'Sair da Conta',
         'Deseja realmente sair da sua conta?',
-        async () => {
-          try {
-            const logoutResult = await authStorage.logout();
-            if (logoutResult) {
-              // Força navegação para tela de login com reset completo da stack
-              if (Platform.OS === 'web') {
-                window.location.href = '/';
-              } else {
-                router.replace('/' as any);
-              }
-            } else {
-              alert.error('Erro', 'Não foi possível sair. Tente novamente.');
-            }
-          } catch (error) {
-            alert.error('Erro', 'Não foi possível sair. Tente novamente.');
-          }
-        },
+        doLogout,
         () => {},
         'Sair',
         'Cancelar'
@@ -256,19 +304,7 @@ export default function SettingsScreen() {
           {
             text: 'Sair',
             style: 'destructive',
-            onPress: async () => {
-              try {
-                const logoutResult = await authStorage.logout();
-                if (logoutResult) {
-                  // Força navegação para tela de login
-                  router.replace('/' as any);
-                } else {
-                  alert.error('Erro', 'Não foi possível sair. Tente novamente.');
-                }
-              } catch (error) {
-                alert.error('Erro', 'Não foi possível sair. Tente novamente.');
-              }
-            },
+            onPress: doLogout,
           },
         ]
       );
@@ -400,7 +436,7 @@ export default function SettingsScreen() {
             icon="information"
             iconColor="#2196F3"
             label="Versão"
-            subtitle="v0.9.5 (Beta)"
+            subtitle="v0.11.1 (Beta)"
           />
 
           <SettingsMenuItem

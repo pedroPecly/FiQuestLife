@@ -46,6 +46,7 @@ export const authMiddleware = async (c: Context, next: Next): Promise<Response |
     
     // Guarda os dados do usuário no contexto pra usar nas rotas
     c.set('user', decoded);
+    c.set('userId', decoded.userId); // Adiciona userId diretamente
     
     // Continua pro próximo middleware/rota
     await next();

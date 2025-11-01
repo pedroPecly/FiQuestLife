@@ -1,8 +1,9 @@
 // app/screens/LoginScreen.tsx
 
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -35,6 +36,55 @@ const LoginScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState(''); // Confirmação de senha
   const [isLogin, setIsLogin] = useState(true); // true = Login, false = Cadastro
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true); // Verificando login automático
+
+  // ============================================
+  // LOGIN AUTOMÁTICO (PERSISTENTE)
+  // ============================================
+  useEffect(() => {
+    checkAutoLogin();
+  }, []);
+
+  const checkAutoLogin = async () => {
+    try {
+      console.log('🔍 Verificando auto-login...');
+      
+      // Verifica se foi um logout manual
+      const manualLogout = await AsyncStorage.getItem('@FiQuestLife:manual_logout');
+      if (manualLogout === 'true') {
+        // Remove a flag e não faz auto-login
+        await AsyncStorage.removeItem('@FiQuestLife:manual_logout');
+        console.log('🚪 Logout manual detectado, não fazendo auto-login');
+        setCheckingAuth(false);
+        return;
+      }
+
+      // Verifica se já existe token salvo
+      const isLoggedIn = await authStorage.isLoggedIn();
+      console.log('🔑 Token existe?', isLoggedIn);
+      
+      if (isLoggedIn) {
+        // Tenta buscar dados do usuário para validar o token
+        const response = await authService.getMe();
+        
+        if (response.success && response.data) {
+          // Token válido! Redireciona direto para o app
+          console.log('✅ Login automático bem-sucedido');
+          router.replace('/(tabs)');
+        } else {
+          // Token inválido ou expirado, limpa o storage
+          console.log('⚠️ Token inválido, fazendo logout');
+          await authStorage.logout();
+        }
+      }
+    } catch (error) {
+      console.log('⚠️ Erro no login automático, usuário precisa logar');
+      // Se der erro, apenas deixa usuário fazer login manual
+      await authStorage.logout();
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
 
   // Validação de email simples
   const validateEmail = (email: string) => {
@@ -205,6 +255,19 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
+
+  // ============================================
+  // LOADING DE VERIFICAÇÃO AUTOMÁTICA
+  // ============================================
+  if (checkingAuth) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ fontSize: 18, color: '#666', marginBottom: 10 }}>
+          Verificando login...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 

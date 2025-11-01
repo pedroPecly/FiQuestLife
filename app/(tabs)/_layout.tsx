@@ -1,9 +1,34 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { useFriendRequestNotifications } from '../../hooks/useFriendRequestNotifications';
+import { friendService } from '../../services/friend';
 
 export default function TabLayout() {
+  // Hook que verifica novas solicitações de amizade periodicamente
+  useFriendRequestNotifications();
+  
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  useEffect(() => {
+    loadPendingRequests();
+    
+    // Atualiza a cada 30 segundos
+    const interval = setInterval(loadPendingRequests, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadPendingRequests = async () => {
+    try {
+      const requests = await friendService.getPendingRequests();
+      setPendingRequestsCount(requests.length);
+    } catch (error) {
+      // Silently fail
+    }
+  };
+
   return (
     <Tabs
       screenOptions={{
@@ -61,6 +86,20 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons 
               name={focused ? 'shield-star' : 'shield-star-outline'} 
+              size={28} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="friends"
+        options={{
+          title: 'Amigos',
+          tabBarBadge: pendingRequestsCount > 0 ? pendingRequestsCount : undefined,
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons 
+              name={focused ? 'account-group' : 'account-group-outline'} 
               size={28} 
               color={color} 
             />

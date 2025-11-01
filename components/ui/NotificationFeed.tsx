@@ -137,6 +137,13 @@ export const NotificationFeed: React.FC<NotificationFeedProps> = ({
       case 'LEVEL_UP':
         router.push('/(tabs)/' as any);
         break;
+      case 'FRIEND_REQUEST':
+        // Navega para a aba de Amigos, sub-aba de Solicitações
+        router.push({
+          pathname: '/(tabs)/friends',
+          params: { tab: 'requests' },
+        } as any);
+        break;
     }
   };
 

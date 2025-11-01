@@ -79,6 +79,11 @@ const ProfileScreen = () => {
   const loadRecentBadges = async () => {
     try {
       setLoadingBadges(true);
+      
+      // Verifica se ainda está logado antes de carregar
+      const token = await authStorage.getToken();
+      if (!token) return;
+      
       const badges = await getUserBadges();
       
       // Pega os 5 badges mais recentes (já vêm ordenados por earnedAt desc)

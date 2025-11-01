@@ -1,3 +1,4 @@
+export { ActivityFeedItem } from './ActivityFeedItem';
 export { AlertModal } from './AlertModal';
 export { Avatar } from './Avatar';
 export { BadgeCard } from './BadgeCard';
@@ -8,6 +9,10 @@ export { Button } from './Button';
 export { Card } from './Card';
 export { default as ChallengeCard } from './ChallengeCard';
 export { DateInput } from './DateInput';
+export { EmptyState } from './EmptyState';
+export type { EmptyStateProps } from './EmptyState';
+export { FriendCard } from './FriendCard';
+export { FriendRequestCard } from './FriendRequestCard';
 export { InfoRow } from './InfoRow';
 export { Input } from './Input';
 export { LoadingScreen } from './LoadingScreen';
@@ -17,7 +22,12 @@ export { NotificationFeed } from './NotificationFeed';
 export { NotificationItem } from './NotificationItem';
 export { ProfileAvatar } from './ProfileAvatar';
 export { RewardCard } from './RewardCard';
+export { SearchBar } from './SearchBar';
+export type { SearchBarProps } from './SearchBar';
 export { SettingsMenuItem } from './SettingsMenuItem';
 export { StatBox } from './StatBox';
 export { Tag } from './Tag';
+export { UserSearchCard } from './UserSearchCard';
+export { UserStatsRow } from './UserStatsRow';
+export type { UserStat, UserStatsRowProps } from './UserStatsRow';
 

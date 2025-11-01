@@ -21,6 +21,7 @@ import { errorMiddleware } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.js';
 import badgeRoutes from './routes/badge.routes.js';
 import challengeRoutes from './routes/challenge.routes.js';
+import friendRoutes from './routes/friend.routes.js';
 import healthRoutes from './routes/health.js';
 import rewardRoutes from './routes/reward.js';
 import userRoutes from './routes/user.js';
@@ -62,6 +63,11 @@ app.get('/', (c) => {
       badgesProgress: '/badges/progress - Progresso de badges (requer token)',
       rewardHistory: '/rewards/history - Histórico de recompensas (requer token)',
       rewardStats: '/rewards/stats - Estatísticas de recompensas (requer token)',
+      friends: '/friends - Lista de amigos (requer token)',
+      friendRequest: '/friends/request - Enviar solicitação de amizade (requer token)',
+      friendRequests: '/friends/requests - Solicitações recebidas (requer token)',
+      friendSearch: '/friends/search?q=query - Buscar usuários (requer token)',
+      friendActivity: '/friends/activity - Atividades dos amigos (requer token)',
     },
     docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
     authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
@@ -86,6 +92,9 @@ app.route('/badges', badgeRoutes);
 
 // Registra as rotas de recompensas (/rewards/history, /rewards/stats)
 app.route('/rewards', rewardRoutes);
+
+// Registra as rotas de amigos (/friends, /friends/request, /friends/activity)
+app.route('/friends', friendRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS

@@ -30,6 +30,10 @@ model User {
   userChallenges       UserChallenge[]
   userBadges           UserBadge[]
   rewardHistory        RewardHistory[]
+  sentFriendRequests   FriendRequest[]   @relation("SentRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+  friendshipsInitiated Friendship[]      @relation("FriendshipInitiator")
+  friendshipsReceived  Friendship[]      @relation("FriendshipReceiver")
 
   @@map("users")
 }
@@ -158,6 +162,50 @@ model RewardHistory {
 }
 
 /// *
+///  * Solicitações de Amizade
+///  * 
+///  * Registra todas as solicitações de amizade enviadas/recebidas.
+///  * Uma solicitação pode estar PENDING, ACCEPTED, REJECTED ou BLOCKED.
+///  * 
+///  * Quando ACCEPTED, cria um registro em Friendship.
+model FriendRequest {
+  id         String            @id @default(uuid())
+  senderId   String            @map("sender_id")
+  receiverId String            @map("receiver_id")
+  status     FriendshipStatus  @default(PENDING)
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+  sender     User              @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User              @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+  @@index([senderId, status])
+  @@map("friend_requests")
+}
+
+/// *
+///  * Amizades Estabelecidas
+///  * 
+///  * Registra amizades confirmadas entre usuários.
+///  * Criado apenas quando uma FriendRequest é ACCEPTED.
+///  * 
+///  * Permite rastrear atividades dos amigos, ranking conjunto, etc.
+model Friendship {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  friendId    String   @map("friend_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  user        User     @relation("FriendshipInitiator", fields: [userId], references: [id], onDelete: Cascade)
+  friend      User     @relation("FriendshipReceiver", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@map("friendships")
+}
+
+/// *
 ///  * Categorias de desafios disponíveis
 ///  * Organiza os desafios por área da vida
 enum ChallengeCategory {
@@ -245,4 +293,14 @@ enum RewardType {
   COINS
   BADGE
   ITEM
+}
+
+/// *
+///  * Status de solicitação de amizade
+///  * Define o estado atual da solicitação
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
 }

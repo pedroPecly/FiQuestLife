@@ -36,7 +36,14 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const getTextColor = () => {
-    return '#FFFFFF';
+    switch (variant) {
+      case 'secondary':
+        return '#1C1C1E'; // Texto escuro para botão com fundo branco
+      case 'danger':
+        return '#FFFFFF';
+      default:
+        return '#FFFFFF';
+    }
   };
 
   return (
@@ -76,8 +83,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
     paddingVertical: 15,
+    paddingHorizontal: 20,
     borderRadius: 10,
     marginTop: 10,
   },

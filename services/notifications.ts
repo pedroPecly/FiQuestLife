@@ -28,7 +28,8 @@ export type NotificationType =
   | 'CHALLENGE_ASSIGNED' // Novos desafios atribuídos
   | 'BADGE_EARNED'      // Badge conquistado
   | 'LEVEL_UP'          // Subiu de nível
-  | 'STREAK_REMINDER';  // Lembrete de streak (21h)
+  | 'STREAK_REMINDER'   // Lembrete de streak (21h)
+  | 'FRIEND_REQUEST';   // Solicitação de amizade recebida
 
 export interface NotificationData {
   type: NotificationType;
@@ -416,6 +417,35 @@ export function addNotificationReceivedListener(
     // Chama callback do usuário
     callback(notification);
   });
+}
+
+/**
+ * Notifica quando recebe uma solicitação de amizade
+ * @param senderName Nome de quem enviou a solicitação
+ * @param senderUsername Username de quem enviou
+ */
+export async function notifyFriendRequest(senderName: string, senderUsername: string): Promise<void> {
+  try {
+    // Envia notificação push (será salva automaticamente pelo listener)
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '👥 Nova Solicitação de Amizade',
+        body: `${senderName} (@${senderUsername}) quer ser seu amigo!`,
+        data: { 
+          type: 'FRIEND_REQUEST', 
+          senderName, 
+          senderUsername,
+        },
+        sound: true,
+        badge: 1,
+      },
+      trigger: null, // Envia imediatamente
+    });
+
+    console.log(`✅ Notificação de solicitação enviada: ${senderName}`);
+  } catch (error) {
+    console.error('❌ Erro ao notificar solicitação de amizade:', error);
+  }
 }
 
 // ==========================================

@@ -62,6 +62,7 @@ export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   BADGE_EARNED: '🏆',
   LEVEL_UP: '🎉',
   CHALLENGE_ASSIGNED: '🎯',
+  FRIEND_REQUEST: '👥',
 };
 
 // Cores por tipo de notificação
@@ -71,6 +72,7 @@ export const NOTIFICATION_COLORS: Record<NotificationType, string> = {
   BADGE_EARNED: '#FFD700',      // Dourado
   LEVEL_UP: '#9C27B0',          // Roxo
   CHALLENGE_ASSIGNED: '#4CAF50', // Verde
+  FRIEND_REQUEST: '#FF9500',    // Laranja
 };
 
 // ==========================================
