@@ -47,10 +47,10 @@ export const styles = StyleSheet.create({
 
   /**
    * Card de Badges (segundo card)
-   * Sem margin adicional (último elemento antes do fim do scroll)
+   * Com marginBottom consistente com outros cards
    */
   badgesCard: {
-    // Sem marginBottom - é o último card
+    marginBottom: 16,
   },
 
   // ==========================================
@@ -498,5 +498,95 @@ export const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     lineHeight: 20, // Adiciona altura de linha para melhor leitura
+  },
+
+  // ============================================================================
+  // HISTÓRICO DE RECOMPENSAS
+  // ============================================================================
+
+  /** Container do botão de histórico */
+  historyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginBottom: 16, // Consistente com outros cards
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+      },
+    }),
+  },
+
+  /** Container do conteúdo do botão */
+  historyButtonContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  /** Container circular do ícone */
+  historyButtonIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F0F9FF', // Azul muito claro
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+
+  /** Emoji dentro do círculo */
+  historyButtonEmoji: {
+    fontSize: 24,
+    ...Platform.select({
+      web: { userSelect: 'none' },
+    }),
+  },
+
+  /** Container do texto do botão */
+  historyButtonText: {
+    flex: 1,
+  },
+
+  /** Título do botão de histórico */
+  historyButtonTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 3,
+  },
+
+  /** Subtítulo do botão de histórico */
+  historyButtonSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
+  },
+
+  /** Seta do botão de histórico */
+  historyButtonArrow: {
+    fontSize: 24,
+    color: '#9CA3AF',
+    marginLeft: 12,
+    ...Platform.select({
+      web: { userSelect: 'none' },
+    }),
   },
 });

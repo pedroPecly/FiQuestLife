@@ -3,13 +3,13 @@
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { Avatar, BadgeItem, Card, InfoRow, StatBox } from '../../components/ui';
@@ -305,6 +305,29 @@ const ProfileScreen = () => {
             </View>
           )}
         </Card>
+
+        {/* BOTÃO: HISTÓRICO DE RECOMPENSAS */}
+        <TouchableOpacity
+          style={styles.historyButton}
+          onPress={() => router.push('/history' as any)}
+          accessible={true}
+          accessibilityLabel="Ver histórico de recompensas"
+          accessibilityRole="button"
+          accessibilityHint="Abre a tela com todo o histórico de XP, moedas e conquistas ganhas"
+        >
+          <View style={styles.historyButtonContent}>
+            <View style={styles.historyButtonIcon}>
+              <Text style={styles.historyButtonEmoji}>📜</Text>
+            </View>
+            <View style={styles.historyButtonText}>
+              <Text style={styles.historyButtonTitle}>Histórico de Recompensas</Text>
+              <Text style={styles.historyButtonSubtitle}>
+                Veja todas as recompensas que você ganhou
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.historyButtonArrow}>›</Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>

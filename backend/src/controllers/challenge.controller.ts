@@ -160,7 +160,7 @@ export const getAllChallengesController = async (c: Context) => {
       return c.json({ error: 'Unauthorized' }, 401);
     }
     
-    const userId = user.userId;
+    //const userId = user.userId;
 
     const challenges = await getAllChallenges();
 

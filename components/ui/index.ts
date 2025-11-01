@@ -16,8 +16,8 @@ export { NotificationBell } from './NotificationBell';
 export { NotificationFeed } from './NotificationFeed';
 export { NotificationItem } from './NotificationItem';
 export { ProfileAvatar } from './ProfileAvatar';
+export { RewardCard } from './RewardCard';
 export { SettingsMenuItem } from './SettingsMenuItem';
 export { StatBox } from './StatBox';
 export { Tag } from './Tag';
-
 

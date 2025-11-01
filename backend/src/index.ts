@@ -22,6 +22,7 @@ import authRoutes from './routes/auth.js';
 import badgeRoutes from './routes/badge.routes.js';
 import challengeRoutes from './routes/challenge.routes.js';
 import healthRoutes from './routes/health.js';
+import rewardRoutes from './routes/reward.js';
 import userRoutes from './routes/user.js';
 
 // Cria a aplicação (nosso servidor)
@@ -59,6 +60,8 @@ app.get('/', (c) => {
       badgesAll: '/badges/all - Todos os badges disponíveis (requer token)',
       badgesUser: '/badges/user - Badges conquistados (requer token)',
       badgesProgress: '/badges/progress - Progresso de badges (requer token)',
+      rewardHistory: '/rewards/history - Histórico de recompensas (requer token)',
+      rewardStats: '/rewards/stats - Estatísticas de recompensas (requer token)',
     },
     docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
     authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
@@ -80,6 +83,9 @@ app.route('/challenges', challengeRoutes);
 
 // Registra as rotas de badges (/badges/all, /badges/user, /badges/progress)
 app.route('/badges', badgeRoutes);
+
+// Registra as rotas de recompensas (/rewards/history, /rewards/stats)
+app.route('/rewards', rewardRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS

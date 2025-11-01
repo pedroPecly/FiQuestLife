@@ -36,12 +36,23 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - ✅ **Modal de Detalhes** - Informações completas de cada badge
 - ✅ **Badges em Destaque** - 5 badges mais recentes no perfil do usuário
 
+### **Histórico de Recompensas** 📜
+- ✅ **Tela Dedicada** com histórico completo
+- ✅ **Filtros Inteligentes** - Todos, XP, Moedas, Conquistas
+- ✅ **Estatísticas Agregadas** - Total de recompensas, XP, moedas, badges
+- ✅ **Animações Suaves** - Slide horizontal ao trocar filtros
+- ✅ **Paginação Infinita** - Scroll infinito com 20 itens por vez
+- ✅ **Pull-to-Refresh** - Atualize puxando para baixo
+- ✅ **20+ Fontes Mapeadas** - Descrições contextuais (desafios, level up, streaks, etc)
+- ✅ **Estados Vazios** - Mensagens específicas por filtro
+
 ### **Perfil e Estatísticas** 👤
 - ✅ **Perfil Completo** com avatar, nome, username
 - ✅ **Upload de Foto** via galeria ou câmera
 - ✅ **Stats de Gamificação:** Level, XP, Coins, Streak atual, Recorde de streak
 - ✅ **Badges Recentes** com scroll horizontal
 - ✅ **Edição de Perfil** profissional com validações
+- ✅ **Botão de Histórico** - Acesso rápido ao histórico de recompensas
 
 ### **Sistema de Notificações Push** 🔔
 - ✅ **5 Tipos de Notificações** implementadas
@@ -59,11 +70,12 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - ✅ **Validações:** Email, username único, senha forte
 
 ### **Interface Profissional** 🎨
-- ✅ **19 Componentes UI** reutilizáveis
-- ✅ **7 Telas Completas** - Login, Perfil, Editar Perfil, Desafios, Badges, Explorar, Configurações
+- ✅ **20 Componentes UI** reutilizáveis
+- ✅ **8 Telas Completas** - Login, Perfil, Editar Perfil, Desafios, Badges, Histórico, Explorar, Configurações
 - ✅ **Design Responsivo** (iOS/Android/Web)
 - ✅ **Navegação por Tabs** (5 tabs principais)
 - ✅ **Modal de Detalhes** integrado no BadgesScreen
+- ✅ **Animações Fluidas** com React Native Animated API
 - ✅ **Dark Mode Ready** (preparado para tema escuro)
 
 ### **Notificações e Engajamento** 🔔
@@ -113,6 +125,7 @@ FiQuestLife/
 │   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
 │   │   ├── ChallengesScreen.tsx # 🆕 Tela de desafios diários (Sprint 6)
 │   │   ├── BadgesScreen.tsx  # 🆕 Tela de badges/conquistas (Sprint 7)
+│   │   ├── RewardHistoryScreen.tsx # 🆕 Tela de histórico de recompensas (Sprint 10)
 │   │   └── EditProfileScreen.tsx # ✏️ Edição de perfil profissional
 │   ├── styles/                # 🎨 Estilos separados por tela
 │   │   ├── index.ts          # Barrel export
@@ -122,6 +135,8 @@ FiQuestLife/
 │   │   ├── settings.styles.ts # Estilos do SettingsScreen
 │   │   ├── challenges.styles.ts # 🆕 Estilos do ChallengesScreen
 │   │   ├── badges.styles.ts  # 🆕 Estilos do BadgesScreen
+│   │   ├── reward-history.styles.ts # 🆕 Estilos do RewardHistoryScreen (Sprint 10)
+│   │   ├── reward-card.styles.ts # 🆕 Estilos do RewardCard (Sprint 10)
 │   │   └── explore.styles.ts # 🆕 Estilos do ExploreScreen
 │   ├── _layout.tsx           # Layout raiz do app
 │   ├── index.tsx             # Rota inicial (redirect)
@@ -130,7 +145,7 @@ FiQuestLife/
 │   └── badges.tsx            # 🆕 Rota para BadgesScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 19 componentes de UI
+│   ├── ui/                   # 20 componentes de UI
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
@@ -148,6 +163,7 @@ FiQuestLife/
 │   │   ├── NotificationFeed.tsx # 🆕 Feed modal de notificações (Sprint 9)
 │   │   ├── NotificationItem.tsx # 🆕 Item individual de notificação (Sprint 9)
 │   │   ├── ProfileAvatar.tsx # 🆕 Avatar com upload de foto (galeria/câmera)
+│   │   ├── RewardCard.tsx    # 🆕 Card individual de recompensa (Sprint 10)
 │   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
 │   │   └── Tag.tsx           # Badge/Tag com ícone
@@ -176,6 +192,7 @@ FiQuestLife/
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
+│   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   └── notificationCenter.ts # 🆕 Histórico de notificações in-app (Sprint 9)
 │
@@ -2446,28 +2463,28 @@ User (1) ←→ (N) RewardHistory
 ### **Métricas do Projeto Atual** 📊
 
 **Código Implementado:**
-- **Frontend:** ~3916 linhas de código
-- **Backend:** ~1500 linhas de código
-- **Total Geral:** ~5416 linhas
-- **Componentes UI:** 16 componentes reutilizáveis
-- **Telas Completas:** 7 telas (Login, Profile, EditProfile, Challenges, Badges, Explore, Settings)
-- **Hooks Personalizados:** 5 hooks (useAlert, useImagePicker, useColorScheme, etc)
-- **Serviços API:** 3 serviços (auth, challenge, badge)
+- **Frontend:** ~5115 linhas de código (+1199 do Sprint 10)
+- **Backend:** ~1772 linhas de código (+272 do Sprint 10)
+- **Total Geral:** ~6887 linhas (+1471 do Sprint 10)
+- **Componentes UI:** 20 componentes reutilizáveis (+1 RewardCard)
+- **Telas Completas:** 8 telas (Login, Profile, EditProfile, Challenges, Badges, RewardHistory, Explore, Settings)
+- **Hooks Personalizados:** 5 hooks (useAlert, useImagePicker, useNotifications, useColorScheme, etc)
+- **Serviços API:** 4 serviços (auth, challenge, badge, reward)
 
 **Backend:**
-- **Controllers:** 4 (auth, health, challenge, badge)
-- **Services:** 2 (challenge, badge)
+- **Controllers:** 5 (auth, health, challenge, badge, reward)
+- **Services:** 3 (challenge, badge, reward)
 - **Models:** 8 tabelas no Prisma
 - **Migrations:** 6 migrations aplicadas
 - **Seeds:** 72 registros (29 badges + 43 desafios)
-- **Endpoints:** 15 endpoints REST
+- **Endpoints:** 18 endpoints REST (+3 do Sprint 10)
 
 **Progresso Geral:**
-- **Sprints Completos:** 8/15 (53%)
-- **Features Implementadas:** 17/25 (68%)
-- **Linhas de Código:** 5416/7000 (77%)
+- **Sprints Completos:** 10/15 (67%) ⬆️
+- **Features Implementadas:** 19/25 (76%) ⬆️
+- **Linhas de Código:** 6887/8000 (86%) ⬆️
 - **MVP Status:** 100% funcional ✅
-- **Completude Média:** 73%
+- **Completude Média:** 79% ⬆️
 
 ---
 
@@ -2492,8 +2509,41 @@ User (1) ←→ (N) RewardHistory
 - ✅ Tratamento de erro silencioso
 - ✅ Performance otimizada (apenas 5 badges carregados)
 
+### **Sprint 10 - Sistema de Histórico de Recompensas** ✅ COMPLETO (01/11/2025)
+- [x] Criar service layer de recompensas (backend/src/services/reward.service.ts - 161 linhas)
+- [x] Criar controller de recompensas (backend/src/controllers/reward.controller.ts - 82 linhas)
+- [x] Criar rotas de recompensas (backend/src/routes/reward.ts - 29 linhas)
+- [x] Implementar 3 endpoints REST (history, stats, recent)
+- [x] Criar RewardHistoryScreen (app/screens/RewardHistoryScreen.tsx - 382 linhas)
+- [x] Criar estilos separados (reward-history.styles.ts - 372 linhas, reward-card.styles.ts - 133 linhas)
+- [x] Criar componente RewardCard (components/ui/RewardCard.tsx - 73 linhas)
+- [x] Expandir serviço reward.ts (239 linhas - 20+ sources mapeados)
+- [x] Implementar filtros inteligentes (Todos, XP, Moedas, Conquistas)
+- [x] Adicionar animações de slide horizontal ao trocar filtros
+- [x] Implementar paginação infinita (20 itens por vez)
+- [x] Adicionar pull-to-refresh
+- [x] Criar 4 cards de estatísticas agregadas
+- [x] Implementar estados vazios contextuais por filtro
+- [x] Integrar botão "Ver Histórico" no ProfileScreen
+- [x] Corrigir bugs de filtros e animações
+- [x] Otimizar performance (React.memo, FlatList virtualization)
+
+**Arquivos Criados:**
+- ✅ `backend/src/services/reward.service.ts` (161 linhas)
+- ✅ `backend/src/controllers/reward.controller.ts` (82 linhas)
+- ✅ `backend/src/routes/reward.ts` (29 linhas)
+- ✅ `app/screens/RewardHistoryScreen.tsx` (382 linhas)
+- ✅ `app/styles/reward-history.styles.ts` (372 linhas)
+- ✅ `app/styles/reward-card.styles.ts` (133 linhas)
+- ✅ `components/ui/RewardCard.tsx` (73 linhas)
+
+**Total:** 1471 linhas implementadas | 7 arquivos criados | 6 arquivos modificados
+
 ### **Futuras Funcionalidades**
-- [ ] Tela de histórico de recompensas
+- [ ] Sistema de notificações in-app (histórico visual)
+- [ ] Gráficos de progresso (charts de XP/moedas ao longo do tempo)
+- [ ] Filtro por data no histórico (seletor de período)
+- [ ] Export de histórico (CSV/PDF)
 - [ ] Animação ao conquistar badge (confetti/lottie)
 - [ ] Sistema de amigos e ranking
 - [ ] Loja de itens com moedas
@@ -2629,6 +2679,191 @@ User (1) ←→ (N) RewardHistory
 - 📱 Multiplataforma (iOS/Android)
 
 ---
+
+### **01 de Novembro de 2025** 🆕
+
+#### **Sprint 10 - Sistema de Histórico de Recompensas - ✅ COMPLETO**
+
+**Backend - API de Histórico (272 linhas)**
+
+- ✅ **Service Layer** (`backend/src/services/reward.service.ts` - 161 linhas):
+  - `getRewardHistory()` - Busca histórico com filtros dinâmicos e paginação
+  - `getRewardStats()` - Estatísticas agregadas (totalXP, totalCoins, totalBadges, totalRewards)
+  - Suporte a filtros: `type` (XP/COINS/BADGE), `startDate`, `endDate`, `limit`, `offset`
+  - Paginação com flag `hasMore` para UI de scroll infinito
+  - Queries Prisma otimizadas com índices (userId, createdAt)
+  - Ordenação por data decrescente (mais recentes primeiro)
+  
+- ✅ **Controller** (`backend/src/controllers/reward.controller.ts` - 82 linhas):
+  - `GET /rewards/history` - Lista histórico completo com query params opcionais
+  - `GET /rewards/stats` - Retorna estatísticas totais do usuário
+  - `GET /rewards/recent` - Últimas 10 recompensas (atalho para UI)
+  - Todos os endpoints protegidos com `authMiddleware`
+  - Validação de tipos e tratamento de erros
+  
+- ✅ **Routes** (`backend/src/routes/reward.ts` - 29 linhas):
+  - Rotas REST organizadas
+  - Autenticação obrigatória em todas as rotas
+  - Query params tipados e validados
+
+**Frontend - Tela de Histórico (1199 linhas)**
+
+- ✅ **RewardHistoryScreen** (`app/screens/RewardHistoryScreen.tsx` - 382 linhas):
+  - Header simples com botão voltar circular (42x42, fundo branco)
+  - 4 Cards de estatísticas: Total de Recompensas, XP Ganho, Moedas Ganhas, Conquistas
+  - **Filtros inteligentes** com scroll horizontal:
+    * Todos, XP (⭐), Moedas (💰), Conquistas (🏆)
+    * Altura compacta (34px) para economizar espaço
+    * Estados ativo/inativo com cores distintas
+  - **Animações suaves** ao trocar filtros:
+    * Slide horizontal bidirecional (esquerda ↔ direita)
+    * Detecta direção baseado na ordem dos filtros
+    * 200ms slide out → carrega dados → 200ms slide in
+    * Animated API com useNativeDriver para 60fps
+    * Zero piscar - dados carregados durante animação
+  - **Lista paginada** com FlatList otimizada:
+    * Scroll infinito (20 itens por vez)
+    * Pull-to-refresh funcional
+    * Loading states (inicial, refresh, load more)
+    * windowSize: 10, removeClippedSubviews: true
+    * initialNumToRender: 15, maxToRenderPerBatch: 10
+  - **Estados vazios contextuais**:
+    * "Nenhuma recompensa encontrada" (filtro ALL)
+    * "Você ainda não ganhou XP" (filtro XP)
+    * "Você ainda não ganhou moedas" (filtro COINS)
+    * "Você ainda não conquistou badges" (filtro BADGE)
+  - **Error handling** com mensagem de erro e retry
+  - useFocusEffect para recarregar ao entrar na tela
+  - SafeAreaView com edges=['top'] (sem faixa inferior)
+  
+- ✅ **RewardCard Component** (`components/ui/RewardCard.tsx` - 73 linhas):
+  - Card individual de recompensa com layout profissional
+  - Ícone circular colorido por tipo (XP, COINS, BADGE)
+  - Nome da recompensa (fonte 15px, peso 600)
+  - Descrição contextual com source formatado
+  - Valor formatado: `+X XP`, `+X Moedas`, emoji de badge
+  - Data em português (ex: "01 Nov")
+  - Otimizado com React.memo para performance
+  - Acessibilidade completa (accessibilityLabel/Role)
+  - Sombras Platform.select para iOS/Android/Web
+  
+- ✅ **Estilos Organizados** (505 linhas):
+  - `app/styles/reward-history.styles.ts` (372 linhas):
+    * Seções comentadas: Container, Header, Stats, Filtros, Lista, Empty/Error
+    * Responsividade multiplataforma (iOS/Android/Web)
+    * Cores consistentes: #F0F8FF (Alice Blue)
+    * Sombras profissionais com Platform.select
+    * Gap e spacing padronizados (8px, 12px, 16px, 20px)
+  - `app/styles/reward-card.styles.ts` (133 linhas):
+    * Estilos separados do componente
+    * Layout flexível e responsivo
+    * Ícone circular 48x48 com cores por tipo
+    * Padding e margins consistentes
+  
+- ✅ **Serviço Expandido** (`services/reward.ts` - 239 linhas):
+  - `getRewardHistory(filters)` - Busca com URLSearchParams
+  - `getRewardStats()` - Estatísticas totais
+  - `getRecentRewards()` - Top 10 mais recentes
+  - **20+ Sources Mapeadas** em `getRewardSourceLabel()`:
+    * CHALLENGE_COMPLETION → "Desafio completado"
+    * LEVEL_MILESTONE → "Novo nível alcançado"
+    * DAILY_LOGIN → "Login diário"
+    * STREAK_BONUS → "Bônus de sequência"
+    * FIRST_CHALLENGE → "Primeiro desafio"
+    * BADGE_EARNED → "Conquista desbloqueada"
+    * CATEGORY_MASTER → "Mestre de categoria"
+    * WEEK_COMPLETION → "Semana completa"
+    * MONTH_MILESTONE → "Marco mensal"
+    * REFERRAL_BONUS → "Indicação de amigo"
+    * ACHIEVEMENT_UNLOCK → "Conquista desbloqueada"
+    * QUEST_COMPLETION → "Missão concluída"
+    * EVENT_PARTICIPATION → "Participação em evento"
+    * DAILY_STREAK → "Sequência diária"
+    * WEEKLY_CHALLENGE → "Desafio semanal"
+    * SPECIAL_EVENT → "Evento especial"
+    * BONUS_REWARD → "Recompensa bônus"
+    * MYSTERY_BOX → "Caixa misteriosa"
+    * LEVEL_UP_BONUS → "Bônus de nível"
+    * Fallback: Remove underscore e capitaliza (ex: "New Source")
+  - **Interfaces TypeScript completas**:
+    * RewardItem, RewardHistoryFilters, RewardHistoryResponse, RewardStats
+  - **Constantes exportadas**:
+    * REWARD_TYPE_ICONS: { XP: '⭐', COINS: '💰', BADGE: '🏆', ITEM: '🎁' }
+    * REWARD_TYPE_LABELS: { XP: 'Experiência', COINS: 'Moedas', ... }
+    * REWARD_TYPE_COLORS: { XP: '#20B2AA', COINS: '#FFD700', BADGE: '#FF6B6B', ... }
+
+**Integrações**
+
+- ✅ **ProfileScreen** atualizado:
+  - Botão "Ver Histórico" adicionado na seção de cards
+  - Navegação para `/screens/reward-history`
+  - Espaçamento consistente (marginBottom: 16)
+  
+- ✅ **Barrel Exports**:
+  - `components/ui/index.ts` - RewardCard exportado
+  - Facilita importações em toda a aplicação
+
+**Funcionalidades Implementadas**
+
+✅ Visualização completa do histórico de recompensas  
+✅ 4 filtros inteligentes (Todos, XP, Moedas, Conquistas)  
+✅ Animação de slide horizontal ao trocar filtros  
+✅ Scroll horizontal nos botões de filtro  
+✅ Estatísticas agregadas no topo (4 cards)  
+✅ Paginação infinita (20 itens por página)  
+✅ Pull-to-refresh funcional  
+✅ Estados vazios contextuais por filtro  
+✅ Loading states (inicial, refresh, load more)  
+✅ Error handling com retry  
+✅ Formatação de datas em português  
+✅ Cores por tipo de recompensa  
+✅ Performance otimizada (React.memo, FlatList virtualization)  
+✅ Acessibilidade completa  
+✅ Multiplataforma (iOS/Android/Web)  
+
+**Correções de Bugs**
+
+✅ **Filtros mostrando dados incorretos**:
+  - Problema: Estado `selectedFilter` não atualizado a tempo
+  - Solução: Passar filtro diretamente como parâmetro em handleFilterChange
+  
+✅ **Área invisível dos filtros ocupando espaço**:
+  - Problema: `filtersContainer` com paddingVertical muito grande
+  - Solução: Reduzir de 12px → 8px, adicionar flexGrow: 0, altura fixa 34px
+  
+✅ **Faixa estranha no final da tela**:
+  - Problema: SafeAreaView adicionando padding inferior
+  - Solução: Usar react-native-safe-area-context com edges={['top']}
+  
+✅ **Lista piscando ao trocar filtros**:
+  - Problema: useFocusEffect recarregando durante animação
+  - Solução: Remover selectedFilter das dependências, carregar dados manualmente
+
+**Métricas do Sprint 10**
+
+- 📦 **7 arquivos criados** (1471 linhas):
+  - 3 backend: service, controller, routes (272 linhas)
+  - 4 frontend: screen, 2 styles, component (1199 linhas)
+- 🔄 **6 arquivos modificados**:
+  - 1 backend: index.ts
+  - 5 frontend: reward.ts, ProfileScreen, profile.styles, index.ts
+- 🎨 **1 componente novo** (RewardCard com React.memo)
+- 🌐 **3 endpoints REST** (history, stats, recent)
+- 🔔 **4 filtros** com animações de transição
+- 📱 **Multiplataforma** (iOS/Android/Web)
+- ⚡ **Performance** otimizada (FlatList + Animated com useNativeDriver)
+
+**Dependências**
+
+Nenhuma nova dependência - apenas APIs nativas do React Native:
+- Animated API (animações 60fps)
+- FlatList (virtualização)
+- ScrollView (scroll horizontal)
+- SafeAreaView (react-native-safe-area-context)
+
+---
+
+### **27 de Outubro de 2025**
 
 #### **Sistema de Upload de Fotos de Perfil - ✅ COMPLETO**
 - ✅ Hook `useImagePicker.ts` implementado (177 linhas):
