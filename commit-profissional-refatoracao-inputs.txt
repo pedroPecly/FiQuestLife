@@ -1,9 +1,0 @@
-feat: refatoração profissional dos inputs para compatibilidade total cross-platform
-
-- Refatorado o componente `Input` (`components/ui/Input.tsx`) do zero, agora utilizando `forwardRef`, `TouchableWithoutFeedback`, controle de foco, anti-autofill, e estilização responsiva para iOS, Android e Web.
-- Corrigido o uso do `Input` em todos os lugares do app, incluindo `LoginScreen`, `EditProfileScreen` e `DateInput`, garantindo integração sem erros e experiência consistente.
-- `DateInput` atualizado para usar apenas props suportadas pelo novo `Input` e manter formatação automática de datas.
-- Todos os erros de tipagem e execução resolvidos após a refatoração.
-- Testado para evitar loops de foco, problemas de teclado e garantir usabilidade em dispositivos antigos (ex: J7 Prime) e iOS.
-
-Essa alteração resolve problemas históricos de foco, looping e autofill nos inputs, além de padronizar a experiência de digitação em todas as plataformas suportadas pelo app.
