@@ -251,74 +251,74 @@ FiQuestLife/
 
 ### **1. Pré-requisitos**
 - Node.js v20+
-- Conta no [Supabase](https://supabase.com) (PostgreSQL gratuito)
+- Conta no [Supabase](https://supabase.com)
 
 ### **2. Instalação**
 
 ```bash
-# Clone e instale dependências
 git clone https://github.com/pedroPecly/FiQuestLife.git
 cd FiQuestLife
 npm install
 cd backend && npm install && cd ..
 ```
 
-### **3. Configurar Backend**
+### **3. Configurar Variáveis de Ambiente**
 
-Crie `backend/.env` (use `.env.example` como base):
+O projeto usa 2 arquivos `.env` (frontend + backend):
 
-```env
-DATABASE_URL="postgresql://postgres:senha@db.projeto.supabase.co:5432/postgres"
-SUPABASE_URL=https://projeto.supabase.co
-SUPABASE_ANON_KEY=sua_chave
-JWT_SECRET=chave_secreta_aleatoria
-PORT=3000
+```bash
+# 1. Backend - Copie e edite com credenciais do Supabase
+cp backend/.env.example backend/.env
+
+# 2. Frontend - Copie e edite com seu IP local
+cp .env.example .env
 ```
 
-Sincronize o banco de dados:
+**Obter credenciais do Supabase:**
+- Crie um projeto em [supabase.com](https://supabase.com)
+- **Settings** → **API**: copie `Project URL` e chaves `anon`/`service_role`
+- **Settings** → **Database** → **Connection String**: copie a URI
+- Preencha `backend/.env` com essas credenciais
+
+**Configurar IP local no `.env` (raiz):**
+```bash
+# Windows: ipconfig | Mac/Linux: ifconfig
+# Substitua 192.168.1.100 pelo SEU IP
+EXPO_PUBLIC_API_URL=http://192.168.1.100:3000
+```
+
+### **4. Configurar Banco de Dados**
 
 ```bash
 cd backend
-npx prisma migrate deploy  # Aplica migrations
-npx prisma generate        # Gera Prisma Client
-npm run prisma:seed        # Popula badges e desafios
+npx prisma migrate deploy
+npx prisma generate
+npm run prisma:seed
 npm run prisma:seed-challenges
 cd ..
-```
-
-### **4. Configurar IP do Frontend**
-
-Descubra seu IP local e configure `services/api.ts`:
-
-```bash
-# Windows
-ipconfig  # Procure "Endereço IPv4"
-
-# Mac/Linux
-ifconfig
-```
-
-Edite `services/api.ts` e altere a linha 8:
-
-```typescript
-const API_URL = 'http://192.168.1.XXX:3000/api';  // Seu IP aqui
 ```
 
 ### **5. Rodar o Projeto**
 
 ```bash
 # Terminal 1 - Backend
-cd backend
-npm run dev
+cd backend && npm run dev
 
-# Terminal 2 - Frontend
+# Terminal 2 - Frontend  
 npx expo start
 ```
 
-Escaneie o QR Code com o app Expo Go (iOS/Android) ou pressione:
-- `a` para Android Emulator
-- `i` para iOS Simulator
-- `w` para Web
+Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
+
+---
+
+## 🔧 Troubleshooting
+
+**Network Error:** Backend rodando? IP correto no `.env`? Mesma rede Wi-Fi?  
+**Prisma Client not generated:** `cd backend && npx prisma generate`  
+**Can't reach database:** Verifique `DATABASE_URL` no `backend/.env`  
+**JWT must be provided:** Adicione `JWT_SECRET` no `backend/.env`  
+**Tela branca:** `npx expo start -c` (limpa cache)
 
 ---
 
