@@ -8,7 +8,7 @@
  */
 
 import type { Context } from 'hono';
-import * as friendService from '../services/friend.service';
+import * as friendService from '../services/friend.service.js';
 
 export const friendController = {
   /**
