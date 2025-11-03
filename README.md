@@ -342,10 +342,4 @@ Escaneie o QR Code com o app Expo Go (iOS/Android) ou pressione:
 
 ---
 
-## 📄 Licença
-
-MIT License - Veja o arquivo LICENSE para mais detalhes.
-
----
-
-**Desenvolvido com ❤️ por Pedro e equipe**
+**Desenvolvido com ❤️ por Pedro Pecly e Gabriel Purificate**
