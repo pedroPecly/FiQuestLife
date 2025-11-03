@@ -8,43 +8,43 @@ datasource db {
 }
 
 model User {
-  id                   String          @id @default(uuid())
-  email                String          @unique
-  username             String          @unique
-  name                 String
-  password             String
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
-  avatarUrl            String?         @map("avatar_url")
-  bio                  String?
-  coins                Int             @default(0)
-  currentStreak        Int             @default(0) @map("current_streak")
-  dailyReminderTime    String?         @map("daily_reminder_time")
-  lastActiveDate       DateTime?       @map("last_active_date")
-  level                Int             @default(1)
-  longestStreak        Int             @default(0) @map("longest_streak")
-  notificationsEnabled Boolean         @default(true) @map("notifications_enabled")
-  profilePublic        Boolean         @default(false) @map("profile_public")
-  xp                   Int             @default(0)
-  birthDate            DateTime        @map("birth_date")
-  userChallenges       UserChallenge[]
-  userBadges           UserBadge[]
-  rewardHistory        RewardHistory[]
-  sentFriendRequests   FriendRequest[]   @relation("SentRequests")
+  id                     String          @id @default(uuid())
+  email                  String          @unique
+  username               String          @unique
+  name                   String
+  password               String
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @updatedAt @map("updated_at")
+  avatarUrl              String?         @map("avatar_url")
+  bio                    String?
+  coins                  Int             @default(0)
+  currentStreak          Int             @default(0) @map("current_streak")
+  dailyReminderTime      String?         @map("daily_reminder_time")
+  lastActiveDate         DateTime?       @map("last_active_date")
+  level                  Int             @default(1)
+  longestStreak          Int             @default(0) @map("longest_streak")
+  notificationsEnabled   Boolean         @default(true) @map("notifications_enabled")
+  profilePublic          Boolean         @default(false) @map("profile_public")
+  xp                     Int             @default(0)
+  birthDate              DateTime        @map("birth_date")
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
-  friendshipsInitiated Friendship[]      @relation("FriendshipInitiator")
-  friendshipsReceived  Friendship[]      @relation("FriendshipReceiver")
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  friendshipsReceived    Friendship[]    @relation("FriendshipReceiver")
+  friendshipsInitiated   Friendship[]    @relation("FriendshipInitiator")
+  rewardHistory          RewardHistory[]
+  userBadges             UserBadge[]
+  userChallenges         UserChallenge[]
 
   @@map("users")
 }
 
 /// *
-///  * Tabela de desafios (catálogo)
-///  * 
-///  * Exemplos:
-///  * - "Beber 2L de água" (DAILY, HYDRATION, EASY)
-///  * - "Meditar por 10 minutos" (DAILY, MINDFULNESS, MEDIUM)
-///  * - "Ir à academia 3x na semana" (WEEKLY, PHYSICAL_ACTIVITY, HARD)
+/// * Tabela de desafios (catálogo)
+/// * 
+/// * Exemplos:
+/// * - "Beber 2L de água" (DAILY, HYDRATION, EASY)
+/// * - "Meditar por 10 minutos" (DAILY, MINDFULNESS, MEDIUM)
+/// * - "Ir à academia 3x na semana" (WEEKLY, PHYSICAL_ACTIVITY, HARD)
 model Challenge {
   id             String              @id @default(uuid())
   title          String
@@ -63,15 +63,15 @@ model Challenge {
 }
 
 /// *
-///  * Relação N:N entre User e Challenge
-///  * 
-///  * Cada registro representa um desafio atribuído a um usuário.
-///  * O mesmo usuário pode ter o mesmo desafio várias vezes
-///  * (ex: "Beber 2L de água" todos os dias)
-///  * 
-///  * Por isso temos @@unique([userId, challengeId, assignedAt])
-///  * - Garante que um usuário não tenha o mesmo desafio 2x no mesmo momento
-///  * - Mas permite ter o mesmo desafio em dias diferentes
+/// * Relação N:N entre User e Challenge
+/// * 
+/// * Cada registro representa um desafio atribuído a um usuário.
+/// * O mesmo usuário pode ter o mesmo desafio várias vezes
+/// * (ex: "Beber 2L de água" todos os dias)
+/// * 
+/// * Por isso temos @@unique([userId, challengeId, assignedAt])
+/// * - Garante que um usuário não tenha o mesmo desafio 2x no mesmo momento
+/// * - Mas permite ter o mesmo desafio em dias diferentes
 model UserChallenge {
   id          String          @id @default(uuid())
   userId      String          @map("user_id")
@@ -91,44 +91,44 @@ model UserChallenge {
 }
 
 /// *
-///  * Catálogo de Badges (Emblemas)
-///  * 
-///  * Define todos os badges disponíveis no sistema.
-///  * Exemplos:
-///  * - "Primeiro Passo" (BEGINNER, completar primeiro desafio)
-///  * - "Guerreiro Semanal" (CONSISTENCY, 7 dias de streak)
-///  * - "Mestre da Hidratação" (ACHIEVEMENT, completar 100 desafios de hidratação)
+/// * Catálogo de Badges (Emblemas)
+/// * 
+/// * Define todos os badges disponíveis no sistema.
+/// * Exemplos:
+/// * - "Primeiro Passo" (BEGINNER, completar primeiro desafio)
+/// * - "Guerreiro Semanal" (CONSISTENCY, 7 dias de streak)
+/// * - "Mestre da Hidratação" (ACHIEVEMENT, completar 100 desafios de hidratação)
 model Badge {
   id               String               @id @default(uuid())
   name             String               @unique
   description      String
   imageUrl         String               @map("image_url")
   category         BadgeCategory
+  rarity           BadgeRarity          @default(COMMON)
   requirementType  BadgeRequirementType @map("requirement_type")
   requirementValue Int                  @map("requirement_value")
-  rarity           BadgeRarity          @default(COMMON)
-  order            Int                  @default(0)
   isActive         Boolean              @default(true) @map("is_active")
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
+  order            Int                  @default(0)
   userBadges       UserBadge[]
 
   @@map("badges")
 }
 
 /// *
-///  * Relação N:N entre User e Badge
-///  * 
-///  * Registra quais badges o usuário conquistou.
-///  * Cada badge só pode ser conquistado uma vez por usuário.
+/// * Relação N:N entre User e Badge
+/// * 
+/// * Registra quais badges o usuário conquistou.
+/// * Cada badge só pode ser conquistado uma vez por usuário.
 model UserBadge {
   id          String   @id @default(uuid())
   userId      String   @map("user_id")
   badgeId     String   @map("badge_id")
   earnedAt    DateTime @default(now()) @map("earned_at")
   isDisplayed Boolean  @default(false) @map("is_displayed")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badge       Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
   @@index([userId])
@@ -137,15 +137,15 @@ model UserBadge {
 }
 
 /// *
-///  * Histórico de Recompensas
-///  * 
-///  * Registra todas as recompensas recebidas por completar desafios,
-///  * subir de nível, conquistar badges, etc.
-///  * 
-///  * Exemplos:
-///  * - +50 XP por completar desafio
-///  * - +20 moedas por completar desafio
-///  * - Badge "Primeiro Passo" desbloqueado
+/// * Histórico de Recompensas
+/// * 
+/// * Registra todas as recompensas recebidas por completar desafios,
+/// * subir de nível, conquistar badges, etc.
+/// * 
+/// * Exemplos:
+/// * - +50 XP por completar desafio
+/// * - +20 moedas por completar desafio
+/// * - Badge "Primeiro Passo" desbloqueado
 model RewardHistory {
   id          String     @id @default(uuid())
   userId      String     @map("user_id")
@@ -162,21 +162,21 @@ model RewardHistory {
 }
 
 /// *
-///  * Solicitações de Amizade
-///  * 
-///  * Registra todas as solicitações de amizade enviadas/recebidas.
-///  * Uma solicitação pode estar PENDING, ACCEPTED, REJECTED ou BLOCKED.
-///  * 
-///  * Quando ACCEPTED, cria um registro em Friendship.
+/// * Solicitações de Amizade
+/// * 
+/// * Registra todas as solicitações de amizade enviadas/recebidas.
+/// * Uma solicitação pode estar PENDING, ACCEPTED, REJECTED ou BLOCKED.
+/// * 
+/// * Quando ACCEPTED, cria um registro em Friendship.
 model FriendRequest {
-  id         String            @id @default(uuid())
-  senderId   String            @map("sender_id")
-  receiverId String            @map("receiver_id")
-  status     FriendshipStatus  @default(PENDING)
-  createdAt  DateTime          @default(now()) @map("created_at")
-  updatedAt  DateTime          @updatedAt @map("updated_at")
-  sender     User              @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver   User              @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  id         String           @id @default(uuid())
+  senderId   String           @map("sender_id")
+  receiverId String           @map("receiver_id")
+  status     FriendshipStatus @default(PENDING)
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+  receiver   User             @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User             @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@unique([senderId, receiverId])
   @@index([receiverId, status])
@@ -185,19 +185,19 @@ model FriendRequest {
 }
 
 /// *
-///  * Amizades Estabelecidas
-///  * 
-///  * Registra amizades confirmadas entre usuários.
-///  * Criado apenas quando uma FriendRequest é ACCEPTED.
-///  * 
-///  * Permite rastrear atividades dos amigos, ranking conjunto, etc.
+/// * Amizades Estabelecidas
+/// * 
+/// * Registra amizades confirmadas entre usuários.
+/// * Criado apenas quando uma FriendRequest é ACCEPTED.
+/// * 
+/// * Permite rastrear atividades dos amigos, ranking conjunto, etc.
 model Friendship {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  friendId    String   @map("friend_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  user        User     @relation("FriendshipInitiator", fields: [userId], references: [id], onDelete: Cascade)
-  friend      User     @relation("FriendshipReceiver", fields: [friendId], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  friendId  String   @map("friend_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  friend    User     @relation("FriendshipReceiver", fields: [friendId], references: [id], onDelete: Cascade)
+  user      User     @relation("FriendshipInitiator", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, friendId])
   @@index([userId])
@@ -206,8 +206,8 @@ model Friendship {
 }
 
 /// *
-///  * Categorias de desafios disponíveis
-///  * Organiza os desafios por área da vida
+/// * Categorias de desafios disponíveis
+/// * Organiza os desafios por área da vida
 enum ChallengeCategory {
   PHYSICAL_ACTIVITY
   NUTRITION
@@ -220,8 +220,8 @@ enum ChallengeCategory {
 }
 
 /// *
-///  * Níveis de dificuldade dos desafios
-///  * Determina XP e moedas ganhas
+/// * Níveis de dificuldade dos desafios
+/// * Determina XP e moedas ganhas
 enum ChallengeDifficulty {
   EASY
   MEDIUM
@@ -230,8 +230,8 @@ enum ChallengeDifficulty {
 }
 
 /// *
-///  * Frequência de repetição do desafio
-///  * Define como o desafio se repete
+/// * Frequência de repetição do desafio
+/// * Define como o desafio se repete
 enum ChallengeFrequency {
   DAILY
   WEEKLY
@@ -240,8 +240,8 @@ enum ChallengeFrequency {
 }
 
 /// *
-///  * Status do desafio para o usuário
-///  * Rastreia o progresso individual
+/// * Status do desafio para o usuário
+/// * Rastreia o progresso individual
 enum ChallengeStatus {
   PENDING
   IN_PROGRESS
@@ -251,8 +251,8 @@ enum ChallengeStatus {
 }
 
 /// *
-///  * Categorias de badges (emblemas)
-///  * Define o tipo/tema do badge
+/// * Categorias de badges (emblemas)
+/// * Define o tipo/tema do badge
 enum BadgeCategory {
   BEGINNER
   CONSISTENCY
@@ -263,8 +263,8 @@ enum BadgeCategory {
 }
 
 /// *
-///  * Tipo de requisito para desbloquear badge
-///  * Define qual condição deve ser cumprida
+/// * Tipo de requisito para desbloquear badge
+/// * Define qual condição deve ser cumprida
 enum BadgeRequirementType {
   CHALLENGES_COMPLETED
   STREAK_DAYS
@@ -276,8 +276,8 @@ enum BadgeRequirementType {
 }
 
 /// *
-///  * Raridade do badge
-///  * Determina o quão difícil é conseguir
+/// * Raridade do badge
+/// * Determina o quão difícil é conseguir
 enum BadgeRarity {
   COMMON
   RARE
@@ -286,8 +286,8 @@ enum BadgeRarity {
 }
 
 /// *
-///  * Tipos de recompensas disponíveis
-///  * Define o que o usuário ganha
+/// * Tipos de recompensas disponíveis
+/// * Define o que o usuário ganha
 enum RewardType {
   XP
   COINS
@@ -296,8 +296,8 @@ enum RewardType {
 }
 
 /// *
-///  * Status de solicitação de amizade
-///  * Define o estado atual da solicitação
+/// * Status de solicitação de amizade
+/// * Define o estado atual da solicitação
 enum FriendshipStatus {
   PENDING
   ACCEPTED
