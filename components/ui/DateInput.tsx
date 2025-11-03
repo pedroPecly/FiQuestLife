@@ -21,10 +21,6 @@ interface DateInputProps {
   placeholder?: string;
   /** Se o input está desabilitado */
   editable?: boolean;
-  /** Tipo de retorno do teclado */
-  returnKeyType?: 'done' | 'next' | 'search' | 'send' | 'go';
-  /** Callback ao pressionar Enter */
-  onSubmitEditing?: () => void;
 }
 
 /**
@@ -50,8 +46,6 @@ export const DateInput: React.FC<DateInputProps> = ({
   onChangeText,
   placeholder = 'Data (DD/MM/YYYY)',
   editable = true,
-  returnKeyType = 'next',
-  onSubmitEditing,
 }) => {
   /**
    * Formata a data automaticamente enquanto o usuário digita
@@ -83,10 +77,10 @@ export const DateInput: React.FC<DateInputProps> = ({
       value={value}
       onChangeText={handleChangeText}
       editable={editable}
-      returnKeyType={returnKeyType}
-      onSubmitEditing={onSubmitEditing}
       keyboardType="numeric"
       maxLength={10}
+      autoComplete="off"
+      autoCorrect={false}
     />
   );
 };

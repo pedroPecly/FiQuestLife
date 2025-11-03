@@ -23,15 +23,15 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SimpleHeader } from '../../components/layout';
 import { AlertModal } from '../../components/ui';
@@ -421,7 +421,6 @@ export const EditProfileScreen = () => {
                 value={birthDate}
                 onChangeText={setBirthDate}
                 placeholder="DD/MM/AAAA"
-                returnKeyType="done"
               />
               {birthDateError ? <Text style={styles.errorText}>{birthDateError}</Text> : null}
             </View>

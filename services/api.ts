@@ -19,7 +19,7 @@ import { authStorage } from './auth';
 // Se o login parar de funcionar, atualize o .env com seu IP atual:
 // Windows: Execute 'ipconfig' no terminal e procure por "Endereço IPv4"
 // Mac/Linux: Execute 'ifconfig' ou 'ip addr show'
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.6:3000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.2:3000';
 
 // Log para debug (remove em produção)
 console.log('🌐 API URL configurada:', API_URL);

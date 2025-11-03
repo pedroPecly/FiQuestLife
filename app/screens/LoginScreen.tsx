@@ -5,13 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { AlertModal } from '../../components/ui/AlertModal';
@@ -272,14 +272,16 @@ const LoginScreen = () => {
   return (
     <KeyboardAvoidingView 
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <StatusBar barStyle="dark-content" />
       
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={false}
       >
         <Header showNotifications={false} />
 
@@ -301,11 +303,11 @@ const LoginScreen = () => {
           placeholder={isLogin ? "Email ou nome de usuário" : "Seu e-mail"}
           keyboardType={isLogin ? "default" : "email-address"}
           autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect={false}
           value={isLogin ? identifier : email}
           onChangeText={isLogin ? setIdentifier : setEmail}
           editable={!loading}
-          returnKeyType="next"
-          onSubmitEditing={isLogin ? () => {} : undefined}
         />
 
         {!isLogin && (
@@ -314,22 +316,24 @@ const LoginScreen = () => {
               icon="account-outline"
               placeholder="Nome de usuário (letras, números e _)"
               autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
+              textContentType="none"
               value={username}
               onChangeText={setUsername}
               editable={!loading}
-              returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
 
             <Input
               icon="card-account-details-outline"
               placeholder="Nome completo (obrigatório)"
               autoCapitalize="words"
+              autoComplete="off"
+              autoCorrect={false}
+              textContentType="none"
               value={name}
               onChangeText={setName}
               editable={!loading}
-              returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
 
             <DateInput
@@ -337,8 +341,6 @@ const LoginScreen = () => {
               onChangeText={setBirthDate}
               placeholder="Data de nascimento (DD/MM/YYYY) - obrigatório"
               editable={!loading}
-              returnKeyType="next"
-              onSubmitEditing={() => {}}
             />
           </>
         )}
@@ -347,11 +349,11 @@ const LoginScreen = () => {
           icon="lock-outline"
           placeholder={isLogin ? "Sua senha" : "Sua senha (mínimo 6 caracteres)"}
           secureTextEntry
+          autoComplete="off"
+          autoCorrect={false}
           value={password}
           onChangeText={setPassword}
           editable={!loading}
-          returnKeyType={isLogin ? "done" : "next"}
-          onSubmitEditing={isLogin ? handleLogin : undefined}
         />
 
         {!isLogin && (
@@ -359,11 +361,11 @@ const LoginScreen = () => {
             icon="lock-check-outline"
             placeholder="Confirme sua senha"
             secureTextEntry
+            autoComplete="off"
+            autoCorrect={false}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             editable={!loading}
-            returnKeyType="done"
-            onSubmitEditing={handleRegister}
           />
         )}
 
