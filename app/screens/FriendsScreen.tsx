@@ -3,8 +3,10 @@ import {
     FriendCard,
     FriendRequestCard,
     LoadingScreen,
+    TabBar,
     UserSearchCard,
 } from '@/components/ui';
+import type { Tab } from '@/components/ui/TabBar';
 import type { Friend, FriendRequest, UserSearchResult } from '@/services/friend';
 import { friendService } from '@/services/friend';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -200,62 +202,33 @@ export default function FriendsScreen() {
     });
   };
 
-  // Render tabs
-  const renderTabs = () => (
-    <View style={styles.tabs}>
-      <TouchableOpacity
-        style={[styles.tab, activeTab === 'search' && styles.tabActive]}
-        onPress={() => setActiveTab('search')}
-      >
-        <MaterialCommunityIcons
-          name="account-search"
-          size={20}
-          color={activeTab === 'search' ? '#007AFF' : '#8E8E93'}
-        />
-        <Text style={[styles.tabText, activeTab === 'search' && styles.tabTextActive]}>
-          Buscar
-        </Text>
-      </TouchableOpacity>
+  // Configuração das tabs
+  const tabs: Tab[] = [
+    { 
+      id: 'search', 
+      label: 'Buscar', 
+      icon: 'account-search'
+    },
+    { 
+      id: 'requests', 
+      label: 'Solicitações', 
+      icon: 'account-clock',
+      badge: pendingRequests.length,
+      badgeColor: pendingRequests.length > 0 ? 'alert' : undefined
+    },
+    { 
+      id: 'friends', 
+      label: 'Amigos', 
+      icon: 'account-group',
+      badge: friendsCount > 0 ? friendsCount : undefined
+    }
+  ];
 
-      <TouchableOpacity
-        style={[styles.tab, activeTab === 'requests' && styles.tabActive]}
-        onPress={() => setActiveTab('requests')}
-      >
-        <MaterialCommunityIcons
-          name="account-clock"
-          size={20}
-          color={activeTab === 'requests' ? '#007AFF' : '#8E8E93'}
-        />
-        <Text style={[styles.tabText, activeTab === 'requests' && styles.tabTextActive]}>
-          Solicitações
-        </Text>
-        {pendingRequests.length > 0 && (
-          <View style={styles.badgeAlert}>
-            <Text style={styles.badgeText}>{pendingRequests.length}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+  // Handler para mudança de tab
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId as TabType);
+  };
 
-      <TouchableOpacity
-        style={[styles.tab, activeTab === 'friends' && styles.tabActive]}
-        onPress={() => setActiveTab('friends')}
-      >
-        <MaterialCommunityIcons
-          name="account-group"
-          size={20}
-          color={activeTab === 'friends' ? '#007AFF' : '#8E8E93'}
-        />
-        <Text style={[styles.tabText, activeTab === 'friends' && styles.tabTextActive]}>
-          Amigos
-        </Text>
-        {friendsCount > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{friendsCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    </View>
-  );
 
   // Render Friends List
   const renderFriendsList = () => (
@@ -439,7 +412,12 @@ export default function FriendsScreen() {
         subtitle="Conecte-se com outros aventureiros! 👥"
         showNotifications={false}
       />
-      {renderTabs()}
+      <TabBar 
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        variant="primary"
+      />
       <View style={styles.content}>
         {activeTab === 'search' && renderSearch()}
         {activeTab === 'requests' && renderRequestsList()}
@@ -456,58 +434,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  tab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-  },
-  tabActive: {
-    backgroundColor: '#E3F2FF',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#8E8E93',
-  },
-  tabTextActive: {
-    color: '#007AFF',
-  },
-  badge: {
-    backgroundColor: '#007AFF',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  badgeAlert: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
   },
   subTabs: {
     flexDirection: 'row',

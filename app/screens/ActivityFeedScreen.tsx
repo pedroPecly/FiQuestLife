@@ -1,5 +1,6 @@
 import { Header } from '@/components/layout';
-import { ActivityFeedItem, LoadingScreen } from '@/components/ui';
+import { ActivityFeedItem, FilterBar, LoadingScreen } from '@/components/ui';
+import type { Filter } from '@/components/ui/FilterBar';
 import type { FriendActivity } from '@/services/friend';
 import { friendService } from '@/services/friend';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,7 +12,6 @@ import {
     SafeAreaView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native';
 import { showAlert } from '../../utils/dialog';
@@ -91,34 +91,18 @@ export default function ActivityFeedScreen() {
     }
   };
 
-  const renderFilter = (
-    filter: FilterType,
-    label: string,
-    icon: 'view-dashboard' | 'trophy' | 'medal' | 'gift'
-  ) => (
-    <TouchableOpacity
-      style={[styles.filterButton, activeFilter === filter && styles.filterButtonActive]}
-      onPress={() => setActiveFilter(filter)}
-    >
-      <MaterialCommunityIcons
-        name={icon}
-        size={18}
-        color={activeFilter === filter ? '#FFFFFF' : '#8E8E93'}
-      />
-      <Text style={[styles.filterText, activeFilter === filter && styles.filterTextActive]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  // Configuração dos filtros
+  const filters: Filter[] = [
+    { id: 'all', label: 'Todos', icon: 'view-dashboard' },
+    { id: 'challenges', label: 'Desafios', icon: 'trophy' },
+    { id: 'badges', label: 'Badges', icon: 'medal' },
+    { id: 'rewards', label: 'Recompensas', icon: 'gift' }
+  ];
 
-  const renderFilters = () => (
-    <View style={styles.filters}>
-      {renderFilter('all', 'Todos', 'view-dashboard')}
-      {renderFilter('challenges', 'Desafios', 'trophy')}
-      {renderFilter('badges', 'Badges', 'medal')}
-      {renderFilter('rewards', 'Recompensas', 'gift')}
-    </View>
-  );
+  // Handler para mudança de filtro
+  const handleFilterChange = (filterId: string) => {
+    setActiveFilter(filterId as FilterType);
+  };
 
   const renderFooter = () => {
     if (!loadingMore) return null;
@@ -138,7 +122,12 @@ export default function ActivityFeedScreen() {
     <SafeAreaView style={styles.container}>
       <Header title="Feed de Atividades" />
 
-      {renderFilters()}
+      <FilterBar 
+        filters={filters}
+        activeFilter={activeFilter}
+        onFilterChange={handleFilterChange}
+        variant="pills"
+      />
 
       <FlatList
         data={activities}
@@ -169,35 +158,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F2F2F7',
-  },
-  filters: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 8,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F2F2F7',
-  },
-  filterButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#8E8E93',
-  },
-  filterTextActive: {
-    color: '#FFFFFF',
   },
   listContent: {
     paddingVertical: 12,

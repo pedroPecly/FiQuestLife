@@ -43,7 +43,7 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Controle de privacidade de perfis
 
 ### **🎨 Interface**
-- 30+ componentes reutilizáveis
+- 32+ componentes reutilizáveis (+2 Sprint 13: TabBar, FilterBar)
 - 12 telas completas e responsivas
 - Design iOS/Android/Web
 - Safe area handling e estados vazios padronizados
@@ -110,18 +110,21 @@ FiQuestLife/
 │   └── badges.tsx            # 🆕 Rota para BadgesScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 27 componentes de UI (+7 Sprint 11)
+│   ├── ui/                   # 32 componentes de UI (+5 Sprint 13)
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── ActivityFeedItem.tsx # 🆕 Item de atividade de amigo (Sprint 11)
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
 │   │   ├── BadgeCard.tsx     # 🆕 Card de badge/conquista com progresso (Sprint 7)
+│   │   ├── BadgeDetailModal.tsx # 🆕 Modal de detalhes do badge
 │   │   ├── BadgeItem.tsx     # 🆕 Item de badge reutilizável (2 variantes: full/mini)
 │   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Card.tsx          # Container com sombra e padding
 │   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com badges e botão de completar
 │   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── EmptyState.tsx    # 🆕 Estado vazio genérico reutilizável (Sprint 11)
+│   │   ├── FeedActivityCard.tsx # 🆕 Card de atividade do feed (Sprint 12)
+│   │   ├── FilterBar.tsx     # 🆕 Barra de filtros horizontal reutilizável (Sprint 13)
 │   │   ├── FriendCard.tsx    # 🆕 Card de amigo com stats (Sprint 11)
 │   │   ├── FriendRequestCard.tsx # 🆕 Card de solicitação de amizade (Sprint 11)
 │   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
@@ -136,12 +139,14 @@ FiQuestLife/
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
 │   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
+│   │   ├── TabBar.tsx        # 🆕 Sistema de abas horizontal reutilizável (Sprint 13)
 │   │   ├── Tag.tsx           # Badge/Tag com ícone
 │   │   ├── UserSearchCard.tsx # 🆕 Card de resultado de busca de usuário (Sprint 11)
 │   │   └── UserStatsRow.tsx  # 🆕 Linha de stats do usuário reutilizável (Sprint 11)
 │   └── layout/
 │       ├── index.ts          # Barrel export
-│       └── Header.tsx        # Cabeçalho do app com NotificationBell
+│       ├── Header.tsx        # Cabeçalho do app com NotificationBell
+│       └── SimpleHeader.tsx  # 🆕 Cabeçalho simples sem notificações (Sprint 12)
 │
 ├── hooks/                     # 🎣 Hooks Personalizados
 │   ├── useAlert.ts           # Hook para gerenciamento de alertas
@@ -164,6 +169,7 @@ FiQuestLife/
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
+│   ├── feed.ts               # 🆕 Serviço de feed social (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
 │   ├── notificationCenter.ts # 🆕 Histórico de notificações in-app (Sprint 9)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
@@ -183,24 +189,29 @@ FiQuestLife/
 │   │   │   ├── badge.controller.ts      # 🆕 Gerenciamento de badges (3 endpoints)
 │   │   │   ├── challenge.controller.ts  # 🆕 Gerenciamento de desafios (4 endpoints)
 │   │   │   ├── friend.controller.ts     # 🆕 Gerenciamento de amigos (12 endpoints - Sprint 11)
-│   │   │   └── health.controller.ts     # Health check
+│   │   │   ├── health.controller.ts     # Health check
+│   │   │   └── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
 │   │   ├── services/         # 🔧 Lógica de Negócio
 │   │   │   ├── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
 │   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
-│   │   │   └── friend.service.ts        # 🆕 12 funções de amigos (530 linhas - Sprint 11)
+│   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (530 linhas - Sprint 11)
+│   │   │   └── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
 │   │   ├── routes/           # 🛣️ Definição de rotas
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
 │   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
 │   │   │   ├── friend.routes.ts         # 🆕 Rotas de amigos (protegidas - Sprint 11)
 │   │   │   ├── health.ts                # Health check
+│   │   │   ├── reward.ts                # 🆕 Rotas de recompensas (protegidas - Sprint 10)
 │   │   │   └── user.ts                  # Rotas de usuário (protegidas)
 │   │   ├── middlewares/      # 🔒 Middlewares
 │   │   │   ├── auth.middleware.ts       # Validação JWT
-│   │   │   └── error.middleware.ts      # Tratamento de erros
+│   │   │   ├── error.middleware.ts      # Tratamento de erros
+│   │   │   └── rate-limit.middleware.ts # 🆕 Rate limiting (5 limiters - Sprint 12)
 │   │   ├── lib/              # 🔧 Clientes e utilitários
 │   │   │   ├── prisma.ts                # Prisma Client
-│   │   │   └── supabase.ts              # Supabase Client
+│   │   │   ├── supabase.ts              # Supabase Client
+│   │   │   └── validation.ts            # 🆕 Validação UUID e sanitização (Sprint 12)
 │   │   └── index.ts          # Entry point do servidor (rotas registradas)
 │   ├── prisma/
 │   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (10 models)
