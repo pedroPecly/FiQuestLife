@@ -1,5 +1,5 @@
 import { FriendshipStatus } from '@prisma/client';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import { validateSearchTerm } from '../utils/validation';
 
 const MAX_FRIENDS = 500;
