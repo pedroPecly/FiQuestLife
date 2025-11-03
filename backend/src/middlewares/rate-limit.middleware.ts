@@ -83,7 +83,7 @@ export function rateLimit(options: {
     c.header('X-RateLimit-Remaining', (max - store[key].count).toString());
     c.header('X-RateLimit-Reset', store[key].resetTime.toString());
 
-    await next();
+    return await next();
   };
 }
 
