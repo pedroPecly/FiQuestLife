@@ -9,7 +9,7 @@ import type { Friend, FriendRequest, UserSearchResult } from '@/services/friend'
 import { friendService } from '@/services/friend';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -266,8 +266,8 @@ export default function FriendsScreen() {
         <FriendCard
           friend={item}
           onPress={() => {
-            // TODO: Navigate to friend profile
-            console.log('Open friend profile:', item.id);
+            // @ts-ignore
+            router.push(`/user-profile?userId=${item.id}`);
           }}
           onRemove={() => handleRemoveFriend(item.id, item.name)}
         />
@@ -316,15 +316,22 @@ export default function FriendsScreen() {
         <FlatList
           data={currentRequests}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <FriendRequestCard
-              request={item}
-              type={requestsSubTab}
-              onAccept={() => handleAcceptRequest(item.id)}
-              onReject={() => handleRejectRequest(item.id)}
-              onCancel={() => handleCancelRequest(item.id)}
-            />
-          )}
+          renderItem={({ item }) => {
+            const userId = requestsSubTab === 'received' ? item.sender?.id : item.receiver?.id;
+            return (
+              <FriendRequestCard
+                request={item}
+                type={requestsSubTab}
+                onAccept={() => handleAcceptRequest(item.id)}
+                onReject={() => handleRejectRequest(item.id)}
+                onCancel={() => handleCancelRequest(item.id)}
+                onPress={userId ? () => {
+                  // @ts-ignore
+                  router.push(`/user-profile?userId=${userId}`);
+                } : undefined}
+              />
+            );
+          }}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
@@ -394,8 +401,8 @@ export default function FriendsScreen() {
             user={item}
             onAddFriend={() => handleSendRequest(item.id)}
             onPress={() => {
-              // TODO: Navigate to user profile
-              console.log('Open user profile:', item.id);
+              // @ts-ignore
+              router.push(`/user-profile?userId=${item.id}`);
             }}
           />
         )}
@@ -445,7 +452,7 @@ export default function FriendsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F8FF', // Fundo padrão do sistema
   },
   content: {
     flex: 1,
@@ -507,7 +514,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     gap: 12,
-    backgroundColor: '#FFFFFF',
   },
   subTab: {
     flex: 1,

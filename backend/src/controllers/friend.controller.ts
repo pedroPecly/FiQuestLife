@@ -256,15 +256,24 @@ export const friendController = {
       const limit = parseInt(c.req.query('limit') || '20', 10);
       const offset = parseInt(c.req.query('offset') || '0', 10);
 
+      console.log('[FEED] Buscando atividades - userId:', userId, 'limit:', limit, 'offset:', offset);
+
       const activities = await friendService.getFriendActivity(userId, limit, offset);
+
+      console.log('[FEED] Atividades encontradas:', activities.length);
 
       return c.json({
         success: true,
         data: activities,
       });
     } catch (error: any) {
-      console.error('Erro ao buscar atividades:', error);
-      return c.json({ success: false, message: error.message || 'Erro ao buscar atividades' }, 500);
+      console.error('[FEED] Erro ao buscar atividades:', error);
+      console.error('[FEED] Stack:', error.stack);
+      return c.json({ 
+        success: false, 
+        message: error.message || 'Erro ao buscar atividades',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }, 500);
     }
   },
 

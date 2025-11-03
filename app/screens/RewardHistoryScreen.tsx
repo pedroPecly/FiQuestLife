@@ -14,22 +14,22 @@
  */
 
 import { styles } from '@/app/styles/reward-history.styles';
+import { SimpleHeader } from '@/components/layout';
 import { LoadingScreen } from '@/components/ui';
 import { RewardCard } from '@/components/ui/RewardCard';
 import type { RewardItem, RewardStats, RewardType } from '@/services/reward';
 import { getRewardHistory, getRewardStats } from '@/services/reward';
 import { useFocusEffect } from '@react-navigation/native';
-import { router } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Animated,
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Animated,
+    FlatList,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -233,21 +233,10 @@ export default function RewardHistoryScreen() {
   const emptyState = getEmptyStateContent();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container}>
       {/* HEADER SIMPLES */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          accessible={true}
-          accessibilityLabel="Voltar"
-          accessibilityRole="button"
-        >
-          <Text style={styles.backButtonText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Histórico</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <SimpleHeader title="Histórico" />
+
 
       {/* ESTADO DE ERRO */}
       {error && !refreshing && (

@@ -15,7 +15,7 @@ export const Card: React.FC<CardProps> = ({ children, style, ...props }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: '100%',
+    alignSelf: 'stretch', // Usa stretch ao invés de width: 100%
     maxWidth: 500,
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    alignItems: 'center',
+    alignItems: 'center', // Volta para center (ProfileScreen precisa)
     ...(Platform.OS === 'web' && {
       boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
     }),

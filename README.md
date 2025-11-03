@@ -46,27 +46,54 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - ✅ **20+ Fontes Mapeadas** - Descrições contextuais (desafios, level up, streaks, etc)
 - ✅ **Estados Vazios** - Mensagens específicas por filtro
 
-### **Sistema de Amigos** 👥 ⭐ NOVO!
+### **Feed Social** 🌐 ⭐ NOVO!
+- ✅ **Timeline de Atividades** - Veja em tempo real o que seus amigos estão fazendo
+- ✅ **4 Tipos de Atividades:** Desafios Completados, Badges Conquistados, Level Up, Streak Milestones
+- ✅ **Cards Informativos** com avatar, nome, timestamp relativo e metadados contextuais
+- ✅ **Paginação Infinita** - Scroll infinito carregando 20 atividades por vez
+- ✅ **Pull-to-Refresh** - Atualize o feed puxando para baixo
+- ✅ **Navegação Integrada** - Clique em qualquer usuário para ver perfil completo
+- ✅ **Estados Inteligentes** - Loading skeleton, empty state com onboarding, footer de carregamento
+- ✅ **Filtro de 7 Dias** - Apenas atividades recentes para feed relevante
+- ✅ **Metadados Ricos** - Categoria de desafio (💪🥗💧), raridade de badge (cores), dias de streak
+
+### **Perfis Públicos** 👤 ⭐ NOVO!
+- ✅ **Visualização de Perfis** - Veja perfis completos de outros usuários
+- ✅ **Controle de Privacidade** - Perfis privados bloqueados automaticamente com mensagem
+- ✅ **Estatísticas Completas** - Level, XP, Streak, Desafios, Badges, Amigos com contagem correta
+- ✅ **Badges Recentes** - Últimos 6 badges conquistados com scroll horizontal
+- ✅ **Desafios Recentes** - Últimos 5 desafios completados com categoria e recompensa
+- ✅ **Amigos em Comum** - Contador de conexões mútuas
+- ✅ **Botões Contextuais** - Adicionar/Remover/Pendente baseado no relacionamento
+- ✅ **4 Estados Gerenciados** - Loading, Erro (404), Privado (403), Sucesso
+- ✅ **Navegação Recursiva** - Explore perfis de amigos de amigos infinitamente
+
+### **Sistema de Amigos** 👥
 - ✅ **Busca de Usuários** - Busca inteligente por @username ou nome (debounce 500ms, mínimo 2 caracteres)
 - ✅ **Solicitações de Amizade** - Sistema completo de enviar, aceitar, rejeitar e cancelar
 - ✅ **Lista de Amigos** - Visualização com stats (level, XP, streak atual, moedas)
 - ✅ **Status Dinâmicos** - Amigos, Pendente, Enviado, Bloqueado (calculado no backend)
-- ✅ **Perfil de Amigos** - Tela dedicada com 4 StatBoxes, data de amizade, amigos em comum
-- ✅ **Feed de Atividades** - Timeline de desafios, badges e recompensas dos amigos
-- ✅ **Filtros de Feed** - Todos, Desafios, Badges, Recompensas (4 filtros com ícones)
-- ✅ **Paginação Infinita** - Scroll infinito com 20 atividades por vez
-- ✅ **Pull-to-Refresh** - Atualização em todas as telas
 - ✅ **Validações Robustas** - Limite de 500 amigos, não duplicar, bloqueio
 - ✅ **3 Tabs Organizadas** - Buscar, Solicitações (Recebidas/Enviadas), Amigos
 - ✅ **Amigos em Comum** - Visualização de conexões mútuas (scroll horizontal)
 - ✅ **Notificações Visuais** - Badge vermelho na tab para solicitações pendentes
-- ✅ **Navegação Recursiva** - Explorar perfis de amigos de amigos
 - ✅ **Estados Vazios** - Mensagens contextuais e onboarding
 - ✅ **12 Endpoints REST** - API completa de amizades
 - ✅ **Amizade Bidirecional** - Sistema otimizado com dois registros (performance)
+- ✅ **Navegação para Perfis** - Clique em amigos/buscas abre perfil público completo
+
+### **Leaderboard e Rankings** 🏆 ⭐ NOVO!
+- ✅ **Ranking de Amigos** - Compare-se com seus amigos
+- ✅ **Ranking Global** - Veja os top 100 usuários do app
+- ✅ **3 Tipos de Ordenação:** XP Total, Streak Atual, Desafios Completados
+- ✅ **Posição Destacada** - Sua posição marcada automaticamente
+- ✅ **Estatísticas Completas** - Level, XP, Streaks, Desafios para cada entrada
+- ✅ **Filtros Dinâmicos** - Troque entre tipos via query params
+- ✅ **Limites Configuráveis** - 50 amigos padrão, 100 global padrão
+- ✅ **2 Endpoints REST** - /leaderboard/friends e /leaderboard/global
 
 ### **Perfil e Estatísticas** 👤
-- ✅ **Perfil Completo** com avatar, nome, username
+- ✅ **Perfil Pessoal Completo** com avatar, nome, username
 - ✅ **Upload de Foto** via galeria ou câmera
 - ✅ **Stats de Gamificação:** Level, XP, Coins, Streak atual, Recorde de streak
 - ✅ **Badges Recentes** com scroll horizontal
@@ -87,15 +114,27 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - ✅ **JWT Authentication** com refresh automático
 - ✅ **Senhas criptografadas** com bcrypt
 - ✅ **Validações:** Email, username único, senha forte
+- ✅ **Rate Limiting** - Proteção contra spam e ataques de força bruta ⭐ NOVO!
+  - 5 limiters configurados (Geral, Amizade, Busca, Feed, Login)
+  - Headers HTTP padrão (X-RateLimit-Limit, Remaining, Reset)
+  - Response 429 com tempo de retry
+  - Cleanup automático de store in-memory
+- ✅ **Validação de UUIDs** - Regex v4 previne SQL injection ⭐ NOVO!
+- ✅ **Sanitização de Input** - Remove caracteres perigosos em buscas ⭐ NOVO!
+- ✅ **Controle de Privacidade** - Perfis privados bloqueados sem expor dados ⭐ NOVO!
 
 ### **Interface Profissional** 🎨
-- ✅ **20 Componentes UI** reutilizáveis
-- ✅ **8 Telas Completas** - Login, Perfil, Editar Perfil, Desafios, Badges, Histórico, Explorar, Configurações
+- ✅ **30+ Componentes UI** reutilizáveis (3 novos no Sprint 12)
+- ✅ **10+ Telas Completas** - Login, Perfil, Feed Social, Perfil Público, Editar Perfil, Desafios, Badges, Histórico, Amigos, Configurações
 - ✅ **Design Responsivo** (iOS/Android/Web)
 - ✅ **Navegação por Tabs** (5 tabs principais)
+- ✅ **Navegação Dinâmica** - Deep linking para perfis (user-profile?userId=xxx)
 - ✅ **Modal de Detalhes** integrado no BadgesScreen
 - ✅ **Animações Fluidas** com React Native Animated API
 - ✅ **Dark Mode Ready** (preparado para tema escuro)
+- ✅ **Safe Area Handling** - useSafeAreaInsets para notch/status bar ⭐ NOVO!
+- ✅ **Estados Vazios Padronizados** - EmptyState reutilizável em 10+ telas ⭐ NOVO!
+- ✅ **Headers Consistentes** - SimpleHeader componentizado elimina duplicação ⭐ NOVO!
 
 ### **Notificações e Engajamento** 🔔
 - ✅ **Expo Notifications** integrado
@@ -3251,174 +3290,21 @@ Nenhuma nova dependência - apenas APIs nativas do React Native:
 
 ## 🆕 Últimas Atualizações
 
-### **1 de Novembro de 2025** 🎉
+### **Novembro de 2025**
+- ✅ **Feed Social Completo** - Timeline de atividades dos amigos com 4 tipos
+- ✅ **Perfis Públicos** - Visualização completa de perfis com controle de privacidade
+- ✅ **Leaderboard Backend** - Rankings de amigos e global com 3 tipos de ordenação
+- ✅ **Camada de Segurança** - Rate limiting, validação UUID, sanitização de inputs
+- ✅ **Sistema de Amigos** - Rede social completa (12 endpoints, 3 telas, 7 componentes)
+- ✅ **Componentização** - UserStatsRow, SearchBar, EmptyState, SimpleHeader reutilizáveis
 
-#### **Sprint 11 - Sistema Completo de Amigos** ✅ IMPLEMENTADO
-**Linhas de Código:** ~2850 linhas | **Endpoints:** 12 REST | **Componentes:** 7 novos
-
-**🗄️ Backend (895 linhas):**
-- ✅ **Database Schema:**
-  - 2 novos models: `Friendship` e `FriendRequest`
-  - 1 novo enum: `FriendshipStatus` (PENDING, ACCEPTED, REJECTED, BLOCKED)
-  - Relações bidirecionais otimizadas (2 registros por amizade)
-  - Índices para queries rápidas
-  - Migration executada com sucesso
-
-- ✅ **Friend Service** (530 linhas - 12 funções):
-  - `sendFriendRequest` - Envio de solicitações (validações completas)
-  - `acceptFriendRequest` - Aceitação com criação bidirecional
-  - `rejectFriendRequest` - Rejeição com limpeza
-  - `cancelFriendRequest` - Cancelamento de pendentes (pelo sender)
-  - `removeFriend` - Remoção bidirecional + cleanup
-  - `blockUser` - Sistema de bloqueio
-  - `getFriendsList` - Lista completa com stats
-  - `getPendingRequests` - Solicitações recebidas
-  - `getSentRequests` - Solicitações enviadas
-  - `searchUsers` - Busca com status calculado
-  - `getFriendStats` - Contadores e limites
-  - `getFriendActivity` - Feed de atividades (SQL raw)
-  - `getMutualFriends` - Amigos em comum
-
-- ✅ **Validações Implementadas:**
-  - ❌ Não pode adicionar a si mesmo
-  - ❌ Limite de 500 amigos por usuário
-  - ❌ Não duplica solicitações pendentes
-  - ❌ Não envia para bloqueados
-  - ✅ Auto-cleanup de requests antigas (previne unique constraint errors)
-  - ✅ Verifica amizade existente
-  - ✅ Remove amizade bidirecional
-
-- ✅ **Friend Controller** (270 linhas - 12 endpoints):
-  - `POST /friends/request` - Enviar solicitação
-  - `POST /friends/accept/:id` - Aceitar
-  - `POST /friends/reject/:id` - Rejeitar
-  - `POST /friends/cancel/:id` - Cancelar (novo!)
-  - `DELETE /friends/:id` - Remover amigo
-  - `POST /friends/block/:id` - Bloquear usuário
-  - `GET /friends` - Listar amigos
-  - `GET /friends/requests` - Recebidas
-  - `GET /friends/sent` - Enviadas
-  - `GET /friends/search?q=query` - Buscar usuários
-  - `GET /friends/stats` - Estatísticas
-  - `GET /friends/activity?limit=20&offset=0` - Feed
-  - `GET /friends/mutual/:id` - Amigos em comum
-  - `DELETE /friends/cleanup` - Limpar requests antigas (debug)
-
-**🎨 Frontend (1955 linhas):**
-- ✅ **Friend Service** (200 linhas):
-  - 5 interfaces TypeScript completas
-  - 12 métodos da classe FriendService
-  - Axios integration com error handling
-  - TypeScript types exportados
-
-- ✅ **Componentes Reutilizáveis:**
-  1. **FriendCard** (90 linhas) - Card de amigo com UserStatsRow
-  2. **FriendRequestCard** (90 linhas) - Solicitações com UserStatsRow
-  3. **UserSearchCard** (80 linhas) - Busca com UserStatsRow
-  4. **ActivityFeedItem** (140 linhas) - Item de atividade
-  5. **SearchBar** (130 linhas) - Barra de busca completa
-  6. **EmptyState** (60 linhas) - Estados vazios genéricos
-  7. **UserStatsRow** (80 linhas) - Stats reutilizáveis
-
-- ✅ **Telas Implementadas:**
-  1. **FriendsScreen** (565 linhas):
-     - 3 tabs: Buscar, Solicitações (Recebidas/Enviadas), Amigos
-     - SearchBar com debounce 500ms
-     - Badge de notificação para pendentes
-     - Pull-to-refresh em todas as tabs
-     - Estados vazios contextuais
-     - Loading states profissionais
-  
-  2. **FriendProfileScreen** (340 linhas):
-     - Header com avatar 100px
-     - 4 StatBoxes (Level, XP, Streak, Moedas)
-     - Data de amizade formatada
-     - Amigos em comum (scroll horizontal)
-     - Botão remover com confirmação
-     - Navegação recursiva
-  
-  3. **ActivityFeedScreen** (280 linhas):
-     - 4 filtros: Todos, Desafios, Badges, Recompensas
-     - Paginação infinita (20 por vez)
-     - Pull-to-refresh
-     - Empty states por filtro
-     - Ícones e cores por tipo
-
-**🧹 Refatoração e Componentização:**
-- ✅ **UserStatsRow** eliminou ~150 linhas duplicadas
-- ✅ **SearchBar** componentizado (reutilizável em 5+ telas)
-- ✅ **EmptyState** padronizado (~200 linhas economizadas)
-- ✅ **FriendCard** refatorado com UserStatsRow (-24 linhas)
-- ✅ **UserSearchCard** refatorado (-22 linhas)
-- ✅ **FriendRequestCard** refatorado (-20 linhas)
-- ✅ **9 console.logs** removidos do backend (código limpo)
-
-**📊 Métricas Finais:**
-- 📦 **15 arquivos** criados/modificados
-- 💻 **~2850 linhas** implementadas
-- 🎨 **7 componentes** novos
-- 📱 **3 telas** completas
-- 🌐 **12 endpoints** REST
-- 🧹 **~66 linhas** de código duplicado eliminadas
-- ✅ **0 erros** TypeScript
-- ✅ **100% funcional**
-
-**🔄 Fluxos Completos:**
-- ✅ Buscar e adicionar amigos
-- ✅ Aceitar/Rejeitar solicitações
-- ✅ Cancelar solicitações enviadas
-- ✅ Ver perfil de amigos
-- ✅ Feed de atividades com filtros
-- ✅ Amigos em comum
-- ✅ Remover amigos
-- ✅ Navegação recursiva
-
-**📄 Documentação Criada:**
-- ✅ `COMPONENTIZATION_OPPORTUNITIES.md` (análise completa - 350 linhas)
-- ✅ `SPRINT_11_SUMMARY.md` (resumo técnico - 500 linhas)
-
----
-
-### **27 de Outubro de 2025**
-- ✅ Serviço completo de notificações (404 linhas - 13 funções)
-- ✅ Hook useNotifications com navegação inteligente (126 linhas)
-- ✅ 5 tipos de notificações implementadas
-- ✅ Lembretes agendados (9h e 21h com DAILY trigger)
-- ✅ Notificações instantâneas (badges, level up)
-- ✅ Toggle em Settings com AsyncStorage
-- ✅ Integração em ChallengesScreen (3 notificações)
-- ✅ Plugin configurado em app.json
-- ✅ Permissões iOS/Android automáticas
-- ✅ Canal Android com som e vibração
-
-### **Sprint 8 - Badges em Destaque no Perfil** ✅
-- ✅ Adicionada seção "🏆 Conquistas Recentes" no ProfileScreen
-- ✅ Scroll horizontal com 5 badges mais recentes
-- ✅ Mini-cards profissionais com bordas coloridas por raridade
-- ✅ Navegação integrada para tela completa de badges
-- ✅ Atualização automática via useFocusEffect
-- ✅ 3 estados visuais (loading/badges/vazio)
-
-**Ajustes de UX Aplicados (27/10/2025):**
-- ✅ Espaçamento consistente entre cards (16px - padrão do app)
-- ✅ Padding interno do card ajustado (25px alinhado com Card.tsx)
-- ✅ Botão "Ver Todos" centralizado para melhor hierarquia visual
-- ✅ Scroll com padding otimizado (paddingLeft: 0, paddingRight: 25)
-- ✅ Títulos e subtítulos centralizados
-- ✅ Fontes legíveis (13px nome, 11px data)
-- ✅ Design responsivo mantido (iOS/Android/Web)
-
-### **Sprint 7 - Sistema de Badges Completo** ✅
-- ✅ BadgesScreen com galeria completa (376 linhas)
-- ✅ Sistema de tabs (Todos/Conquistados/Bloqueados)
-- ✅ Filtros por raridade (5 opções)
-- ✅ Modal de detalhes integrado
-- ✅ Barra de progresso visual
-- ✅ BadgeCard componente reutilizável
-- ✅ Serviço badge.ts completo (189 linhas)
-- ✅ Pull-to-refresh e estados vazios
-
-**Total Sprints 7-9:** 1.426 + 213 + 530 = **2.169 linhas** | Zero erros | 100% funcional
+### **Outubro de 2025**
+- ✅ **Histórico de Recompensas** - Tela completa com filtros e paginação infinita
+- ✅ **Notificações Push** - Sistema completo com 5 tipos e lembretes agendados
+- ✅ **Sistema de Badges** - 29 conquistas em 5 categorias com 4 raridades
+- ✅ **Edição de Perfil** - Upload de foto, validações, campos completos
+- ✅ **Desafios Diários** - 43 desafios em 8 categorias com atribuição automática
+- ✅ **Gamificação Base** - XP, níveis, moedas, streaks completos
 
 ---
 

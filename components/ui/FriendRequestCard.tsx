@@ -1,6 +1,6 @@
 import type { FriendRequest } from '@/services/friend';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { UserStatsRow } from './UserStatsRow';
@@ -22,6 +22,7 @@ interface FriendRequestCardProps {
   onAccept?: () => void;
   onReject?: () => void;
   onCancel?: () => void;
+  onPress?: () => void;
   loading?: boolean;
 }
 
@@ -31,6 +32,7 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
   onAccept,
   onReject,
   onCancel,
+  onPress,
   loading = false,
 }) => {
   const user = type === 'received' ? request.sender : request.receiver;
@@ -47,7 +49,12 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <TouchableOpacity 
+        style={styles.content}
+        onPress={onPress}
+        activeOpacity={0.7}
+        disabled={!onPress}
+      >
         {/* Avatar */}
         <Avatar initials={initials} imageUrl={user.avatarUrl} size={60} />
 
@@ -69,7 +76,7 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
             gap={12}
           />
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Buttons */}
       <View style={styles.actions}>

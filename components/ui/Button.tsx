@@ -10,7 +10,7 @@ import {
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline';
   icon?: string;
   loading?: boolean;
 }
@@ -30,6 +30,8 @@ export const Button: React.FC<ButtonProps> = ({
         return styles.secondaryButton;
       case 'danger':
         return styles.dangerButton;
+      case 'outline':
+        return styles.outlineButton;
       default:
         return styles.primaryButton;
     }
@@ -41,6 +43,8 @@ export const Button: React.FC<ButtonProps> = ({
         return '#1C1C1E'; // Texto escuro para botão com fundo branco
       case 'danger':
         return '#FFFFFF';
+      case 'outline':
+        return '#007AFF';
       default:
         return '#FFFFFF';
     }
@@ -98,6 +102,11 @@ const styles = StyleSheet.create({
   },
   dangerButton: {
     backgroundColor: '#FF6B6B',
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#007AFF',
   },
   buttonDisabled: {
     backgroundColor: '#cccccc',

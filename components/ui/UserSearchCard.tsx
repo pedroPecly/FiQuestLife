@@ -1,6 +1,6 @@
 import type { UserSearchResult } from '@/services/friend';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { UserStatsRow } from './UserStatsRow';
@@ -71,7 +71,12 @@ export const UserSearchCard: React.FC<UserSearchCardProps> = ({
   const buttonConfig = getButtonConfig();
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={onPress}
+      activeOpacity={0.7}
+      disabled={!onPress}
+    >
       <View style={styles.content}>
         {/* Avatar */}
         <Avatar initials={initials} imageUrl={user.avatarUrl} size={50} />
@@ -105,7 +110,7 @@ export const UserSearchCard: React.FC<UserSearchCardProps> = ({
           style={styles.button}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

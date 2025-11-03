@@ -1,19 +1,20 @@
 /**
  * ============================================
- * SEED DE DESAFIOS - 30+ Desafios
+ * SEED DE DESAFIOS - 58 Desafios
  * ============================================
  * 
  * Popula o banco com desafios variados em 8 categorias:
- * - PHYSICAL_ACTIVITY (Atividade Física)
- * - NUTRITION (Nutrição)
- * - HYDRATION (Hidratação)
- * - MENTAL_HEALTH (Saúde Mental)
- * - SLEEP (Sono)
- * - SOCIAL (Social)
- * - PRODUCTIVITY (Produtividade)
- * - MINDFULNESS (Mindfulness)
+ * - PHYSICAL_ACTIVITY (Atividade Física) - 11 desafios
+ * - NUTRITION (Nutrição) - 9 desafios
+ * - HYDRATION (Hidratação) - 5 desafios
+ * - MENTAL_HEALTH (Saúde Mental) - 4 desafios
+ * - SLEEP (Sono) - 5 desafios
+ * - SOCIAL (Social) - 5 desafios
+ * - PRODUCTIVITY (Produtividade) - 8 desafios
+ * - MINDFULNESS (Mindfulness) - 4 desafios
  * 
  * @created 20 de outubro de 2025
+ * @updated 2 de novembro de 2025
  */
 
 import type {
@@ -42,7 +43,7 @@ async function seedChallenges() {
     frequency: ChallengeFrequency;
   }> = [
     // ============================================
-    // 💪 PHYSICAL_ACTIVITY (8 desafios)
+    // 💪 PHYSICAL_ACTIVITY (11 desafios)
     // ============================================
     {
       title: 'Caminhada de 30 minutos',
@@ -116,9 +117,36 @@ async function seedChallenges() {
       coinsReward: 20,
       frequency: 'DAILY',
     },
+    {
+      title: 'Ciclismo 30 minutos',
+      description: 'Ande de bicicleta por pelo menos 30 minutos',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'MEDIUM',
+      xpReward: 100,
+      coinsReward: 20,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Natação',
+      description: 'Nade por 30 minutos na piscina',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'MEDIUM',
+      xpReward: 120,
+      coinsReward: 24,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Exercícios funcionais',
+      description: 'Faça 20 minutos de exercícios funcionais (burpees, agachamentos, etc)',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'HARD',
+      xpReward: 130,
+      coinsReward: 26,
+      frequency: 'DAILY',
+    },
 
     // ============================================
-    // 🥗 NUTRITION (6 desafios)
+    // 🥗 NUTRITION (9 desafios)
     // ============================================
     {
       title: 'Comer 5 porções de frutas/vegetais',
@@ -174,9 +202,36 @@ async function seedChallenges() {
       coinsReward: 20,
       frequency: 'DAILY',
     },
+    {
+      title: 'Comer salada no almoço',
+      description: 'Inclua uma porção generosa de salada no almoço',
+      category: 'NUTRITION',
+      difficulty: 'EASY',
+      xpReward: 50,
+      coinsReward: 10,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Lanches saudáveis',
+      description: 'Substitua lanches industrializados por frutas ou castanhas',
+      category: 'NUTRITION',
+      difficulty: 'MEDIUM',
+      xpReward: 70,
+      coinsReward: 14,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Reduzir sal',
+      description: 'Evite adicionar sal extra na comida hoje',
+      category: 'NUTRITION',
+      difficulty: 'MEDIUM',
+      xpReward: 80,
+      coinsReward: 16,
+      frequency: 'DAILY',
+    },
 
     // ============================================
-    // 💧 HYDRATION (4 desafios)
+    // 💧 HYDRATION (5 desafios)
     // ============================================
     {
       title: 'Beber 2L de água',
@@ -212,6 +267,15 @@ async function seedChallenges() {
       difficulty: 'EASY',
       xpReward: 40,
       coinsReward: 8,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Água com limão',
+      description: 'Beba água com limão em jejum pela manhã',
+      category: 'HYDRATION',
+      difficulty: 'EASY',
+      xpReward: 35,
+      coinsReward: 7,
       frequency: 'DAILY',
     },
 
@@ -256,7 +320,7 @@ async function seedChallenges() {
     },
 
     // ============================================
-    // 😴 SLEEP (3 desafios)
+    // 😴 SLEEP (5 desafios)
     // ============================================
     {
       title: 'Dormir 8 horas',
@@ -285,9 +349,27 @@ async function seedChallenges() {
       coinsReward: 24,
       frequency: 'DAILY',
     },
+    {
+      title: 'Cochilo power nap',
+      description: 'Tire um cochilo de 20 minutos durante o dia',
+      category: 'SLEEP',
+      difficulty: 'EASY',
+      xpReward: 40,
+      coinsReward: 8,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Acordar no mesmo horário',
+      description: 'Acorde no mesmo horário programado (mesmo fim de semana)',
+      category: 'SLEEP',
+      difficulty: 'MEDIUM',
+      xpReward: 90,
+      coinsReward: 18,
+      frequency: 'DAILY',
+    },
 
     // ============================================
-    // 👥 SOCIAL (3 desafios)
+    // 👥 SOCIAL (5 desafios)
     // ============================================
     {
       title: 'Ligar para amigo/familiar',
@@ -316,9 +398,27 @@ async function seedChallenges() {
       coinsReward: 20,
       frequency: 'WEEKLY',
     },
+    {
+      title: 'Mensagem para amigo',
+      description: 'Envie uma mensagem carinhosa para um amigo que não fala há tempo',
+      category: 'SOCIAL',
+      difficulty: 'EASY',
+      xpReward: 50,
+      coinsReward: 10,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Participar de grupo/comunidade',
+      description: 'Participe de uma atividade em grupo ou comunidade',
+      category: 'SOCIAL',
+      difficulty: 'MEDIUM',
+      xpReward: 90,
+      coinsReward: 18,
+      frequency: 'WEEKLY',
+    },
 
     // ============================================
-    // 🎯 PRODUCTIVITY (4 desafios)
+    // 🎯 PRODUCTIVITY (8 desafios)
     // ============================================
     {
       title: 'Planejar o dia',
@@ -355,6 +455,33 @@ async function seedChallenges() {
       xpReward: 90,
       coinsReward: 18,
       frequency: 'DAILY',
+    },
+    {
+      title: 'Ler 20 páginas',
+      description: 'Leia pelo menos 20 páginas de um livro',
+      category: 'PRODUCTIVITY',
+      difficulty: 'EASY',
+      xpReward: 60,
+      coinsReward: 12,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Zero procrastinação',
+      description: 'Complete suas 3 tarefas prioritárias sem procrastinar',
+      category: 'PRODUCTIVITY',
+      difficulty: 'HARD',
+      xpReward: 130,
+      coinsReward: 26,
+      frequency: 'DAILY',
+    },
+    {
+      title: 'Revisar metas semanais',
+      description: 'Dedique 15 minutos para revisar suas metas da semana',
+      category: 'PRODUCTIVITY',
+      difficulty: 'MEDIUM',
+      xpReward: 80,
+      coinsReward: 16,
+      frequency: 'WEEKLY',
     },
 
     // ============================================

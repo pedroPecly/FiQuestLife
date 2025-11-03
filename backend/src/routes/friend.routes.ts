@@ -13,6 +13,7 @@
 import { Hono } from 'hono';
 import { friendController } from '../controllers/friend.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { feedLimiter, friendRequestLimiter, searchLimiter } from '../middlewares/rate-limit.middleware.js';
 
 const friendRoutes = new Hono();
 
@@ -28,8 +29,9 @@ friendRoutes.get('/', friendController.getFriends);
 /**
  * POST /friends/request
  * Envia solicitação de amizade
+ * Rate limit: 20 req / 15 min
  */
-friendRoutes.post('/request', friendController.sendRequest);
+friendRoutes.post('/request', friendRequestLimiter, friendController.sendRequest);
 
 /**
  * GET /friends/requests
@@ -76,8 +78,9 @@ friendRoutes.post('/block/:id', friendController.blockUser);
 /**
  * GET /friends/search?q=query
  * Busca usuários por username/nome
+ * Rate limit: 30 req / 1 min
  */
-friendRoutes.get('/search', friendController.searchUsers);
+friendRoutes.get('/search', searchLimiter, friendController.searchUsers);
 
 /**
  * GET /friends/stats
@@ -94,8 +97,9 @@ friendRoutes.delete('/cleanup', friendController.cleanup);
 /**
  * GET /friends/activity?limit=20&offset=0
  * Retorna atividades dos amigos
+ * Rate limit: 60 req / 1 min
  */
-friendRoutes.get('/activity', friendController.getActivity);
+friendRoutes.get('/activity', feedLimiter, friendController.getActivity);
 
 /**
  * GET /friends/mutual/:id

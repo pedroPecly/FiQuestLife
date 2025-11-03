@@ -1,4 +1,3 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { getUnreadCount } from '../../services/notificationCenter';
@@ -37,7 +36,6 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <View style={styles.container}>
         <View style={styles.content}>
-          <MaterialCommunityIcons name="crown-outline" size={40} color="#20B2AA" />
           <Text style={styles.title}>{title}</Text>
           {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>

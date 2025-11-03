@@ -11,6 +11,7 @@ export { default as ChallengeCard } from './ChallengeCard';
 export { DateInput } from './DateInput';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+export { FeedActivityCard } from './FeedActivityCard';
 export { FriendCard } from './FriendCard';
 export { FriendRequestCard } from './FriendRequestCard';
 export { InfoRow } from './InfoRow';

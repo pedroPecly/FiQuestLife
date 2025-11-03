@@ -23,16 +23,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
+import { SimpleHeader } from '../../components/layout';
 import { AlertModal } from '../../components/ui';
 import { Button } from '../../components/ui/Button';
 import { DateInput } from '../../components/ui/DateInput';
@@ -331,9 +332,7 @@ export const EditProfileScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       {/* Header Simples */}
-      <View style={styles.headerSimple}>
-        <Text style={styles.headerTitle}>Editar Perfil</Text>
-      </View>
+      <SimpleHeader title="Editar Perfil" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

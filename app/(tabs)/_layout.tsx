@@ -109,10 +109,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explorar',
+          title: 'Feed',
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons 
-              name={focused ? 'compass' : 'compass-outline'} 
+              name={focused ? 'view-dashboard' : 'view-dashboard-outline'} 
               size={28} 
               color={color} 
             />
