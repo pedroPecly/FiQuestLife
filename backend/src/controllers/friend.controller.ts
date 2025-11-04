@@ -8,6 +8,7 @@
  */
 
 import type { Context } from 'hono';
+import * as feedService from '../services/feed.service.js';
 import * as friendService from '../services/friend.service.js';
 
 export const friendController = {
@@ -262,9 +263,21 @@ export const friendController = {
 
       console.log('[FEED] Atividades encontradas:', activities.length);
 
+      // Buscar stats de curtidas/comentários para as atividades
+      const activityIds = activities.map((a: any) => a.id);
+      const stats = await feedService.getActivityStats(activityIds, userId) as Record<string, { likesCount: number; commentsCount: number; isLikedByUser: boolean }>;
+
+      // Adicionar stats às atividades
+      const activitiesWithStats = activities.map((activity: any) => ({
+        ...activity,
+        likesCount: stats[activity.id]?.likesCount || 0,
+        commentsCount: stats[activity.id]?.commentsCount || 0,
+        isLikedByUser: stats[activity.id]?.isLikedByUser || false,
+      }));
+
       return c.json({
         success: true,
-        data: activities,
+        data: activitiesWithStats,
       });
     } catch (error: any) {
       console.error('[FEED] Erro ao buscar atividades:', error);

@@ -15,6 +15,12 @@
 
 import type { ChallengeCategory } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
+import {
+    notifyBadgeEarned,
+    notifyChallengeCompleted,
+    notifyLevelUp,
+    notifyStreakMilestone,
+} from './notification.service.js';
 
 /**
  * Atribui 5 desafios aleatórios para o dia atual
@@ -167,6 +173,18 @@ export const completeChallenge = async (userId: string, userChallengeId: string)
     },
   });
 
+  // Criar notificação de desafio completado
+  try {
+    await notifyChallengeCompleted(
+      userId,
+      userChallenge.challenge.title,
+      userChallenge.challenge.xpReward,
+      userChallenge.challenge.coinsReward
+    );
+  } catch (error) {
+    console.error('[CHALLENGE SERVICE] Erro ao criar notificação de desafio completado:', error);
+  }
+
   // Busca stats atualizadas
   const updatedUser = await prisma.user.findUnique({
     where: { id: userId },
@@ -232,6 +250,13 @@ export const updateUserStats = async (userId: string, xp: number, coins: number)
         description: `Subiu para o nível ${newLevel}!`,
       },
     });
+
+    // Criar notificação
+    try {
+      await notifyLevelUp(userId, newLevel);
+    } catch (error) {
+      console.error('[CHALLENGE SERVICE] Erro ao criar notificação de level up:', error);
+    }
   }
 
   return { leveledUp, newLevel };
@@ -291,6 +316,13 @@ export const checkAndUpdateStreak = async (userId: string) => {
       lastActiveDate: today,
     },
   });
+
+  // Criar notificação de streak milestone
+  try {
+    await notifyStreakMilestone(userId, newStreak);
+  } catch (error) {
+    console.error('[CHALLENGE SERVICE] Erro ao criar notificação de streak:', error);
+  }
 };
 
 /**
@@ -408,6 +440,13 @@ export const checkAndAwardBadges = async (userId: string) => {
           description: `Conquistou badge: ${badge.name}`,
         },
       });
+
+      // Criar notificação
+      try {
+        await notifyBadgeEarned(userId, badge.name, badge.rarity);
+      } catch (error) {
+        console.error('[CHALLENGE SERVICE] Erro ao criar notificação de badge:', error);
+      }
 
       newBadges.push(badge);
     }

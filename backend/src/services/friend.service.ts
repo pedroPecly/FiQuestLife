@@ -1,6 +1,7 @@
 import { FriendshipStatus } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { validateSearchTerm } from '../utils/validation.js';
+import { notifyFriendAccepted, notifyFriendRequest } from './notification.service.js';
 
 const MAX_FRIENDS = 500;
 
@@ -104,8 +105,25 @@ export async function sendFriendRequest(userId: string, targetUserId: string) {
           xp: true,
         },
       },
+      sender: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+        },
+      },
     },
   });
+
+  // Criar notificação para o receptor
+  try {
+    await notifyFriendRequest(
+      targetUserId,
+      friendRequest.sender.name || friendRequest.sender.username
+    );
+  } catch (error) {
+    console.error('[FRIEND SERVICE] Erro ao criar notificação de friend request:', error);
+  }
 
   return friendRequest;
 }
@@ -180,9 +198,28 @@ export async function acceptFriendRequest(userId: string, requestId: string) {
             xp: true,
           },
         },
+        receiver: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+          },
+        },
       },
     });
   });
+
+  // Criar notificação para quem enviou a solicitação
+  if (result) {
+    try {
+      await notifyFriendAccepted(
+        request.senderId,
+        result.receiver.name || result.receiver.username
+      );
+    } catch (error) {
+      console.error('[FRIEND SERVICE] Erro ao criar notificação de friend accepted:', error);
+    }
+  }
 
   return result;
 }
@@ -556,7 +593,7 @@ export async function getFriendStats(userId: string) {
 
 /**
  * Retorna atividades recentes dos amigos (Feed Social)
- * Tipos: CHALLENGE_COMPLETED, BADGE_EARNED, LEVEL_UP, STREAK_MILESTONE
+ * Versão profissional usando Prisma e reward_history como fonte única
  */
 export async function getFriendActivity(userId: string, limit: number = 20, offset: number = 0) {
   try {
@@ -570,110 +607,129 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
 
     const friendIds = friendships.map((f) => f.friendId);
 
-    console.log('[FEED SERVICE] Amigos encontrados:', friendIds.length, 'IDs:', friendIds);
+    console.log('[FEED SERVICE] Amigos encontrados:', friendIds.length);
 
     if (friendIds.length === 0) {
       console.log('[FEED SERVICE] Usuário não tem amigos, retornando array vazio');
       return [];
     }
 
-    console.log('[FEED SERVICE] Executando query SQL...');
+    // Buscar atividades do reward_history
+    const allActivities = await prisma.rewardHistory.findMany({
+      where: {
+        userId: { in: friendIds },
+        source: {
+          in: [
+            'CHALLENGE_COMPLETION',
+            'BADGE_ACHIEVEMENT',
+            'LEVEL_PROGRESSION',
+          ],
+        },
+        createdAt: {
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Últimos 7 dias
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatarUrl: true,
+            level: true,
+            currentStreak: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-    // Criar placeholders para os IDs ($1, $2, $3, etc)
-    const placeholders = friendIds.map((_, index) => `$${index + 1}`).join(',');
+    console.log('[FEED SERVICE] Atividades brutas encontradas:', allActivities.length);
 
-    // Buscar atividades dos amigos - usando IN ao invés de ANY
-    const activities = await prisma.$queryRawUnsafe<any[]>(
-      `
-      (
-        SELECT 
-          'CHALLENGE_COMPLETED' as type,
-          uc.user_id as "userId",
-          u.username,
-          u.name,
-          u.avatar_url as "avatarUrl",
-          c.title as description,
-          CAST(c.category as TEXT) as metadata,
-          uc.completed_at as "createdAt",
-          c.xp_reward as "xpReward"
-        FROM user_challenges uc
-        JOIN users u ON u.id = uc.user_id
-        JOIN challenges c ON c.id = uc.challenge_id
-        WHERE uc.user_id IN (${placeholders})
-          AND uc.status = 'COMPLETED'
-          AND uc.completed_at IS NOT NULL
-          AND uc.completed_at > NOW() - INTERVAL '7 days'
-      )
-      UNION ALL
-      (
-        SELECT 
-          'BADGE_EARNED' as type,
-          ub.user_id as "userId",
-          u.username,
-          u.name,
-          u.avatar_url as "avatarUrl",
-          b.name as description,
-          CAST(b.rarity as TEXT) as metadata,
-          ub.earned_at as "createdAt",
-          0 as "xpReward"
-        FROM user_badges ub
-        JOIN users u ON u.id = ub.user_id
-        JOIN badges b ON b.id = ub.badge_id
-        WHERE ub.user_id IN (${placeholders})
-          AND ub.earned_at > NOW() - INTERVAL '7 days'
-      )
-      UNION ALL
-      (
-        SELECT 
-          'LEVEL_UP' as type,
-          rh.user_id as "userId",
-          u.username,
-          u.name,
-          u.avatar_url as "avatarUrl",
-          rh.description,
-          CAST(u.level as TEXT) as metadata,
-          rh.created_at as "createdAt",
-          rh.amount as "xpReward"
-        FROM reward_history rh
-        JOIN users u ON u.id = rh.user_id
-        WHERE rh.user_id IN (${placeholders})
-          AND rh.type = 'XP'
-          AND rh.source = 'level_up'
-          AND rh.created_at > NOW() - INTERVAL '7 days'
-      )
-      UNION ALL
-      (
-        SELECT 
-          'STREAK_MILESTONE' as type,
-          rh.user_id as "userId",
-          u.username,
-          u.name,
-          u.avatar_url as "avatarUrl",
-          rh.description,
-          CAST(u.current_streak as TEXT) as metadata,
-          rh.created_at as "createdAt",
-          rh.amount as "xpReward"
-        FROM reward_history rh
-        JOIN users u ON u.id = rh.user_id
-        WHERE rh.user_id IN (${placeholders})
-          AND rh.source LIKE '%streak%'
-          AND rh.created_at > NOW() - INTERVAL '7 days'
-      )
-      ORDER BY "createdAt" DESC
-      LIMIT $${friendIds.length + 1}
-      OFFSET $${friendIds.length + 2}
-      `,
-      ...friendIds,
-      limit,
-      offset
-    );
+    // Agrupar por sourceId (unificar XP + Moedas de uma mesma tarefa)
+    const groupedMap = new Map<string, any>();
+    
+    for (const activity of allActivities) {
+      const key = activity.sourceId || activity.id;
+      
+      if (!groupedMap.has(key)) {
+        // Primeira entrada para esta atividade
+        groupedMap.set(key, {
+          id: activity.id, // Usar primeiro ID encontrado
+          source: activity.source,
+          sourceId: activity.sourceId,
+          userId: activity.user.id,
+          username: activity.user.username,
+          name: activity.user.name,
+          avatarUrl: activity.user.avatarUrl,
+          level: activity.user.level,
+          currentStreak: activity.user.currentStreak,
+          description: activity.description,
+          createdAt: activity.createdAt,
+          xpAmount: activity.type === 'XP' ? activity.amount : 0,
+          coinsAmount: activity.type === 'COINS' ? activity.amount : 0,
+        });
+      } else {
+        // Somar XP ou Moedas à entrada existente
+        const existing = groupedMap.get(key);
+        if (activity.type === 'XP') {
+          existing.xpAmount += activity.amount;
+        } else if (activity.type === 'COINS') {
+          existing.coinsAmount += activity.amount;
+        }
+      }
+    }
 
-    console.log('[FEED SERVICE] Query executada com sucesso. Atividades:', activities.length);
+    // Converter Map para array e ordenar por data
+    const groupedActivities = Array.from(groupedMap.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(offset, offset + limit);
 
-    return activities.map(activity => ({
-      ...activity,
-      createdAt: new Date(activity.createdAt).toISOString(),
-    }));
+    console.log('[FEED SERVICE] Atividades agrupadas:', groupedActivities.length);
+
+    // Mapear para formato do feed
+    const mappedActivities = groupedActivities.map((activity) => {
+      let type = '';
+      let metadata = '';
+
+      switch (activity.source) {
+        case 'CHALLENGE_COMPLETION':
+          type = 'CHALLENGE_COMPLETED';
+          metadata = '';
+          break;
+        case 'BADGE_ACHIEVEMENT':
+          type = 'BADGE_EARNED';
+          metadata = '';
+          break;
+        case 'LEVEL_PROGRESSION':
+          type = 'LEVEL_UP';
+          metadata = String(activity.level);
+          break;
+        default:
+          if (activity.source.includes('streak')) {
+            type = 'STREAK_MILESTONE';
+            metadata = String(activity.currentStreak);
+          }
+      }
+
+      return {
+        id: activity.id,
+        type,
+        userId: activity.userId,
+        username: activity.username,
+        name: activity.name,
+        avatarUrl: activity.avatarUrl,
+        description: activity.description,
+        metadata,
+        createdAt: activity.createdAt.toISOString(),
+        xpReward: activity.xpAmount, // XP total (somado)
+        coinsReward: activity.coinsAmount, // Moedas total (somado)
+      };
+    });
+
+    return mappedActivities;
   } catch (error) {
     console.error('[FEED SERVICE] Erro na função getFriendActivity:', error);
     throw error;

@@ -416,7 +416,7 @@ export default function FriendsScreen() {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        variant="primary"
+        variant="card"
       />
       <View style={styles.content}>
         {activeTab === 'search' && renderSearch()}

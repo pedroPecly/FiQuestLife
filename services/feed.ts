@@ -21,6 +21,7 @@ export type FeedActivityType =
   | 'STREAK_MILESTONE';
 
 export interface FeedActivity {
+  id: string; // ID único da atividade
   type: FeedActivityType;
   userId: string;
   username: string;
@@ -30,6 +31,11 @@ export interface FeedActivity {
   metadata?: string; // category, rarity, level, etc
   createdAt: string;
   xpReward?: number;
+  coinsReward?: number; // Adicionar moedas
+  // Contadores de interações
+  likesCount?: number;
+  commentsCount?: number;
+  isLikedByUser?: boolean;
 }
 
 // ============================================
@@ -45,6 +51,19 @@ class FeedService {
     offset: number = 0
   ): Promise<FeedActivity[]> {
     const response = await api.get('/friends/activity', {
+      params: { limit, offset },
+    });
+    return response.data.data;
+  }
+
+  /**
+   * Busca atividades do próprio usuário
+   */
+  async getMyActivity(
+    limit: number = 20,
+    offset: number = 0
+  ): Promise<FeedActivity[]> {
+    const response = await api.get('/user/my-activity', {
       params: { limit, offset },
     });
     return response.data.data;

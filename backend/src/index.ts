@@ -21,9 +21,12 @@ import { errorMiddleware } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.js';
 import badgeRoutes from './routes/badge.routes.js';
 import challengeRoutes from './routes/challenge.routes.js';
+import feedRoutes from './routes/feed.routes.js';
 import friendRoutes from './routes/friend.routes.js';
 import healthRoutes from './routes/health.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
+import { notificationRoutes } from './routes/notification.routes.js';
+import pushTokenRoutes from './routes/push-token.routes.js';
 import rewardRoutes from './routes/reward.js';
 import userProfileRoutes from './routes/user-profile.routes.js';
 import userRoutes from './routes/user.js';
@@ -98,11 +101,20 @@ app.route('/rewards', rewardRoutes);
 // Registra as rotas de amigos (/friends, /friends/request, /friends/activity)
 app.route('/friends', friendRoutes);
 
+// Registra as rotas de feed (/feed/:activityId/like, /feed/:activityId/comment)
+app.route('/feed', feedRoutes);
+
 // Registra as rotas de perfis públicos (/users/:userId/profile, /users/:userId/mutual-friends)
 app.route('/users', userProfileRoutes);
 
 // Registra as rotas de leaderboard (/leaderboard/friends, /leaderboard/global)
 app.route('/leaderboard', leaderboardRoutes);
+
+// Registra as rotas de notificações (/notifications, /notifications/unread-count)
+app.route('/notifications', notificationRoutes);
+
+// Registra as rotas de push token (/push-token)
+app.route('/push-token', pushTokenRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS

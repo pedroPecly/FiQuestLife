@@ -1,10 +1,11 @@
 /**
  * TabBar Component
  * 
- * Sistema de abas horizontal reutilizável com suporte a:
+ * Sistema de abas horizontal reutilizável com visual de card arredondado.
+ * Suporte a:
  * - Ícones opcionais (MaterialCommunityIcons)
  * - Badges numéricos (azul padrão ou vermelho para alertas)
- * - 2 variantes visuais (primary = fundo branco, secondary = pills)
+ * - 3 variantes visuais (primary = fundo branco, secondary = pills, card = card arredondado)
  * - Estilos consistentes com o design system
  * 
  * @example
@@ -25,7 +26,7 @@
  *   tabs={tabs} 
  *   activeTab={activeTab} 
  *   onTabChange={setActiveTab}
- *   variant="primary"
+ *   variant="card"
  * />
  * ```
  */
@@ -63,8 +64,8 @@ export interface TabBarProps {
   activeTab: string;
   /** Callback ao trocar de tab */
   onTabChange: (tabId: string) => void;
-  /** Variante visual (primary = fundo branco com borda, secondary = pills sem borda) */
-  variant?: 'primary' | 'secondary';
+  /** Variante visual (primary = fundo branco com borda, secondary = pills sem borda, card = card arredondado) */
+  variant?: 'primary' | 'secondary' | 'card';
 }
 
 // ============================================
@@ -80,7 +81,8 @@ export const TabBar: React.FC<TabBarProps> = ({
   return (
     <View style={[
       styles.container,
-      variant === 'secondary' && styles.containerSecondary
+      variant === 'secondary' && styles.containerSecondary,
+      variant === 'card' && styles.containerCard
     ]}>
       {tabs.map(tab => {
         const isActive = activeTab === tab.id;
@@ -92,8 +94,10 @@ export const TabBar: React.FC<TabBarProps> = ({
             style={[
               styles.tab,
               variant === 'secondary' && styles.tabSecondary,
+              variant === 'card' && styles.tabCard,
               isActive && styles.tabActive,
-              isActive && variant === 'secondary' && styles.tabSecondaryActive
+              isActive && variant === 'secondary' && styles.tabSecondaryActive,
+              isActive && variant === 'card' && styles.tabCardActive
             ]}
             onPress={() => onTabChange(tab.id)}
             accessibilityRole="tab"
@@ -104,12 +108,19 @@ export const TabBar: React.FC<TabBarProps> = ({
               <MaterialCommunityIcons
                 name={tab.icon}
                 size={20}
-                color={isActive ? '#007AFF' : '#8E8E93'}
+                color={
+                  isActive && variant === 'card' 
+                    ? '#FFFFFF' 
+                    : isActive 
+                    ? '#007AFF' 
+                    : '#8E8E93'
+                }
               />
             )}
             <Text style={[
               styles.tabText,
-              isActive && styles.tabTextActive
+              isActive && styles.tabTextActive,
+              isActive && variant === 'card' && styles.tabTextCardActive
             ]}>
               {tab.label}
             </Text>
@@ -147,6 +158,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingVertical: 12,
   },
+  containerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderBottomWidth: 0,
+    marginHorizontal: 16,
+    marginVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
 
   // Tab
   tab: {
@@ -164,10 +189,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 10,
   },
+  tabCard: {
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 10,
+  },
   tabActive: {
     backgroundColor: '#E3F2FF',
   },
   tabSecondaryActive: {
+    backgroundColor: '#007AFF',
+  },
+  tabCardActive: {
     backgroundColor: '#007AFF',
   },
 
@@ -179,6 +212,9 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: '#007AFF',
+  },
+  tabTextCardActive: {
+    color: '#FFFFFF',
   },
 
   // Badge

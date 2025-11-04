@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { getUnreadCount } from '../../services/notificationCenter';
-import { NotificationBell, NotificationFeed } from '../ui';
+import { authStorage } from '../../services/auth';
+import { getUnreadCount } from '../../services/notificationApi';
+import { NotificationBell, NotificationsModal } from '../ui';
 
 interface HeaderProps {
   title?: string;
@@ -19,15 +20,34 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Carrega count de notificações não lidas
   const loadUnreadCount = useCallback(async () => {
-    const count = await getUnreadCount();
-    setUnreadCount(count);
+    try {
+      // Verificar se há token antes de fazer request
+      const token = await authStorage.getToken();
+      
+      if (!token) {
+        // Sem token = usuário não logado, não tenta buscar
+        setUnreadCount(0);
+        return;
+      }
+      
+      const count = await getUnreadCount();
+      setUnreadCount(count);
+    } catch (error: any) {
+      // Se for 401, significa que não está autenticado
+      if (error?.response?.status === 401) {
+        setUnreadCount(0);
+        return;
+      }
+      console.error('[HEADER] Erro ao carregar notificações:', error);
+      // Não atualiza se der erro
+    }
   }, []);
 
   useEffect(() => {
     loadUnreadCount();
     
-    // Recarrega a cada 10 segundos
-    const interval = setInterval(loadUnreadCount, 10000);
+    // Recarrega a cada 5 segundos para notificações mais rápidas
+    const interval = setInterval(loadUnreadCount, 5000);
     
     return () => clearInterval(interval);
   }, [loadUnreadCount]);
@@ -52,10 +72,14 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </View>
 
-      <NotificationFeed
+      <NotificationsModal
         visible={feedVisible}
-        onClose={() => setFeedVisible(false)}
-        onBadgeCountChange={setUnreadCount}
+        onClose={() => {
+          setFeedVisible(false);
+          // Recarrega contador quando fecha o modal
+          loadUnreadCount();
+        }}
+        onUnreadCountChange={setUnreadCount}
       />
     </>
   );

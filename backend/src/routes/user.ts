@@ -10,6 +10,8 @@
 import { Hono } from 'hono';
 import { prisma } from '../lib/prisma.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
+import * as feedService from '../services/feed.service.js';
+import * as userActivityService from '../services/user-activity.service.js';
 
 const user = new Hono();
 
@@ -374,5 +376,50 @@ user.delete('/avatar', authMiddleware, async (c) => {
     }, 500);
   }
 });
+
+/**
+ * GET /user/my-activity
+ * Retorna atividades do próprio usuário
+ */
+user.get('/my-activity', authMiddleware, async (c) => {
+  try {
+    // @ts-ignore - Context type issue
+    const userId = c.get('userId');
+    const limit = parseInt(c.req.query('limit') || '20', 10);
+    const offset = parseInt(c.req.query('offset') || '0', 10);
+
+    console.log('[USER ACTIVITY] Buscando atividades - userId:', userId, 'limit:', limit, 'offset:', offset);
+
+    const activities = await userActivityService.getUserOwnActivity(String(userId), limit, offset);
+
+    console.log('[USER ACTIVITY] Atividades encontradas:', activities.length);
+
+    // Buscar stats de curtidas/comentários para as atividades
+    const activityIds = activities.map((a: any) => a.id);
+    const stats = await feedService.getActivityStats(activityIds, String(userId)) as Record<string, { likesCount: number; commentsCount: number; isLikedByUser: boolean }>;
+
+    // Adicionar stats às atividades
+    const activitiesWithStats = activities.map((activity: any) => ({
+      ...activity,
+      likesCount: stats[activity.id]?.likesCount || 0,
+      commentsCount: stats[activity.id]?.commentsCount || 0,
+      isLikedByUser: stats[activity.id]?.isLikedByUser || false,
+    }));
+
+    return c.json({
+      success: true,
+      data: activitiesWithStats,
+    });
+  } catch (error: any) {
+    console.error('[USER ACTIVITY] Erro ao buscar atividades:', error);
+    console.error('[USER ACTIVITY] Stack:', error.stack);
+    return c.json({ 
+      success: false, 
+      message: error.message || 'Erro ao buscar atividades',
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, 500);
+  }
+});
+
 
 export default user;

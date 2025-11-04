@@ -15,15 +15,15 @@
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { saveNotification } from '../services/notificationCenter';
 import {
-  addNotificationReceivedListener,
-  addNotificationResponseListener,
-  getNotificationsEnabled,
-  requestNotificationPermissions,
-  scheduleDailyReminder,
-  scheduleStreakReminder,
+    addNotificationReceivedListener,
+    addNotificationResponseListener,
+    getNotificationsEnabled,
+    requestNotificationPermissions,
+    scheduleDailyReminder,
+    scheduleStreakReminder,
 } from '../services/notifications';
+import { registerPushToken } from '../services/pushToken';
 
 export function useNotifications() {
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -40,16 +40,8 @@ export function useNotifications() {
         const content = notification.request.content;
         console.log('📬 Notificação recebida:', content.title);
         
-        // Se a notificação tem flag saveToFeed, salva no feed local
-        if (content.data?.saveToFeed && content.data?.type) {
-          await saveNotification({
-            type: content.data.type as any,
-            title: content.title || '',
-            body: content.body || '',
-            data: content.data,
-          });
-          console.log('💾 Notificação salva no feed local');
-        }
+        // As notificações agora são gerenciadas pelo backend
+        // Não precisamos salvar localmente
       }
     );
 
@@ -59,17 +51,8 @@ export function useNotifications() {
       const content = response.notification.request.content;
       console.log('👆 Usuário tocou na notificação:', data?.type);
       
-      // Salva notificações agendadas quando usuário interage com elas
-      // (Para o caso de notificações que chegaram quando app estava fechado)
-      if (data?.saveToFeed && data?.type) {
-        await saveNotification({
-          type: data.type as any,
-          title: content.title || '',
-          body: content.body || '',
-          data: data,
-        });
-        console.log('💾 Notificação agendada salva no feed ao tocar');
-      }
+      // As notificações agora são gerenciadas pelo backend
+      // Não precisamos salvar localmente
       
       handleNotificationTap(data);
     });
@@ -97,6 +80,9 @@ export function useNotifications() {
       setPermissionGranted(granted);
 
       if (granted) {
+        // Registra o push token no backend
+        await registerPushToken();
+        
         // Verifica se usuário quer receber notificações
         const enabled = await getNotificationsEnabled();
         

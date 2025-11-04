@@ -32,9 +32,13 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Navegação recursiva entre perfis
 
 ### **🔔 Notificações**
+- Sistema completo de notificações push (Expo Push API)
+- Notificações in-app com histórico persistente
+- 8 tipos de notificações (curtidas, comentários, amizades, conquistas, level up, desafios, streaks)
 - Lembretes diários agendados (9h e 21h)
-- Notificações de conquistas e level up
-- Navegação inteligente integrada
+- Badge counter em tempo real
+- Registro automático de push tokens
+- Proteção contra duplicatas (5 segundos)
 
 ### **🔒 Segurança**
 - Autenticação JWT com refresh automático
@@ -43,10 +47,11 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Controle de privacidade de perfis
 
 ### **🎨 Interface**
-- 32+ componentes reutilizáveis (+2 Sprint 13: TabBar, FilterBar)
+- 35+ componentes reutilizáveis (TabBar, FilterBar, BottomSheetModal, NotificationItem, ActivityRewardBadges)
 - 12 telas completas e responsivas
 - Design iOS/Android/Web
 - Safe area handling e estados vazios padronizados
+- Componentização profissional e arquitetura escalável
 
 ---
 
@@ -110,17 +115,20 @@ FiQuestLife/
 │   └── badges.tsx            # 🆕 Rota para BadgesScreen
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
-│   ├── ui/                   # 32 componentes de UI (+5 Sprint 13)
+│   ├── ui/                   # 35 componentes de UI
 │   │   ├── index.ts          # Barrel export de todos os componentes
 │   │   ├── ActivityFeedItem.tsx # 🆕 Item de atividade de amigo (Sprint 11)
+│   │   ├── ActivityRewardBadges.tsx # 🆕 Badges de XP/Coins reutilizáveis (Sprint 13)
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
 │   │   ├── BadgeCard.tsx     # 🆕 Card de badge/conquista com progresso (Sprint 7)
 │   │   ├── BadgeDetailModal.tsx # 🆕 Modal de detalhes do badge
 │   │   ├── BadgeItem.tsx     # 🆕 Item de badge reutilizável (2 variantes: full/mini)
+│   │   ├── BottomSheetModal.tsx # 🆕 Modal bottom sheet genérico (Sprint 13)
 │   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Card.tsx          # Container com sombra e padding
 │   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com badges e botão de completar
+│   │   ├── CommentModal.tsx  # 🆕 Modal de comentários em atividades (Sprint 12)
 │   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── EmptyState.tsx    # 🆕 Estado vazio genérico reutilizável (Sprint 11)
 │   │   ├── FeedActivityCard.tsx # 🆕 Card de atividade do feed (Sprint 12)
@@ -129,11 +137,12 @@ FiQuestLife/
 │   │   ├── FriendRequestCard.tsx # 🆕 Card de solicitação de amizade (Sprint 11)
 │   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
 │   │   ├── Input.tsx         # Input com ícone e multiline + efeitos foco
+│   │   ├── LeaderboardCard.tsx # 🆕 Card de ranking com posição (Sprint 12)
 │   │   ├── LoadingScreen.tsx # Tela de loading reutilizável
 │   │   ├── LogoutButton.tsx  # Botão de logout com confirmação
 │   │   ├── NotificationBell.tsx # 🆕 Sino de notificações com badge count (Sprint 9)
-│   │   ├── NotificationFeed.tsx # 🆕 Feed modal de notificações (Sprint 9)
-│   │   ├── NotificationItem.tsx # 🆕 Item individual de notificação (Sprint 9)
+│   │   ├── NotificationItem.tsx # 🆕 Item de notificação reutilizável (Sprint 13)
+│   │   ├── NotificationsModal.tsx # 🆕 Modal de notificações (Sprint 9/13)
 │   │   ├── ProfileAvatar.tsx # 🆕 Avatar com upload de foto (galeria/câmera)
 │   │   ├── RewardCard.tsx    # 🆕 Card individual de recompensa (Sprint 10)
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
@@ -170,10 +179,14 @@ FiQuestLife/
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
 │   ├── feed.ts               # 🆕 Serviço de feed social (Sprint 12)
+│   ├── feedInteractions.ts   # 🆕 Serviço de curtidas/comentários (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
-│   ├── notificationCenter.ts # 🆕 Histórico de notificações in-app (Sprint 9)
+│   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
+│   ├── notificationApi.ts    # 🆕 Serviço de notificações backend (Sprint 13)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
-│   └── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
+│   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
+│   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
+│   └── userProfile.ts        # 🆕 Serviço de perfis públicos (Sprint 12)
 │
 ├── constants/                 # 🎨 Constantes e Temas
 │   ├── responsive.ts         # Breakpoints e helpers responsivos
@@ -188,22 +201,35 @@ FiQuestLife/
 │   │   │   ├── auth.controller.ts       # Login, Register, Profile
 │   │   │   ├── badge.controller.ts      # 🆕 Gerenciamento de badges (3 endpoints)
 │   │   │   ├── challenge.controller.ts  # 🆕 Gerenciamento de desafios (4 endpoints)
+│   │   │   ├── feed.controller.ts       # 🆕 Feed de atividades (Sprint 12)
 │   │   │   ├── friend.controller.ts     # 🆕 Gerenciamento de amigos (12 endpoints - Sprint 11)
 │   │   │   ├── health.controller.ts     # Health check
-│   │   │   └── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
+│   │   │   ├── leaderboard.controller.ts # 🆕 Rankings (Sprint 12)
+│   │   │   ├── notification.controller.ts # 🆕 Notificações backend (Sprint 13)
+│   │   │   ├── push-token.controller.ts # 🆕 Gerenciamento de tokens push (Sprint 13)
+│   │   │   ├── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
+│   │   │   └── user.controller.ts       # 🆕 Perfis públicos (Sprint 12)
 │   │   ├── services/         # 🔧 Lógica de Negócio
 │   │   │   ├── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
 │   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
-│   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (530 linhas - Sprint 11)
+│   │   │   ├── expo-push.service.ts     # 🆕 Serviço Expo Push API (Sprint 13)
+│   │   │   ├── feed.service.ts          # 🆕 Feed social (Sprint 12)
+│   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (774 linhas - Sprint 11)
+│   │   │   ├── leaderboard.service.ts   # 🆕 Rankings (Sprint 12)
+│   │   │   ├── notification.service.ts  # 🆕 Notificações com proteção duplicatas (Sprint 13)
 │   │   │   └── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
 │   │   ├── routes/           # 🛣️ Definição de rotas
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
 │   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
+│   │   │   ├── feed.routes.ts           # 🆕 Rotas de feed (protegidas - Sprint 12)
 │   │   │   ├── friend.routes.ts         # 🆕 Rotas de amigos (protegidas - Sprint 11)
 │   │   │   ├── health.ts                # Health check
+│   │   │   ├── leaderboard.routes.ts    # 🆕 Rotas de rankings (protegidas - Sprint 12)
+│   │   │   ├── notification.routes.ts   # 🆕 Rotas de notificações (protegidas - Sprint 13)
+│   │   │   ├── push-token.routes.ts     # 🆕 Rotas de tokens push (protegidas - Sprint 13)
 │   │   │   ├── reward.ts                # 🆕 Rotas de recompensas (protegidas - Sprint 10)
-│   │   │   └── user.ts                  # Rotas de usuário (protegidas)
+│   │   │   └── user.ts                  # Rotas de usuário e perfis públicos (protegidas)
 │   │   ├── middlewares/      # 🔒 Middlewares
 │   │   │   ├── auth.middleware.ts       # Validação JWT
 │   │   │   ├── error.middleware.ts      # Tratamento de erros
@@ -336,6 +362,16 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Novembro de 2025**
+- ✅ **Sprint 13: Notificações Push + Componentização** (04/11/2025)
+  - Sistema completo de notificações push com Expo Push API
+  - Registro automático de tokens no backend
+  - Envio de push notifications em tempo real (curtidas, comentários, amizades)
+  - Proteção contra notificações duplicadas (5 segundos)
+  - Componentização profissional: NotificationItem, BottomSheetModal, ActivityRewardBadges
+  - TabBar com variante "card" (bordas arredondadas, sombra, estado ativo azul)
+  - NotificationsModal refatorado (100 linhas removidas)
+  - FeedActivityCard refatorado (40 linhas removidas)
+  - Arquitetura escalável e código limpo
 - ✅ **Feed Social Completo** - Timeline de atividades dos amigos com 4 tipos
 - ✅ **Perfis Públicos** - Visualização completa de perfis com controle de privacidade
 - ✅ **Leaderboard Backend** - Rankings de amigos e global com 3 tipos de ordenação
@@ -345,7 +381,7 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 
 ### **Outubro de 2025**
 - ✅ **Histórico de Recompensas** - Tela completa com filtros e paginação infinita
-- ✅ **Notificações Push** - Sistema completo com 5 tipos e lembretes agendados
+- ✅ **Sistema de Notificações** - Push notifications com 5 tipos e lembretes agendados
 - ✅ **Sistema de Badges** - 29 conquistas em 5 categorias com 4 raridades
 - ✅ **Edição de Perfil** - Upload de foto, validações, campos completos
 - ✅ **Desafios Diários** - 43 desafios em 8 categorias com atribuição automática

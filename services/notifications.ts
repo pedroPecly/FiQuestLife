@@ -17,7 +17,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { saveNotification } from './notificationCenter';
 
 // ==========================================
 // TIPOS
@@ -368,25 +367,6 @@ export async function getNotificationsEnabled(): Promise<boolean> {
 // ==========================================
 
 /**
- * Salva notificação recebida no histórico local (in-app)
- * Chamado automaticamente quando notificação chega
- */
-async function saveNotificationToHistory(notification: Notifications.Notification) {
-  try {
-    const { title, body, data } = notification.request.content;
-    
-    await saveNotification({
-      type: (data?.type as NotificationType) || 'DAILY_REMINDER',
-      title: title || 'Notificação',
-      body: body || '',
-      data: data,
-    });
-  } catch (error) {
-    console.error('Erro ao salvar notificação no histórico:', error);
-  }
-}
-
-/**
  * Adiciona listener para quando usuário toca na notificação
  * Usado para navegar para tela apropriada
  * 
@@ -402,7 +382,6 @@ export function addNotificationResponseListener(
 /**
  * Adiciona listener para notificações recebidas (app aberto)
  * Usado para atualizar UI quando notificação chega
- * TAMBÉM salva notificação no histórico in-app
  * 
  * @param callback Função chamada quando notificação chega
  * @returns Subscription (para cleanup)
@@ -410,13 +389,7 @@ export function addNotificationResponseListener(
 export function addNotificationReceivedListener(
   callback: (notification: Notifications.Notification) => void
 ) {
-  return Notifications.addNotificationReceivedListener((notification) => {
-    // Salva no histórico in-app
-    saveNotificationToHistory(notification);
-    
-    // Chama callback do usuário
-    callback(notification);
-  });
+  return Notifications.addNotificationReceivedListener(callback);
 }
 
 /**

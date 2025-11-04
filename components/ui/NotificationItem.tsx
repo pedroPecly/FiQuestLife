@@ -1,133 +1,149 @@
-/**
- * ============================================
- * NOTIFICATION ITEM - Item de Notificação
- * ============================================
- * 
- * Representa uma notificação individual no feed.
- * 
- * Features:
- * - Visual diferente para lida/não lida
- * - Ícone colorido por tipo
- * - Timestamp relativo
- * - Touch para navegar
- * 
- * @created 27 de outubro de 2025
- */
-
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { formatTimestamp, NOTIFICATION_COLORS, type InAppNotification } from '../../services/notificationCenter';
+import type { BackendNotification } from '../../services/notificationApi';
 
-// ==========================================
-// TIPOS
-// ==========================================
+const theme = {
+  colors: {
+    background: '#FFFFFF',
+    text: {
+      primary: '#1C1C1E',
+      secondary: '#8E8E93',
+      tertiary: '#C7C7CC',
+    },
+    primary: '#007AFF',
+    border: '#E5E5EA',
+    accent: {
+      red: '#FF3B30',
+    },
+  },
+};
 
 interface NotificationItemProps {
-  notification: InAppNotification;
-  onPress: (notification: InAppNotification) => void;
+  notification: BackendNotification;
+  onPress: () => void;
+  onDelete: () => void;
 }
 
-// ==========================================
-// COMPONENTE
-// ==========================================
+const getNotificationIcon = (type: BackendNotification['type']): keyof typeof Ionicons.glyphMap => {
+  switch (type) {
+    case 'ACTIVITY_LIKE':
+      return 'heart';
+    case 'ACTIVITY_COMMENT':
+      return 'chatbubble';
+    case 'FRIEND_REQUEST':
+      return 'person-add';
+    case 'FRIEND_ACCEPTED':
+      return 'people';
+    case 'BADGE_EARNED':
+      return 'medal';
+    case 'LEVEL_UP':
+      return 'arrow-up-circle';
+    case 'CHALLENGE_COMPLETED':
+      return 'checkmark-circle';
+    case 'STREAK_MILESTONE':
+      return 'flame';
+    default:
+      return 'notifications';
+  }
+};
 
-export const NotificationItem: React.FC<NotificationItemProps> = ({
-  notification,
-  onPress,
-}) => {
-  const isUnread = !notification.read;
-  const iconColor = NOTIFICATION_COLORS[notification.type];
+const getTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return 'Agora';
+  if (minutes < 60) return `${minutes}m atrás`;
+  if (hours < 24) return `${hours}h atrás`;
+  if (days < 7) return `${days}d atrás`;
+  
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+};
+
+export function NotificationItem({ notification, onPress, onDelete }: NotificationItemProps) {
+  const timeAgo = getTimeAgo(notification.createdAt);
 
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        isUnread && styles.unreadContainer,
-      ]}
-      onPress={() => onPress(notification)}
-      activeOpacity={0.7}
+      style={[styles.notificationItem, !notification.read && styles.unread]}
+      onPress={onPress}
     >
-      {/* Ícone */}
-      <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
-        <Text style={styles.iconEmoji}>{notification.icon}</Text>
+      <View style={styles.iconContainer}>
+        <Ionicons name={getNotificationIcon(notification.type)} size={24} color={theme.colors.primary} />
+        {!notification.read && <View style={styles.unreadDot} />}
       </View>
 
-      {/* Conteúdo */}
       <View style={styles.content}>
-        <Text style={[styles.title, isUnread && styles.unreadTitle]}>
-          {notification.title}
-        </Text>
-        <Text style={styles.body} numberOfLines={2}>
-          {notification.body}
-        </Text>
-        <Text style={styles.timestamp}>
-          {formatTimestamp(notification.timestamp)}
-        </Text>
+        <Text style={styles.title}>{notification.title}</Text>
+        <Text style={styles.message}>{notification.message}</Text>
+        <Text style={styles.time}>{timeAgo}</Text>
       </View>
 
-      {/* Indicador de não lida */}
-      {isUnread && <View style={styles.unreadDot} />}
+      <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+        <Ionicons name="close" size={20} color={theme.colors.text.secondary} />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
-};
-
-// ==========================================
-// ESTILOS
-// ==========================================
+}
 
 const styles = StyleSheet.create({
-  container: {
+  notificationItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
   },
-  unreadContainer: {
-    backgroundColor: '#f8f9fa',
+  unread: {
+    backgroundColor: theme.colors.primary + '05',
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primary + '10',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
-  },
-  iconEmoji: {
-    fontSize: 24,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 4,
-  },
-  unreadTitle: {
-    color: '#333',
-    fontWeight: '700',
-  },
-  body: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#999',
+    position: 'relative',
   },
   unreadDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#2196F3',
+    backgroundColor: theme.colors.accent.red,
+    borderWidth: 2,
+    borderColor: theme.colors.background,
+  },
+  content: {
+    flex: 1,
+    gap: 4,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  message: {
+    fontSize: 13,
+    color: theme.colors.text.secondary,
+    lineHeight: 18,
+  },
+  time: {
+    fontSize: 11,
+    color: theme.colors.text.tertiary,
+    marginTop: 4,
+  },
+  deleteButton: {
+    padding: 4,
     marginLeft: 8,
-    marginTop: 6,
   },
 });

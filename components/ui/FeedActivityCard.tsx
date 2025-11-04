@@ -1,8 +1,11 @@
 ﻿import { FeedActivity, FeedActivityType } from '@/services/feed';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { feedInteractionsService } from '@/services/feedInteractions';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityRewardBadges } from './ActivityRewardBadges';
+import { CommentModal } from './CommentModal';
 
 const theme = {
   colors: {
@@ -20,6 +23,7 @@ const theme = {
 
 interface FeedActivityCardProps {
   activity: FeedActivity;
+  onInteraction?: () => void; // Callback para recarregar stats após interação
 }
 
 const getActivityIcon = (type: FeedActivityType) => {
@@ -75,7 +79,45 @@ const getRarityColor = (rarity: string): string => {
   return map[rarity] || theme.colors.textSecondary;
 };
 
-export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity }) => {
+export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, onInteraction }) => {
+  const [liked, setLiked] = useState(activity.isLikedByUser || false);
+  const [likesCount, setLikesCount] = useState(activity.likesCount || 0);
+  const [commentsCount, setCommentsCount] = useState(activity.commentsCount || 0);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [liking, setLiking] = useState(false);
+  
+  // Sincronizar estado quando activity prop mudar (após refreshStats)
+  useEffect(() => {
+    setLiked(activity.isLikedByUser || false);
+    setLikesCount(activity.likesCount || 0);
+    setCommentsCount(activity.commentsCount || 0);
+  }, [activity.isLikedByUser, activity.likesCount, activity.commentsCount]);
+  
+  const handleLike = async () => {
+    if (liking) return;
+    
+    setLiking(true);
+    const previousLiked = liked;
+    const previousCount = likesCount;
+    
+    // Otimistic update
+    setLiked(!liked);
+    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
+    
+    const result = await feedInteractionsService.toggleLike(activity.id);
+    
+    if (!result.success) {
+      // Revert on error
+      setLiked(previousLiked);
+      setLikesCount(previousCount);
+    } else {
+      // Notificar para recarregar stats do servidor
+      onInteraction?.();
+    }
+    
+    setLiking(false);
+  };
+
   const metaText = (() => {
     if (!activity.metadata) return '';
     const m = String(activity.metadata);
@@ -99,6 +141,7 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity }) 
     : theme.colors.textSecondary;
     
   const xp = activity.xpReward || 0;
+  const coins = activity.coinsReward || 0;
   const bgColor = getActivityColor(activity.type);
 
   return (
@@ -127,13 +170,70 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity }) 
         {metaText.length > 0 && (
           <Text style={[styles.metadata, { color: metaColor }]}>{metaText}</Text>
         )}
-        {xp > 0 && (
-          <View style={styles.xpBadge}>
-            <MaterialCommunityIcons name="star" size={16} color={theme.colors.warning} />
-            <Text style={styles.xpText}>{'+' + xp + ' XP'}</Text>
-          </View>
+        
+        {/* Badges de recompensas (XP e Moedas) */}
+        {(xp > 0 || coins > 0) && (
+          <ActivityRewardBadges xp={xp} coins={coins} size="small" />
         )}
+        
+        {/* Botões de interação */}
+        <View style={styles.interactionRow}>
+          <TouchableOpacity 
+            style={styles.interactionButton}
+            onPress={handleLike}
+            activeOpacity={0.7}
+          >
+            <Ionicons 
+              name={liked ? "heart" : "heart-outline"} 
+              size={20} 
+              color={liked ? "#FF3B30" : theme.colors.textSecondary} 
+            />
+            {likesCount > 0 && (
+              <Text style={[styles.interactionText, liked && styles.likedText]}>
+                {likesCount}
+              </Text>
+            )}
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.interactionButton}
+            onPress={() => setShowCommentModal(true)}
+            activeOpacity={0.7}
+          >
+            <Ionicons 
+              name="chatbubble-outline" 
+              size={20} 
+              color={theme.colors.textSecondary} 
+            />
+            {commentsCount > 0 && (
+              <Text style={styles.interactionText}>
+                {commentsCount}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
+      
+      {/* Modal de comentários */}
+      <CommentModal
+        visible={showCommentModal}
+        activityId={activity.id}
+        onClose={() => {
+          setShowCommentModal(false);
+        }}
+        onCommentAdded={() => {
+          // Incrementar contagem quando adiciona comentário
+          setCommentsCount(prev => prev + 1);
+          // Notificar para recarregar stats do servidor
+          onInteraction?.();
+        }}
+        onCommentDeleted={() => {
+          // Decrementar contagem quando deleta comentário
+          setCommentsCount(prev => Math.max(0, prev - 1));
+          // Notificar para recarregar stats do servidor
+          onInteraction?.();
+        }}
+      />
     </View>
   );
 };
@@ -228,21 +328,26 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontWeight: '500',
   },
-  xpBadge: {
+  interactionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: theme.colors.warning + '20',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: theme.colors.warning + '40',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    gap: 16,
   },
-  xpText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: theme.colors.warning,
-    marginLeft: 4,
+  interactionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  interactionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
+  },
+  likedText: {
+    color: '#FF3B30',
   },
 });
