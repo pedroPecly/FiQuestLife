@@ -17,21 +17,28 @@ import { FeedActivity, feedService } from '@/services/feed';
 import { feedInteractionsService } from '@/services/feedInteractions';
 import { LeaderboardEntry, LeaderboardType, leaderboardService } from '@/services/leaderboard';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  FlatList,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    RefreshControl,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+  const feedListRef = useRef<FlatList>(null);
+  const myPostsListRef = useRef<FlatList>(null);
+  
   const [activeTab, setActiveTab] = useState<'feed' | 'myPosts' | 'ranking'>('feed');
+  const [highlightedActivityId, setHighlightedActivityId] = useState<string | null>(null);
+  const [openCommentsForActivityId, setOpenCommentsForActivityId] = useState<string | null>(null);
   
   // Feed state
   const [activities, setActivities] = useState<FeedActivity[]>([]);
@@ -68,6 +75,94 @@ export default function ExploreScreen() {
       }
     }, [activeTab])
   );
+
+  // Processa parâmetros de navegação (highlight de atividades)
+  useEffect(() => {
+    console.log('[EXPLORE] ========================================');
+    console.log('[EXPLORE] useEffect disparado');
+    console.log('[EXPLORE] Todos os params:', JSON.stringify(params));
+    console.log('[EXPLORE] params.highlightActivityId:', params.highlightActivityId);
+    console.log('[EXPLORE] params.tab:', params.tab);
+    console.log('[EXPLORE] params.openComments:', params.openComments);
+    console.log('[EXPLORE] ========================================');
+
+    if (params.highlightActivityId && params.tab) {
+      const targetTab = params.tab as 'feed' | 'myPosts';
+      const activityId = params.highlightActivityId as string;
+      const shouldOpenComments = params.openComments === 'true';
+
+      console.log('[EXPLORE] ✅ Processando navegação:');
+      console.log('[EXPLORE] - Tab:', targetTab);
+      console.log('[EXPLORE] - ActivityId:', activityId);
+      console.log('[EXPLORE] - OpenComments:', shouldOpenComments);
+
+      // Muda para a tab correta
+      setActiveTab(targetTab);
+      
+      // Define o ID para highlight
+      setHighlightedActivityId(activityId);
+
+      // Define se deve abrir comentários
+      if (shouldOpenComments) {
+        setOpenCommentsForActivityId(activityId);
+      }
+
+      // Carrega os dados e depois faz scroll
+      const loadAndScroll = async () => {
+        try {
+          if (targetTab === 'feed') {
+            await loadFeed(true);
+          } else {
+            await loadMyPosts(true);
+          }
+
+          // Aguarda um pouco para garantir que os dados foram renderizados
+          setTimeout(() => {
+            scrollToActivity(activityId, targetTab);
+          }, 500);
+        } catch (error) {
+          console.error('[EXPLORE] Erro ao carregar e fazer scroll:', error);
+        }
+      };
+
+      loadAndScroll();
+
+      // Remove o highlight após 3 segundos
+      setTimeout(() => {
+        setHighlightedActivityId(null);
+        setOpenCommentsForActivityId(null);
+      }, 3000);
+    }
+  }, [params.highlightActivityId, params.tab, params.openComments]);
+
+  // Função para fazer scroll até uma atividade específica
+  const scrollToActivity = (activityId: string, tab: 'feed' | 'myPosts') => {
+    const list = tab === 'feed' ? activities : myPosts;
+    const listRef = tab === 'feed' ? feedListRef : myPostsListRef;
+    const index = list.findIndex(a => a.id === activityId);
+    
+    console.log('[EXPLORE] Fazendo scroll - Index:', index, 'Total items:', list.length);
+    
+    if (index !== -1 && listRef.current) {
+      try {
+        listRef.current.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.5, // Centraliza no meio da tela
+        });
+        console.log('[EXPLORE] Scroll executado com sucesso');
+      } catch (error) {
+        console.error('[EXPLORE] Erro ao fazer scroll:', error);
+        // Fallback: tenta scroll manual
+        listRef.current.scrollToOffset({
+          offset: index * 200, // Altura aproximada de um card
+          animated: true,
+        });
+      }
+    } else {
+      console.warn('[EXPLORE] Atividade não encontrada na lista ou ref não disponível');
+    }
+  };
 
   // Load initial feed
   const loadFeed = async (isRefresh = false) => {
@@ -330,9 +425,17 @@ export default function ExploreScreen() {
       {/* Content */}
       {activeTab === 'feed' ? (
         <FlatList
+          ref={feedListRef}
           data={activities}
           keyExtractor={(item, index) => `${item.id || item.userId}-${item.type}-${index}`}
-          renderItem={({ item }) => <FeedActivityCard activity={item} onInteraction={refreshStats} />}
+          renderItem={({ item }) => (
+            <FeedActivityCard 
+              activity={item} 
+              onInteraction={refreshStats}
+              isHighlighted={highlightedActivityId === item.id}
+              openCommentsOnMount={openCommentsForActivityId === item.id}
+            />
+          )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -342,12 +445,28 @@ export default function ExploreScreen() {
           onEndReachedThreshold={0.5}
           ListEmptyComponent={renderEmptyState}
           ListFooterComponent={renderFooter}
+          onScrollToIndexFailed={(info) => {
+            console.warn('[EXPLORE] Falha ao scroll para índice:', info);
+            // Tenta scroll para offset em vez de index
+            feedListRef.current?.scrollToOffset({
+              offset: info.averageItemLength * info.index,
+              animated: true,
+            });
+          }}
         />
       ) : activeTab === 'myPosts' ? (
         <FlatList
+          ref={myPostsListRef}
           data={myPosts}
           keyExtractor={(item, index) => `${item.id || item.userId}-${item.type}-${index}`}
-          renderItem={({ item }) => <FeedActivityCard activity={item} onInteraction={refreshStats} />}
+          renderItem={({ item }) => (
+            <FeedActivityCard 
+              activity={item} 
+              onInteraction={refreshStats}
+              isHighlighted={highlightedActivityId === item.id}
+              openCommentsOnMount={openCommentsForActivityId === item.id}
+            />
+          )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -371,6 +490,13 @@ export default function ExploreScreen() {
               </View>
             ) : null
           }
+          onScrollToIndexFailed={(info) => {
+            console.warn('[EXPLORE] Falha ao scroll para índice (myPosts):', info);
+            myPostsListRef.current?.scrollToOffset({
+              offset: info.averageItemLength * info.index,
+              animated: true,
+            });
+          }}
         />
       ) : (
         <FlatList

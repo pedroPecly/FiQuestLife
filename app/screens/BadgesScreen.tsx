@@ -19,12 +19,12 @@ import {
     ActivityIndicator,
     FlatList,
     RefreshControl,
-    SafeAreaView,
     StatusBar,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCard, BadgeDetailModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import type { BadgeWithProgress } from '../../services/badge';
@@ -42,6 +42,7 @@ type FilterType = 'all' | 'earned' | 'locked';
 // ==========================================
 
 export const BadgesScreen = () => {
+  const insets = useSafeAreaInsets();
   // ==========================================
   // STATE
   // ==========================================
@@ -134,13 +135,13 @@ export const BadgesScreen = () => {
   // ==========================================
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#8B5CF6" />
           <Text style={styles.loadingText}>Carregando conquistas...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -148,7 +149,7 @@ export const BadgesScreen = () => {
   // RENDER MAIN
   // ==========================================
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       {/* Header */}
@@ -232,6 +233,6 @@ export const BadgesScreen = () => {
         visible={modalVisible}
         onClose={closeBadgeDetails}
       />
-    </SafeAreaView>
+    </View>
   );
 };

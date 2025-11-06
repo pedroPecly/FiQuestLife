@@ -24,6 +24,8 @@ const theme = {
 interface FeedActivityCardProps {
   activity: FeedActivity;
   onInteraction?: () => void; // Callback para recarregar stats após interação
+  isHighlighted?: boolean; // Indica se o card deve ser destacado visualmente
+  openCommentsOnMount?: boolean; // Abre modal de comentários ao montar (para notificações de comentário)
 }
 
 const getActivityIcon = (type: FeedActivityType) => {
@@ -79,7 +81,7 @@ const getRarityColor = (rarity: string): string => {
   return map[rarity] || theme.colors.textSecondary;
 };
 
-export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, onInteraction }) => {
+export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, onInteraction, isHighlighted = false, openCommentsOnMount = false }) => {
   const [liked, setLiked] = useState(activity.isLikedByUser || false);
   const [likesCount, setLikesCount] = useState(activity.likesCount || 0);
   const [commentsCount, setCommentsCount] = useState(activity.commentsCount || 0);
@@ -92,6 +94,16 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
     setLikesCount(activity.likesCount || 0);
     setCommentsCount(activity.commentsCount || 0);
   }, [activity.isLikedByUser, activity.likesCount, activity.commentsCount]);
+
+  // Abre modal de comentários automaticamente se solicitado (para notificações de comentário)
+  useEffect(() => {
+    if (openCommentsOnMount && isHighlighted) {
+      // Pequeno delay para garantir que o scroll aconteceu primeiro
+      setTimeout(() => {
+        setShowCommentModal(true);
+      }, 800);
+    }
+  }, [openCommentsOnMount, isHighlighted]);
   
   const handleLike = async () => {
     if (liking) return;
@@ -145,7 +157,10 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
   const bgColor = getActivityColor(activity.type);
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      isHighlighted && styles.highlighted
+    ]}>
       <View style={[styles.colorStrip, { backgroundColor: bgColor }]} />
       <View style={styles.iconBadge}>{getActivityIcon(activity.type)}</View>
       <View style={styles.content}>
@@ -254,6 +269,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+  },
+  highlighted: {
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
+    backgroundColor: theme.colors.primary + '08', // Azul translúcido
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   colorStrip: {
     position: 'absolute',

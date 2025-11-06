@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
     paddingHorizontal: 10,
+    paddingTop: 10, // Adiciona espaço superior para não ficar muito encima
   },
   content: {
     alignItems: 'center',
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   notificationContainer: {
     position: 'absolute',
     right: 10,
-    top: 0,
+    top: 10, // Ajusta posição para acompanhar o paddingTop do container
   },
 });
 

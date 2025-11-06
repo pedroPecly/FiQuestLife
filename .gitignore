@@ -38,6 +38,9 @@ yarn-error.*
 *.tsbuildinfo
 
 # Audit and Analysis Reports (local use only)
+
+# Diagnóstico de gambiarras (não versionar)
+GAMBIARRAS_E_PRATICAS_RUINS.md
 AUDIT_REPORT.md
 AUDIT_SUMMARY.md
 IMPROVEMENTS.md

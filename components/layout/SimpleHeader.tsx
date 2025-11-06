@@ -74,7 +74,7 @@ export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
 
 const styles = StyleSheet.create({
   headerContainer: {
-    paddingTop: StatusBar.currentHeight || 0, // Android
+    // Padding removido - será gerenciado pelo container pai com useSafeAreaInsets
   },
   header: {
     flexDirection: 'row',

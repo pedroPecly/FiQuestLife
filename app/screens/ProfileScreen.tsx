@@ -4,13 +4,13 @@ import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    SafeAreaView,
     ScrollView,
     StatusBar,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '../../components/layout/Header';
 import { Avatar, BadgeItem, Card, InfoRow, StatBox } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
@@ -21,6 +21,7 @@ import type { User } from '../../types/user';
 import { styles } from '../styles/profile.styles';
 
 const ProfileScreen = () => {
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentBadges, setRecentBadges] = useState<any[]>([]);
@@ -156,25 +157,25 @@ const ProfileScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" />
         <ActivityIndicator size="large" color="#20B2AA" />
         <Text style={styles.loadingText}>Carregando seus dados...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (!user) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" />
         <Text style={styles.loadingText}>Erro ao carregar dados</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
       
       <ScrollView 
@@ -335,7 +336,7 @@ const ProfileScreen = () => {
         </TouchableOpacity>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

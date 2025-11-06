@@ -15,26 +15,29 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     RefreshControl,
-    SafeAreaView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { showAlert, showDialog } from '../../utils/dialog';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// import removido: dialog legacy
 
 type TabType = 'friends' | 'requests' | 'search';
 
 export default function FriendsScreen() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const initialTab = (params.tab as TabType) || 'search';
   
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
 
   // Friends tab
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -57,13 +60,34 @@ export default function FriendsScreen() {
     }, [])
   );
 
+  // Processa parâmetros de navegação (highlight de usuário)
+  React.useEffect(() => {
+    if (params.highlightUserId && params.tab) {
+      const userId = params.highlightUserId as string;
+      const targetTab = params.tab as TabType;
+
+      console.log('[FRIENDS] Parâmetros recebidos - Tab:', targetTab, 'UserId:', userId);
+
+      // Muda para a tab correta
+      setActiveTab(targetTab);
+      
+      // Define o ID para highlight
+      setHighlightedUserId(userId);
+
+      // Remove o highlight após 3 segundos
+      setTimeout(() => {
+        setHighlightedUserId(null);
+      }, 3000);
+    }
+  }, [params.highlightUserId, params.tab]);
+
   const loadData = async () => {
     try {
       setLoading(true);
       await Promise.all([loadFriends(), loadRequests(), loadStats()]);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
-      showAlert('Erro', error.message || 'Erro ao carregar dados');
+      Alert.alert('Erro', 'Erro ao carregar dados. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -110,7 +134,7 @@ export default function FriendsScreen() {
   // Search function
   const performSearch = async () => {
     if (searchQuery.trim().length < 2) {
-      showAlert('Atenção', 'Digite pelo menos 2 caracteres para buscar');
+  // alert removido
       return;
     }
 
@@ -120,7 +144,7 @@ export default function FriendsScreen() {
       setSearchResults(results);
     } catch (error: any) {
       console.error('Erro ao buscar usuários:', error);
-      showAlert('Erro', error.message || 'Erro ao buscar usuários');
+  // alert removido
     } finally {
       setSearching(false);
     }
@@ -143,63 +167,54 @@ export default function FriendsScreen() {
   const handleSendRequest = async (userId: string) => {
     try {
       await friendService.sendFriendRequest(userId);
-      showAlert('Sucesso', 'Solicitação de amizade enviada!');
+  // alert removido
       // Reload search to update status
       if (searchQuery.trim().length >= 2) {
         await performSearch();
       }
       await loadRequests();
     } catch (error: any) {
-      showAlert('Erro', error.message || 'Erro ao enviar solicitação');
+      Alert.alert('Erro', 'Erro ao enviar solicitação de amizade.');
     }
   };
 
   const handleAcceptRequest = async (requestId: string) => {
     try {
       await friendService.acceptFriendRequest(requestId);
-      showAlert('Sucesso', 'Solicitação aceita!');
+  // alert removido
       await loadData();
     } catch (error: any) {
-      showAlert('Erro', error.message || 'Erro ao aceitar solicitação');
+      Alert.alert('Erro', 'Erro ao aceitar solicitação.');
     }
   };
 
   const handleRejectRequest = async (requestId: string) => {
     try {
       await friendService.rejectFriendRequest(requestId);
-      showAlert('Sucesso', 'Solicitação rejeitada');
+  // alert removido
       await loadData();
     } catch (error: any) {
-      showAlert('Erro', error.message || 'Erro ao rejeitar solicitação');
+      Alert.alert('Erro', 'Erro ao rejeitar solicitação.');
     }
   };
 
   const handleCancelRequest = async (requestId: string) => {
     try {
       await friendService.cancelFriendRequest(requestId);
-      showAlert('Sucesso', 'Solicitação cancelada');
+  // alert removido
       await loadData();
     } catch (error: any) {
-      showAlert('Erro', error.message || 'Erro ao cancelar solicitação');
+      Alert.alert('Erro', 'Erro ao cancelar solicitação.');
     }
   };
 
   const handleRemoveFriend = async (friendId: string, friendName: string) => {
-    showDialog({
-      title: 'Confirmar',
-      message: `Tem certeza que deseja remover ${friendName} dos seus amigos?`,
-      confirmText: 'Remover',
-      cancelText: 'Cancelar',
-      onConfirm: async () => {
-        try {
-          await friendService.removeFriend(friendId);
-          showAlert('Sucesso', 'Amigo removido');
-          await loadData();
-        } catch (error: any) {
-          showAlert('Erro', error.message || 'Erro ao remover amigo');
-        }
-      },
-    });
+    try {
+      await friendService.removeFriend(friendId);
+      await loadData();
+    } catch (error: any) {
+      Alert.alert('Erro', 'Erro ao remover amigo.');
+    }
   };
 
   // Configuração das tabs
@@ -302,6 +317,7 @@ export default function FriendsScreen() {
                   // @ts-ignore
                   router.push(`/user-profile?userId=${userId}`);
                 } : undefined}
+                isHighlighted={highlightedUserId === userId}
               />
             );
           }}
@@ -406,7 +422,7 @@ export default function FriendsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Header 
         title="Amigos"
         subtitle="Conecte-se com outros aventureiros! 👥"
@@ -423,7 +439,7 @@ export default function FriendsScreen() {
         {activeTab === 'requests' && renderRequestsList()}
         {activeTab === 'friends' && renderFriendsList()}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

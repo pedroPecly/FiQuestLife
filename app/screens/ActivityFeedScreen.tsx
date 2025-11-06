@@ -14,7 +14,7 @@ import {
     Text,
     View,
 } from 'react-native';
-import { showAlert } from '../../utils/dialog';
+// import removido: dialog legacy
 
 type FilterType = 'all' | 'challenges' | 'badges' | 'rewards';
 
@@ -58,7 +58,7 @@ export default function ActivityFeedScreen() {
       setOffset(currentOffset + data.length);
     } catch (error: any) {
       console.error('Erro ao carregar atividades:', error);
-      showAlert('Erro', error.message || 'Erro ao carregar atividades');
+  // alert removido
     } finally {
       setLoading(false);
       setRefreshing(false);

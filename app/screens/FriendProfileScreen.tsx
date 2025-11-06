@@ -6,16 +6,18 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    SafeAreaView,
+    Alert,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
-import { showAlert, showDialog } from '../../utils/dialog';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// import removido: dialog legacy
 
 export default function FriendProfileScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
   const friendId = params.id as string;
@@ -36,8 +38,9 @@ export default function FriendProfileScreen() {
       const friendsList = await friendService.getFriendsList();
       const friendData = friendsList.find((f) => f.id === friendId);
 
+
       if (!friendData) {
-        showAlert('Erro', 'Amigo não encontrado');
+        Alert.alert('Erro', 'Amigo não encontrado.');
         router.back();
         return;
       }
@@ -49,33 +52,23 @@ export default function FriendProfileScreen() {
       setMutualFriends(mutual);
     } catch (error: any) {
       console.error('Erro ao carregar perfil do amigo:', error);
-      showAlert('Erro', error.message || 'Erro ao carregar perfil');
+      Alert.alert('Erro', 'Erro ao carregar perfil do amigo.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRemoveFriend = () => {
+  const handleRemoveFriend = async () => {
     if (!friend) return;
-
-    showDialog({
-      title: 'Confirmar',
-      message: `Tem certeza que deseja remover ${friend.name} dos seus amigos?`,
-      confirmText: 'Remover',
-      cancelText: 'Cancelar',
-      onConfirm: async () => {
-        try {
-          setRemoving(true);
-          await friendService.removeFriend(friend.id);
-          showAlert('Sucesso', 'Amigo removido');
-          router.back();
-        } catch (error: any) {
-          showAlert('Erro', error.message || 'Erro ao remover amigo');
-        } finally {
-          setRemoving(false);
-        }
-      },
-    });
+    try {
+      setRemoving(true);
+      await friendService.removeFriend(friend.id);
+      router.back();
+    } catch (error: any) {
+      Alert.alert('Erro', 'Erro ao remover amigo.');
+    } finally {
+      setRemoving(false);
+    }
   };
 
   if (loading) {
@@ -84,12 +77,12 @@ export default function FriendProfileScreen() {
 
   if (!friend) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <Header title="Perfil" />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Amigo não encontrado</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -109,7 +102,7 @@ export default function FriendProfileScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Header title="Perfil do Amigo" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -204,7 +197,7 @@ export default function FriendProfileScreen() {
             icon="chart-line"
             onPress={() => {
               // TODO: Navigate to joint ranking
-              showAlert('Em breve', 'Funcionalidade de ranking conjunto em desenvolvimento');
+              // alert removido
             }}
             style={styles.actionButton}
           />
@@ -222,7 +215,7 @@ export default function FriendProfileScreen() {
         {/* Bottom spacing */}
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import type { BackendNotification } from '../../services/notificationApi';
 import * as notificationApi from '../../services/notificationApi';
+import { navigateFromNotification } from '../../services/notificationNavigation';
 import { BottomSheetModal } from './BottomSheetModal';
 import { NotificationItem } from './NotificationItem';
 
@@ -95,23 +96,40 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
     }
   }, [visible, onUnreadCountChange]);
 
-  const handleMarkAsRead = async (notification: BackendNotification) => {
-    if (notification.read) return;
+  const handleNotificationPress = async (notification: BackendNotification) => {
+    console.log('[NOTIFICATIONS MODAL] ========================================');
+    console.log('[NOTIFICATIONS MODAL] Notificação clicada:', notification.type);
+    console.log('[NOTIFICATIONS MODAL] ID:', notification.id);
+    console.log('[NOTIFICATIONS MODAL] Dados:', JSON.stringify(notification.data));
+    console.log('[NOTIFICATIONS MODAL] ========================================');
 
-    try {
-      await notificationApi.markAsRead(notification.id);
-      
-      // Atualizar localmente
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
-      );
+    // Marca como lida se ainda não estiver
+    if (!notification.read) {
+      try {
+        await notificationApi.markAsRead(notification.id);
+        
+        // Atualizar localmente
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+        );
 
-      // Atualizar contagem
-      const unreadCount = notifications.filter((n) => !n.read && n.id !== notification.id).length;
-      onUnreadCountChange?.(unreadCount);
-    } catch (error) {
-      console.error('Erro ao marcar como lida:', error);
+        // Atualizar contagem
+        const unreadCount = notifications.filter((n) => !n.read && n.id !== notification.id).length;
+        onUnreadCountChange?.(unreadCount);
+      } catch (error) {
+        console.error('Erro ao marcar como lida:', error);
+      }
     }
+
+    // Fecha o modal antes de navegar
+    console.log('[NOTIFICATIONS MODAL] Fechando modal...');
+    onClose();
+
+    // Navega para o destino apropriado
+    setTimeout(() => {
+      console.log('[NOTIFICATIONS MODAL] Chamando navigateFromNotification...');
+      navigateFromNotification(notification);
+    }, 300); // Pequeno delay para animação do modal fechar
   };
 
   const handleDelete = async (notificationId: string) => {
@@ -147,7 +165,7 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
   const renderNotification = ({ item }: { item: BackendNotification }) => (
     <NotificationItem
       notification={item}
-      onPress={() => handleMarkAsRead(item)}
+      onPress={() => handleNotificationPress(item)}
       onDelete={() => handleDelete(item.id)}
     />
   );

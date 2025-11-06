@@ -66,6 +66,7 @@ export async function toggleLike(userId: string, activityId: string) {
         try {
           await notifyActivityLike(
             activity.userId,
+            activityId, // ID da atividade
             like.user.name || like.user.username,
             activity.description || 'sua conquista'
           );
@@ -161,6 +162,7 @@ export async function addComment(userId: string, activityId: string, content: st
       try {
         await notifyActivityComment(
           activity.userId,
+          activityId, // ID da atividade
           comment.user.name || comment.user.username,
           comment.content,
           activity.description || 'sua conquista'

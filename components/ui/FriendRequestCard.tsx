@@ -24,6 +24,7 @@ interface FriendRequestCardProps {
   onCancel?: () => void;
   onPress?: () => void;
   loading?: boolean;
+  isHighlighted?: boolean; // Indica se o card deve ser destacado visualmente
 }
 
 export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
@@ -34,6 +35,7 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
   onCancel,
   onPress,
   loading = false,
+  isHighlighted = false,
 }) => {
   const user = type === 'received' ? request.sender : request.receiver;
 
@@ -48,7 +50,10 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
     .substring(0, 2);
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      isHighlighted && styles.highlighted
+    ]}>
       <TouchableOpacity 
         style={styles.content}
         onPress={onPress}
@@ -125,6 +130,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+  },
+  highlighted: {
+    borderColor: '#007AFF', // Primary color
+    borderWidth: 2,
+    backgroundColor: '#007AFF08', // Azul translúcido
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   content: {
     flexDirection: 'row',

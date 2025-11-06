@@ -200,7 +200,12 @@ export async function deleteNotification(notificationId: string, userId: string)
  * Helpers para criar notificações específicas
  */
 
-export async function notifyActivityLike(activityOwnerId: string, likerName: string, activityDescription: string) {
+export async function notifyActivityLike(
+  activityOwnerId: string,
+  activityId: string,
+  likerName: string,
+  activityDescription: string
+) {
   console.log('[NOTIFICATION SERVICE] Criando notificação de curtida para:', activityOwnerId);
   
   const notification = await createNotification({
@@ -209,6 +214,7 @@ export async function notifyActivityLike(activityOwnerId: string, likerName: str
     title: 'Nova curtida! ❤️',
     message: `${likerName} curtiu sua conquista: ${activityDescription}`,
     data: {
+      activityId,
       likerName,
       activityDescription,
     },
@@ -220,6 +226,7 @@ export async function notifyActivityLike(activityOwnerId: string, likerName: str
 
 export async function notifyActivityComment(
   activityOwnerId: string,
+  activityId: string,
   commenterName: string,
   commentContent: string,
   activityDescription: string
@@ -232,6 +239,7 @@ export async function notifyActivityComment(
     title: 'Novo comentário! 💬',
     message: `${commenterName} comentou: "${commentContent.substring(0, 50)}${commentContent.length > 50 ? '...' : ''}"`,
     data: {
+      activityId,
       commenterName,
       commentContent,
       activityDescription,
