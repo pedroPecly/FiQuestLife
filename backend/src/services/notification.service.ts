@@ -42,6 +42,9 @@ export async function createNotification(notificationData: CreateNotificationDat
       },
     });
 
+    // ============================================
+    // PUSH NOTIFICATION: Fallback para usuários offline
+    // ============================================
     // Enviar push notification
     try {
       const user = await prisma.user.findUnique({

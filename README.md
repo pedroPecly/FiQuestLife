@@ -183,6 +183,7 @@ FiQuestLife/
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
 │   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
 │   ├── notificationApi.ts    # 🆕 Serviço de notificações backend (Sprint 13)
+│   ├── notificationNavigation.ts # 🆕 Navegação de notificações (Sprint 14)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
 │   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
@@ -372,6 +373,7 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
   - NotificationsModal refatorado (100 linhas removidas)
   - FeedActivityCard refatorado (40 linhas removidas)
   - Arquitetura escalável e código limpo
+  - Correção de navegação de notificações com timestamp único
 - ✅ **Feed Social Completo** - Timeline de atividades dos amigos com 4 tipos
 - ✅ **Perfis Públicos** - Visualização completa de perfis com controle de privacidade
 - ✅ **Leaderboard Backend** - Rankings de amigos e global com 3 tipos de ordenação

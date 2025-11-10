@@ -3,16 +3,16 @@ import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
 import {
-  cancelStreakReminder,
+    cancelStreakReminder,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
+    RefreshControl,
+    ScrollView,
+    Text,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/challenges.styles';

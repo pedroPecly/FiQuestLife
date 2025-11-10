@@ -21,6 +21,7 @@ import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     FlatList,
+    InteractionManager,
     RefreshControl,
     StatusBar,
     StyleSheet,
@@ -97,10 +98,7 @@ export default function ExploreScreen() {
       console.log('[EXPLORE] - ActivityId:', activityId);
       console.log('[EXPLORE] - OpenComments:', shouldOpenComments);
 
-      // Muda para a tab correta
-      setActiveTab(targetTab);
-      
-      // Define o ID para highlight
+      // Define o ID para highlight ANTES de mudar de tab
       setHighlightedActivityId(activityId);
 
       // Define se deve abrir comentários
@@ -108,33 +106,91 @@ export default function ExploreScreen() {
         setOpenCommentsForActivityId(activityId);
       }
 
-      // Carrega os dados e depois faz scroll
-      const loadAndScroll = async () => {
-        try {
-          if (targetTab === 'feed') {
-            await loadFeed(true);
-          } else {
-            await loadMyPosts(true);
-          }
-
-          // Aguarda um pouco para garantir que os dados foram renderizados
-          setTimeout(() => {
-            scrollToActivity(activityId, targetTab);
-          }, 500);
-        } catch (error) {
-          console.error('[EXPLORE] Erro ao carregar e fazer scroll:', error);
-        }
-      };
-
-      loadAndScroll();
+      // Muda para a tab correta (isso vai disparar o useFocusEffect que carrega os dados)
+      setActiveTab(targetTab);
 
       // Remove o highlight após 3 segundos
-      setTimeout(() => {
+      const highlightTimer = setTimeout(() => {
         setHighlightedActivityId(null);
         setOpenCommentsForActivityId(null);
       }, 3000);
+
+      return () => clearTimeout(highlightTimer);
     }
   }, [params.highlightActivityId, params.tab, params.openComments, params.timestamp]);
+
+  // Faz scroll quando os dados estão carregados e existe um highlight
+  useEffect(() => {
+    if (!highlightedActivityId) return;
+
+    const targetList = activeTab === 'feed' ? activities : myPosts;
+    const isLoading = activeTab === 'feed' ? feedLoading : myPostsLoading;
+    const listRef = activeTab === 'feed' ? feedListRef : myPostsListRef;
+
+    console.log('[EXPLORE] Verificando scroll - Tab:', activeTab, 'Loading:', isLoading, 'Items:', targetList.length, 'Ref:', !!listRef.current);
+
+    // Aguarda os dados serem carregados
+    if (isLoading || targetList.length === 0) {
+      console.log('[EXPLORE] Aguardando dados serem carregados...');
+      return;
+    }
+
+    // Encontra o índice da atividade
+    const index = targetList.findIndex(a => a.id === highlightedActivityId);
+    
+    console.log('[EXPLORE] Tentando scroll - Index:', index, 'Total items:', targetList.length);
+
+    if (index === -1) {
+      console.warn('[EXPLORE] ⚠️ Atividade não encontrada na lista:', highlightedActivityId);
+      return;
+    }
+
+    // Aguarda todas as interações e animações terminarem antes de tentar scroll
+    const handle = InteractionManager.runAfterInteractions(() => {
+      console.log('[EXPLORE] ✅ Interações completas, verificando ref...');
+      
+      const currentListRef = activeTab === 'feed' ? feedListRef : myPostsListRef;
+      
+      if (currentListRef.current) {
+        console.log('[EXPLORE] ✅ Ref disponível! Fazendo scroll');
+        if (activeTab === 'feed' || activeTab === 'myPosts') {
+          // Delay adicional para garantir layout
+          setTimeout(() => {
+            scrollToActivity(highlightedActivityId, activeTab);
+          }, 200);
+        }
+      } else {
+        console.warn('[EXPLORE] ⚠️ Ref não disponível após interações, tentando com retry...');
+        
+        // Fallback: tenta com retry
+        let attempts = 0;
+        const maxAttempts = 15;
+        
+        const checkAndScroll = () => {
+          attempts++;
+          const retryListRef = activeTab === 'feed' ? feedListRef : myPostsListRef;
+          
+          console.log(`[EXPLORE] Retry ${attempts}/${maxAttempts} - Tab: ${activeTab}, Ref: ${!!retryListRef.current}`);
+          
+          if (retryListRef.current) {
+            console.log(`[EXPLORE] ✅ Ref disponível no retry ${attempts}! Executando scroll`);
+            if (activeTab === 'feed' || activeTab === 'myPosts') {
+              scrollToActivity(highlightedActivityId, activeTab);
+            }
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkAndScroll, 150);
+          } else {
+            console.error(`[EXPLORE] ❌ Ref não disponível após ${attempts} tentativas`);
+            console.error(`[EXPLORE] Debug - activeTab: ${activeTab}, items: ${targetList.length}`);
+          }
+        };
+        
+        setTimeout(checkAndScroll, 200);
+      }
+    });
+
+    return () => handle.cancel();
+  }, [highlightedActivityId, activeTab, activities, myPosts, feedLoading, myPostsLoading]);
 
   // Função para fazer scroll até uma atividade específica
   const scrollToActivity = (activityId: string, tab: 'feed' | 'myPosts') => {
@@ -142,26 +198,38 @@ export default function ExploreScreen() {
     const listRef = tab === 'feed' ? feedListRef : myPostsListRef;
     const index = list.findIndex(a => a.id === activityId);
     
-    console.log('[EXPLORE] Fazendo scroll - Index:', index, 'Total items:', list.length);
+    console.log('[EXPLORE] Fazendo scroll - Index:', index, 'Total items:', list.length, 'Ref disponível:', !!listRef.current);
     
-    if (index !== -1 && listRef.current) {
+    if (index === -1) {
+      console.warn('[EXPLORE] ⚠️ Atividade não encontrada na lista');
+      return;
+    }
+
+    if (!listRef.current) {
+      console.warn('[EXPLORE] ⚠️ Ref não disponível ainda, FlatList não renderizado');
+      return;
+    }
+    
+    try {
+      // Tenta scrollToIndex primeiro (método preferido)
+      listRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.3, // Posiciona um pouco acima do centro para melhor visibilidade
+      });
+      console.log('[EXPLORE] ✅ Scroll executado com sucesso para index:', index);
+    } catch (error) {
+      console.error('[EXPLORE] ❌ Erro ao fazer scrollToIndex:', error);
+      // Fallback: tenta scroll manual por offset
       try {
-        listRef.current.scrollToIndex({
-          index,
-          animated: true,
-          viewPosition: 0.5, // Centraliza no meio da tela
-        });
-        console.log('[EXPLORE] Scroll executado com sucesso');
-      } catch (error) {
-        console.error('[EXPLORE] Erro ao fazer scroll:', error);
-        // Fallback: tenta scroll manual
         listRef.current.scrollToOffset({
-          offset: index * 200, // Altura aproximada de um card
+          offset: index * 250, // Altura aproximada de um card
           animated: true,
         });
+        console.log('[EXPLORE] ✅ Scroll por offset executado para index:', index);
+      } catch (fallbackError) {
+        console.error('[EXPLORE] ❌ Erro no fallback de scroll:', fallbackError);
       }
-    } else {
-      console.warn('[EXPLORE] Atividade não encontrada na lista ou ref não disponível');
     }
   };
 
@@ -228,6 +296,7 @@ export default function ExploreScreen() {
       setMyPostsLoading(false);
       setMyPostsRefreshing(false);
       setMyPostsInitialLoad(false);
+      setInitialLoad(false); // Garante que o loading screen seja removido
     }
   };
 
@@ -251,6 +320,7 @@ export default function ExploreScreen() {
     } finally {
       setLeaderboardLoading(false);
       setLeaderboardRefreshing(false);
+      setInitialLoad(false); // Garante que o loading screen seja removido
     }
   };
 

@@ -11,7 +11,7 @@
 import 'dotenv/config';
 
 // Importa o framework Hono e seus recursos
-import { serve } from '@hono/node-server'; // Adaptador pra rodar Hono no Node.js
+import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors'; // Permite requisições de outros domínios (front-end)
 import { logger } from 'hono/logger'; // Mostra logs no terminal de cada requisição
