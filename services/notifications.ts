@@ -132,16 +132,23 @@ export async function areNotificationsEnabled(): Promise<boolean> {
  */
 export async function scheduleDailyReminder(): Promise<void> {
   try {
-    // Cancela lembretes anteriores para evitar duplicação
+    // Cancela TODOS os lembretes do tipo DAILY_REMINDER para evitar duplicação
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    let cancelledCount = 0;
+    
     for (const notif of scheduled) {
       if (notif.content.data?.type === 'DAILY_REMINDER') {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+        cancelledCount++;
       }
+    }
+    
+    if (cancelledCount > 0) {
+      console.log(`🧹 Cancelados ${cancelledCount} lembretes diários antigos`);
     }
 
     // Agenda novo lembrete diário (9h)
-    await Notifications.scheduleNotificationAsync({
+    const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: '🎯 Novos Desafios Disponíveis!',
         body: 'Seus desafios diários já estão prontos. Vamos conquistá-los?',
@@ -156,7 +163,7 @@ export async function scheduleDailyReminder(): Promise<void> {
       },
     });
 
-    console.log('✅ Lembrete diário agendado para 9h');
+    console.log(`✅ Lembrete diário agendado para 9h (ID: ${notificationId})`);
   } catch (error) {
     console.error('❌ Erro ao agendar lembrete diário:', error);
   }
@@ -169,16 +176,23 @@ export async function scheduleDailyReminder(): Promise<void> {
  */
 export async function scheduleStreakReminder(): Promise<void> {
   try {
-    // Cancela lembretes anteriores
+    // Cancela TODOS os lembretes do tipo STREAK_REMINDER para evitar duplicação
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    let cancelledCount = 0;
+    
     for (const notif of scheduled) {
       if (notif.content.data?.type === 'STREAK_REMINDER') {
         await Notifications.cancelScheduledNotificationAsync(notif.identifier);
+        cancelledCount++;
       }
+    }
+    
+    if (cancelledCount > 0) {
+      console.log(`🧹 Cancelados ${cancelledCount} lembretes de streak antigos`);
     }
 
     // Agenda novo lembrete de streak (21h)
-    await Notifications.scheduleNotificationAsync({
+    const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: '🔥 Não perca sua sequência!',
         body: 'Complete pelo menos um desafio hoje para manter seu streak!',
@@ -196,7 +210,7 @@ export async function scheduleStreakReminder(): Promise<void> {
       },
     });
 
-    console.log('✅ Lembrete de streak agendado para 21h');
+    console.log(`✅ Lembrete de streak agendado para 21h (ID: ${notificationId})`);
   } catch (error) {
     console.error('❌ Erro ao agendar lembrete de streak:', error);
   }
@@ -301,25 +315,6 @@ export async function notifyLevelUp(newLevel: number): Promise<void> {
  * Notifica quando novos desafios são atribuídos
  * @param count Número de desafios atribuídos (padrão: 5)
  */
-export async function notifyChallengesAssigned(count: number = 5): Promise<void> {
-  try {
-    // Envia notificação push (será salva automaticamente pelo listener)
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🎯 Novos Desafios!',
-        body: `${count} novos desafios foram atribuídos para você hoje!`,
-        data: { type: 'CHALLENGE_ASSIGNED', count },
-        sound: true,
-        badge: count,
-      },
-      trigger: null, // Envia imediatamente
-    });
-
-    console.log(`✅ Notificação de desafios enviada: ${count} desafios`);
-  } catch (error) {
-    console.error('❌ Erro ao notificar desafios:', error);
-  }
-}
 
 // ==========================================
 // CONFIGURAÇÕES DO USUÁRIO

@@ -4,8 +4,6 @@ import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
 import {
   cancelStreakReminder,
-  notifyBadgeEarned,
-  notifyLevelUp,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
 import { useFocusEffect } from 'expo-router';
@@ -103,22 +101,16 @@ export default function ChallengesScreen() {
       console.log('📊 Response completa:', JSON.stringify(response, null, 2));
       console.log('🎯 leveledUp:', response.leveledUp, '| newLevel:', response.newLevel);
 
-      // Notificar level up
+      // Notificação de level up removida - backend já gerencia
       if (response.leveledUp && response.newLevel) {
-        console.log('🚀 Chamando notifyLevelUp com nível:', response.newLevel);
+        console.log('🎉 Level up! Novo nível:', response.newLevel);
         successMessage += `\n\n🎉 Parabéns! Você subiu para o nível ${response.newLevel}!`;
-        await notifyLevelUp(response.newLevel);
       }
 
-      // Notificar badges conquistados
+      // Notificação de badges removida - backend já gerencia
       if (response.newBadges && response.newBadges.length > 0) {
         const badgeNames = response.newBadges.map((b) => b.name).join(', ');
         successMessage += `\n\n🏆 Novas conquistas: ${badgeNames}`;
-        
-        // Notifica cada badge
-        for (const badge of response.newBadges) {
-          await notifyBadgeEarned(badge.name, badge.rarity);
-        }
       }
 
       // Mostrar feedback de sucesso

@@ -30,8 +30,16 @@ export function useNotifications() {
   const [isReady, setIsReady] = useState(false);
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
+  const setupCompleted = useRef(false); // Flag para evitar setup múltiplo
 
   useEffect(() => {
+    // Evita setup duplicado
+    if (setupCompleted.current) {
+      console.log('⚠️ Setup de notificações já foi executado, pulando...');
+      return;
+    }
+    
+    setupCompleted.current = true;
     setupNotifications();
 
     // Listener para notificações recebidas (app aberto)
