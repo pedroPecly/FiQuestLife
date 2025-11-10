@@ -84,6 +84,7 @@ export default function ExploreScreen() {
     console.log('[EXPLORE] params.highlightActivityId:', params.highlightActivityId);
     console.log('[EXPLORE] params.tab:', params.tab);
     console.log('[EXPLORE] params.openComments:', params.openComments);
+    console.log('[EXPLORE] params.timestamp:', params.timestamp);
     console.log('[EXPLORE] ========================================');
 
     if (params.highlightActivityId && params.tab) {
@@ -133,7 +134,7 @@ export default function ExploreScreen() {
         setOpenCommentsForActivityId(null);
       }, 3000);
     }
-  }, [params.highlightActivityId, params.tab, params.openComments]);
+  }, [params.highlightActivityId, params.tab, params.openComments, params.timestamp]);
 
   // Função para fazer scroll até uma atividade específica
   const scrollToActivity = (activityId: string, tab: 'feed' | 'myPosts') => {

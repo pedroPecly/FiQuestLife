@@ -70,6 +70,7 @@ const handleFriendRequest = (notification: BackendNotification): void => {
     params: { 
       tab: 'requests',
       highlightUserId: friendId || '',
+      timestamp: Date.now().toString(), // Force unique navigation
     },
   });
 };
@@ -129,6 +130,7 @@ const handleActivityLike = (notification: BackendNotification): void => {
     params: {
       tab: 'myPosts',
       highlightActivityId: activityId,
+      timestamp: Date.now().toString(), // Force unique navigation
     },
   });
 };
@@ -168,6 +170,7 @@ const handleActivityComment = (notification: BackendNotification): void => {
       tab: 'myPosts',
       highlightActivityId: activityId,
       openComments: 'true', // Flag para abrir modal de comentários
+      timestamp: Date.now().toString(), // Force unique navigation
     },
   });
 };
