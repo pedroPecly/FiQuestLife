@@ -8,9 +8,21 @@
 
 import { prisma } from '../lib/prisma.js';
 
+// Constantes
+const ACTIVITY_TIME_WINDOW_DAYS = 30;
+const VALID_ACTIVITY_SOURCES = [
+  'CHALLENGE_COMPLETION',
+  'BADGE_ACHIEVEMENT',
+  'LEVEL_PROGRESSION',
+];
+
 /**
  * Retorna atividades do próprio usuário (Aba "Meus Posts")
- * Versão profissional usando Prisma e reward_history como fonte única
+ * 
+ * @param userId - ID do usuário
+ * @param limit - Número máximo de atividades a retornar (padrão: 20)
+ * @param offset - Número de atividades a pular para paginação (padrão: 0)
+ * @returns Array de atividades formatadas para o feed
  */
 export async function getUserOwnActivity(userId: string, limit: number = 20, offset: number = 0) {
   try {
@@ -21,14 +33,10 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
       where: {
         userId,
         source: {
-          in: [
-            'CHALLENGE_COMPLETION',
-            'BADGE_ACHIEVEMENT',
-            'LEVEL_PROGRESSION',
-          ],
+          in: VALID_ACTIVITY_SOURCES,
         },
         createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Últimos 30 dias
+          gte: new Date(Date.now() - ACTIVITY_TIME_WINDOW_DAYS * 24 * 60 * 60 * 1000),
         },
       },
       include: {
@@ -50,16 +58,70 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
 
     console.log('[USER ACTIVITY SERVICE] Atividades brutas encontradas:', allActivities.length);
 
+    // Buscar UserChallenges para atividades de CHALLENGE_COMPLETION
+    const challengeCompletionIds = allActivities
+      .filter(a => a.source === 'CHALLENGE_COMPLETION' && a.sourceId)
+      .map(a => a.sourceId as string);
+
+    console.log('[USER ACTIVITY SERVICE] 🔍 IDs de desafios para buscar:', challengeCompletionIds.length);
+
+    const userChallenges = challengeCompletionIds.length > 0
+      ? await prisma.userChallenge.findMany({
+          where: {
+            id: { in: challengeCompletionIds },
+          },
+          select: {
+            id: true,
+            photoUrl: true,
+            caption: true,
+            challenge: {
+              select: {
+                category: true,
+              },
+            },
+          },
+        })
+      : [];
+
+    console.log('[USER ACTIVITY SERVICE] 📦 UserChallenges encontrados:', userChallenges.length);
+    console.log('[USER ACTIVITY SERVICE] 📸 UserChallenges com foto:', userChallenges.filter(uc => uc.photoUrl).length);
+
+    // Criar mapa de UserChallenges para acesso rápido
+    const userChallengeMap = new Map(
+      userChallenges.map(uc => [uc.id, uc])
+    );
+
+    // Tipo para a atividade agrupada
+    interface GroupedActivity {
+      id: string;
+      source: string;
+      sourceId: string | null;
+      userId: string;
+      username: string;
+      name: string;
+      avatarUrl: string | null;
+      level: number;
+      currentStreak: number;
+      description: string | null;
+      createdAt: Date;
+      xpAmount: number;
+      coinsAmount: number;
+      photoUrl: string | null;
+      caption: string | null;
+      category: string | null;
+    }
+
     // Agrupar por sourceId (unificar XP + Moedas de uma mesma tarefa)
-    const groupedMap = new Map<string, any>();
+    const groupedMap = new Map<string, GroupedActivity>();
     
     for (const activity of allActivities) {
       const key = activity.sourceId || activity.id;
+      const userChallenge = activity.sourceId ? userChallengeMap.get(activity.sourceId) : null;
       
       if (!groupedMap.has(key)) {
         // Primeira entrada para esta atividade
         groupedMap.set(key, {
-          id: activity.id, // Usar primeiro ID encontrado
+          id: activity.id,
           source: activity.source,
           sourceId: activity.sourceId,
           userId: activity.user.id,
@@ -72,14 +134,28 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
           createdAt: activity.createdAt,
           xpAmount: activity.type === 'XP' ? activity.amount : 0,
           coinsAmount: activity.type === 'COINS' ? activity.amount : 0,
+          // Dados do desafio (se houver)
+          photoUrl: userChallenge?.photoUrl || null,
+          caption: userChallenge?.caption || null,
+          category: userChallenge?.challenge?.category || null,
         });
       } else {
         // Somar XP ou Moedas à entrada existente
-        const existing = groupedMap.get(key);
+        const existing = groupedMap.get(key)!;
         if (activity.type === 'XP') {
           existing.xpAmount += activity.amount;
         } else if (activity.type === 'COINS') {
           existing.coinsAmount += activity.amount;
+        }
+        // Preservar photoUrl e caption se ainda não estiverem definidos
+        if (!existing.photoUrl && userChallenge?.photoUrl) {
+          existing.photoUrl = userChallenge.photoUrl;
+        }
+        if (!existing.caption && userChallenge?.caption) {
+          existing.caption = userChallenge.caption;
+        }
+        if (!existing.category && userChallenge?.challenge?.category) {
+          existing.category = userChallenge.challenge.category;
         }
       }
     }
@@ -99,7 +175,7 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
       switch (activity.source) {
         case 'CHALLENGE_COMPLETION':
           type = 'CHALLENGE_COMPLETED';
-          metadata = '';
+          metadata = activity.category || '';
           break;
         case 'BADGE_ACHIEVEMENT':
           type = 'BADGE_EARNED';
@@ -116,7 +192,7 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
           }
       }
 
-      return {
+      const result = {
         id: activity.id,
         type,
         userId: activity.userId,
@@ -125,10 +201,23 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
         avatarUrl: activity.avatarUrl,
         description: activity.description,
         metadata,
+        photoUrl: activity.photoUrl,
+        caption: activity.caption,
         createdAt: activity.createdAt.toISOString(),
         xpReward: activity.xpAmount, // XP total (somado)
         coinsReward: activity.coinsAmount, // Moedas total (somado)
       };
+
+      // Log detalhado para debug
+      if (activity.photoUrl) {
+        console.log('[USER ACTIVITY SERVICE] 📸 Atividade COM FOTO:', {
+          id: result.id,
+          photoUrl: result.photoUrl?.substring(0, 50),
+          caption: result.caption,
+        });
+      }
+
+      return result;
     });
 
     return mappedActivities;

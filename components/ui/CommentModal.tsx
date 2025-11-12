@@ -8,8 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     StyleSheet,
     Text,
     TextInput,
@@ -58,6 +61,21 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
       setComments([...comments, result.data]);
       setNewComment('');
       onCommentAdded?.(); // Notificar pai que adicionou comentário
+    } else {
+      // Tratar erro de comentário duplicado de forma profissional
+      if (result.error?.includes('já comentou')) {
+        Alert.alert(
+          'Apenas 1 Comentário Permitido',
+          'Você já comentou nesta atividade. Apenas um comentário por pessoa é permitido.',
+          [{ text: 'Entendi', style: 'default' }]
+        );
+      } else {
+        Alert.alert(
+          'Erro ao Comentar',
+          result.error || 'Não foi possível adicionar o comentário. Tente novamente.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      }
     }
     
     setSending(false);
@@ -78,7 +96,11 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
@@ -149,7 +171,7 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

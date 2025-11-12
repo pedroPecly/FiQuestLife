@@ -34,6 +34,13 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
+  },
+  global: {
+    // Desabilita funcionalidades que dependem de websocket no Node.js
+    headers: {}
+  },
+  db: {
+    schema: 'public'
   }
 });
 

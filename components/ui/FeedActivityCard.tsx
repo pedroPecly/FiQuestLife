@@ -68,7 +68,7 @@ const getTimeAgo = (dateString: string): string => {
 const getCategoryEmoji = (category: string): string => {
   const map: Record<string, string> = {
     PHYSICAL_ACTIVITY: '💪', NUTRITION: '🥗', HYDRATION: '💧', SLEEP: '😴',
-    MENTAL_HEALTH: '🧠', SOCIAL: '🤝', PRODUCTIVITY: '📚', MINDFULNESS: '🧘',
+    MENTAL_HEALTH: '🧠', SOCIAL: '🤝', PRODUCTIVITY: '📚',
   };
   return map[category] || '✨';
 };
@@ -184,6 +184,20 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
         <Text style={styles.description}>{String(activity.description)}</Text>
         {metaText.length > 0 && (
           <Text style={[styles.metadata, { color: metaColor }]}>{metaText}</Text>
+        )}
+        
+        {/* Foto do desafio (se houver) */}
+        {activity.photoUrl && (
+          <View style={styles.photoContainer}>
+            <Image 
+              source={{ uri: activity.photoUrl }} 
+              style={styles.challengePhoto} 
+              resizeMode="cover"
+            />
+            {activity.caption && (
+              <Text style={styles.photoCaption}>{activity.caption}</Text>
+            )}
+          </View>
         )}
         
         {/* Badges de recompensas (XP e Moedas) */}
@@ -352,6 +366,23 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginBottom: 6,
     fontWeight: '500',
+  },
+  photoContainer: {
+    marginVertical: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  challengePhoto: {
+    width: '100%',
+    height: 250,
+    backgroundColor: '#F5F5F5',
+  },
+  photoCaption: {
+    fontSize: 14,
+    color: theme.colors.text,
+    padding: 12,
+    backgroundColor: '#FAFAFA',
+    lineHeight: 20,
   },
   interactionRow: {
     flexDirection: 'row',

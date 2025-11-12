@@ -333,16 +333,7 @@ async function main() {
         rarity: BadgeRarity.RARE,
         order: 46,
       },
-      {
-        name: 'Meditador',
-        description: 'Complete 10 desafios de mindfulness',
-        imageUrl: '/badges/meditator.png',
-        category: BadgeCategory.ACHIEVEMENT,
-        requirementType: BadgeRequirementType.CATEGORY_MASTER,
-        requirementValue: 10, // MINDFULNESS
-        rarity: BadgeRarity.RARE,
-        order: 47,
-      },
+  // Badge Meditador removido: relacionado à Mindfulness
     ],
   });
   console.log('✅ 8 badges de ACHIEVEMENT (Categorias) criados!\n');

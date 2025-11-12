@@ -100,7 +100,7 @@ export const getBadgesProgress = async (userId: string) => {
     'Dorminhoco': 'SLEEP',
     'Social': 'SOCIAL',
     'Produtivo': 'PRODUCTIVITY',
-    'Meditador': 'MINDFULNESS',
+  // 'Meditador': 'MINDFULNESS',
   };
 
   // Calcula progresso de cada badge

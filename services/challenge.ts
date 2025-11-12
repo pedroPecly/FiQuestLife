@@ -14,6 +14,7 @@ export interface Challenge {
   coinsReward: number;
   frequency: ChallengeFrequency;
   isActive: boolean;
+  requiresPhoto: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +27,8 @@ export interface UserChallenge {
   assignedAt: string;
   completedAt: string | null;
   progress: number;
+  photoUrl: string | null;
+  caption: string | null;
   challenge: Challenge;
 }
 
@@ -36,8 +39,7 @@ export type ChallengeCategory =
   | 'MENTAL_HEALTH'
   | 'SLEEP'
   | 'SOCIAL'
-  | 'PRODUCTIVITY'
-  | 'MINDFULNESS';
+  | 'PRODUCTIVITY';
 
 export type ChallengeDifficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
 
@@ -85,7 +87,6 @@ export const CATEGORY_COLORS: Record<ChallengeCategory, string> = {
   SLEEP: '#6366F1', // Índigo
   SOCIAL: '#EC4899', // Rosa
   PRODUCTIVITY: '#F59E0B', // Laranja
-  MINDFULNESS: '#14B8A6', // Teal
 };
 
 export const CATEGORY_LABELS: Record<ChallengeCategory, string> = {
@@ -96,7 +97,6 @@ export const CATEGORY_LABELS: Record<ChallengeCategory, string> = {
   SLEEP: 'Sono',
   SOCIAL: 'Social',
   PRODUCTIVITY: 'Produtividade',
-  MINDFULNESS: 'Mindfulness',
 };
 
 export const CATEGORY_ICONS: Record<ChallengeCategory, string> = {
@@ -107,7 +107,6 @@ export const CATEGORY_ICONS: Record<ChallengeCategory, string> = {
   SLEEP: '😴',
   SOCIAL: '👥',
   PRODUCTIVITY: '🎯',
-  MINDFULNESS: '🧘',
 };
 
 // ==========================================
@@ -149,8 +148,37 @@ class ChallengeService {
   /**
    * Completa um desafio
    */
-  async completeChallenge(userChallengeId: string): Promise<CompleteChallengeResponse> {
+  async completeChallenge(
+    userChallengeId: string,
+    photo?: { uri: string; type: string; name: string },
+    caption?: string
+  ): Promise<CompleteChallengeResponse> {
     try {
+      // Se houver foto, enviar como multipart/form-data
+      if (photo) {
+        const formData = new FormData();
+        
+        // Adicionar foto
+        formData.append('photo', {
+          uri: photo.uri,
+          type: photo.type,
+          name: photo.name,
+        } as any);
+
+        // Adicionar caption se fornecida
+        if (caption) {
+          formData.append('caption', caption);
+        }
+
+        const response = await api.post(`/challenges/${userChallengeId}/complete`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data.data;
+      }
+
+      // Se não houver foto, enviar como JSON vazio
       const response = await api.post(`/challenges/${userChallengeId}/complete`);
       return response.data.data; // Backend retorna { success, data, message }
     } catch (error) {

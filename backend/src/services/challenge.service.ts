@@ -16,10 +16,9 @@
 import type { ChallengeCategory } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import {
-    notifyBadgeEarned,
-    notifyChallengeCompleted,
-    notifyLevelUp,
-    notifyStreakMilestone,
+  notifyBadgeEarned,
+  notifyLevelUp,
+  notifyStreakMilestone,
 } from './notification.service.js';
 
 /**
@@ -105,7 +104,12 @@ export const getUserDailyChallenges = async (userId: string) => {
  * Completa um desafio e dá recompensas
  * Retorna stats atualizadas, levelUp, e novos badges
  */
-export const completeChallenge = async (userId: string, userChallengeId: string) => {
+export const completeChallenge = async (
+  userId: string,
+  userChallengeId: string,
+  photoUrl?: string,
+  caption?: string
+) => {
   // Busca o UserChallenge
   const userChallenge = await prisma.userChallenge.findUnique({
     where: { id: userChallengeId },
@@ -124,6 +128,11 @@ export const completeChallenge = async (userId: string, userChallengeId: string)
     throw new Error('Desafio já completado');
   }
 
+  // Verificar se o desafio requer foto
+  if (userChallenge.challenge.requiresPhoto && !photoUrl) {
+    throw new Error('Este desafio requer uma foto para ser completado');
+  }
+
   // Atualiza status do desafio
   const updatedChallenge = await prisma.userChallenge.update({
     where: { id: userChallengeId },
@@ -131,6 +140,8 @@ export const completeChallenge = async (userId: string, userChallengeId: string)
       status: 'COMPLETED',
       completedAt: new Date(),
       progress: 100,
+      photoUrl,
+      caption,
     },
     include: {
       challenge: true,
@@ -173,17 +184,8 @@ export const completeChallenge = async (userId: string, userChallengeId: string)
     },
   });
 
-  // Criar notificação de desafio completado
-  try {
-    await notifyChallengeCompleted(
-      userId,
-      userChallenge.challenge.title,
-      userChallenge.challenge.xpReward,
-      userChallenge.challenge.coinsReward
-    );
-  } catch (error) {
-    console.error('[CHALLENGE SERVICE] Erro ao criar notificação de desafio completado:', error);
-  }
+  // REMOVIDO: Notificação de desafio completado (usuário não quer receber)
+  // As notificações para desafios completados foram desativadas a pedido do usuário
 
   // Busca stats atualizadas
   const updatedUser = await prisma.user.findUnique({
@@ -401,7 +403,7 @@ export const checkAndAwardBadges = async (userId: string) => {
           'Dorminhoco': 'SLEEP',
           'Social': 'SOCIAL',
           'Produtivo': 'PRODUCTIVITY',
-          'Meditador': 'MINDFULNESS',
+          // 'Meditador': 'MINDFULNESS',
         };
 
         const category = categoryMap[badge.name];

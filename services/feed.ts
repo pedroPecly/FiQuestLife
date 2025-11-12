@@ -29,6 +29,8 @@ export interface FeedActivity {
   avatarUrl: string | null;
   description: string;
   metadata?: string; // category, rarity, level, etc
+  photoUrl?: string | null; // URL da foto do desafio (se houver)
+  caption?: string | null; // Legenda da foto (se houver)
   createdAt: string;
   xpReward?: number;
   coinsReward?: number; // Adicionar moedas

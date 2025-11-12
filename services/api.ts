@@ -61,6 +61,27 @@ api.interceptors.request.use(
 );
 
 /**
+ * ============================================
+ * INTERCEPTOR DE RESPOSTA - TRATA ERROS 401
+ * ============================================
+ */
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    // Se receber 401 (não autorizado), limpa o token
+    if (error.response?.status === 401) {
+      console.log('🔓 Token inválido ou expirado - limpando dados...');
+      try {
+        await authStorage.clear();
+      } catch (clearError) {
+        console.error('❌ Erro ao limpar storage:', clearError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+/**
  * Serviço de Autenticação
  */
 export const authService = {

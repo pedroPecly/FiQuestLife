@@ -10,9 +10,9 @@
  */
 
 import type {
-    ChallengeCategory,
-    ChallengeDifficulty,
-    ChallengeFrequency,
+  ChallengeCategory,
+  ChallengeDifficulty,
+  ChallengeFrequency,
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
@@ -49,7 +49,7 @@ async function addNewChallenges() {
     {
       title: 'Desenho livre',
       description: 'Crie um desenho ou ilustração por 20 minutos',
-      category: 'MINDFULNESS', // ou crie uma nova categoria se necessário
+      category: 'PRODUCTIVITY', // Categoria ajustada após remoção de MINDFULNESS
       difficulty: 'EASY',
       xpReward: 60,
       coinsReward: 12,

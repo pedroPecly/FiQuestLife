@@ -61,12 +61,18 @@ export default function ChallengesScreen() {
   }, []);
 
   // Completar desafio
-  const handleCompleteChallenge = async (userChallengeId: string) => {
+  const handleCompleteChallenge = async (
+    userChallengeId: string,
+    photo?: { uri: string; type: string; name: string },
+    caption?: string
+  ) => {
     setCompletingId(userChallengeId);
 
     try {
       const response: CompleteChallengeResponse = await challengeService.completeChallenge(
-        userChallengeId
+        userChallengeId,
+        photo,
+        caption
       );
 
       // Atualizar desafio na lista local

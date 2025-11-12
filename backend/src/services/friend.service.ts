@@ -648,11 +648,56 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
 
     console.log('[FEED SERVICE] Atividades brutas encontradas:', allActivities.length);
 
+    // Buscar UserChallenges para atividades de CHALLENGE_COMPLETION
+    const challengeCompletionIds = allActivities
+      .filter(a => a.source === 'CHALLENGE_COMPLETION' && a.sourceId)
+      .map(a => a.sourceId as string);
+
+    console.log('[FEED SERVICE] 🔍 IDs de desafios para buscar:', challengeCompletionIds);
+
+    const userChallenges = challengeCompletionIds.length > 0
+      ? await prisma.userChallenge.findMany({
+          where: {
+            id: { in: challengeCompletionIds },
+          },
+          select: {
+            id: true,
+            photoUrl: true,
+            caption: true,
+            challenge: {
+              select: {
+                category: true,
+              },
+            },
+          },
+        })
+      : [];
+
+    console.log('[FEED SERVICE] 📦 UserChallenges encontrados:', userChallenges.length);
+    console.log('[FEED SERVICE] 📸 UserChallenges com foto:', userChallenges.filter(uc => uc.photoUrl).length);
+    
+    // Log detalhado dos UserChallenges com foto
+    userChallenges.forEach(uc => {
+      if (uc.photoUrl) {
+        console.log('[FEED SERVICE] 📷 UserChallenge:', {
+          id: uc.id,
+          photoUrl: uc.photoUrl?.substring(0, 80) + '...',
+          caption: uc.caption,
+        });
+      }
+    });
+
+    // Criar mapa de UserChallenges para acesso rápido
+    const userChallengeMap = new Map(
+      userChallenges.map(uc => [uc.id, uc])
+    );
+
     // Agrupar por sourceId (unificar XP + Moedas de uma mesma tarefa)
     const groupedMap = new Map<string, any>();
     
     for (const activity of allActivities) {
       const key = activity.sourceId || activity.id;
+      const userChallenge = activity.sourceId ? userChallengeMap.get(activity.sourceId) : null;
       
       if (!groupedMap.has(key)) {
         // Primeira entrada para esta atividade
@@ -670,6 +715,10 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
           createdAt: activity.createdAt,
           xpAmount: activity.type === 'XP' ? activity.amount : 0,
           coinsAmount: activity.type === 'COINS' ? activity.amount : 0,
+          // Dados do desafio (se houver)
+          photoUrl: userChallenge?.photoUrl || null,
+          caption: userChallenge?.caption || null,
+          category: userChallenge?.challenge?.category || null,
         });
       } else {
         // Somar XP ou Moedas à entrada existente
@@ -678,6 +727,16 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
           existing.xpAmount += activity.amount;
         } else if (activity.type === 'COINS') {
           existing.coinsAmount += activity.amount;
+        }
+        // Preservar photoUrl e caption se ainda não estiverem definidos
+        if (!existing.photoUrl && userChallenge?.photoUrl) {
+          existing.photoUrl = userChallenge.photoUrl;
+        }
+        if (!existing.caption && userChallenge?.caption) {
+          existing.caption = userChallenge.caption;
+        }
+        if (!existing.category && userChallenge?.challenge?.category) {
+          existing.category = userChallenge.challenge.category;
         }
       }
     }
@@ -697,7 +756,7 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
       switch (activity.source) {
         case 'CHALLENGE_COMPLETION':
           type = 'CHALLENGE_COMPLETED';
-          metadata = '';
+          metadata = activity.category || '';
           break;
         case 'BADGE_ACHIEVEMENT':
           type = 'BADGE_EARNED';
@@ -714,7 +773,7 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
           }
       }
 
-      return {
+      const result = {
         id: activity.id,
         type,
         userId: activity.userId,
@@ -723,11 +782,29 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
         avatarUrl: activity.avatarUrl,
         description: activity.description,
         metadata,
+        photoUrl: activity.photoUrl,
+        caption: activity.caption,
         createdAt: activity.createdAt.toISOString(),
         xpReward: activity.xpAmount, // XP total (somado)
         coinsReward: activity.coinsAmount, // Moedas total (somado)
       };
+
+      // Log detalhado para debug
+      if (activity.photoUrl) {
+        console.log('[FEED SERVICE] 📸 Atividade COM FOTO:', {
+          id: result.id,
+          photoUrl: result.photoUrl,
+          caption: result.caption,
+          source: activity.source,
+          sourceId: activity.sourceId,
+        });
+      }
+
+      return result;
     });
+
+    console.log('[FEED SERVICE] 📊 Total de atividades retornadas:', mappedActivities.length);
+    console.log('[FEED SERVICE] 📸 Atividades com foto:', mappedActivities.filter(a => a.photoUrl).length);
 
     return mappedActivities;
   } catch (error) {

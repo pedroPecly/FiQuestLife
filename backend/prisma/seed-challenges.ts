@@ -11,16 +11,16 @@
  * - SLEEP (Sono) - 5 desafios
  * - SOCIAL (Social) - 5 desafios
  * - PRODUCTIVITY (Produtividade) - 8 desafios
- * - MINDFULNESS (Mindfulness) - 4 desafios
+ * (Mindfulness removido)
  * 
  * @created 20 de outubro de 2025
  * @updated 2 de novembro de 2025
  */
 
 import type {
-    ChallengeCategory,
-    ChallengeDifficulty,
-    ChallengeFrequency,
+  ChallengeCategory,
+  ChallengeDifficulty,
+  ChallengeFrequency,
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
@@ -484,45 +484,7 @@ async function seedChallenges() {
       frequency: 'WEEKLY',
     },
 
-    // ============================================
-    // 🧘 MINDFULNESS (4 desafios)
-    // ============================================
-    {
-      title: 'Meditar 10 minutos',
-      description: 'Pratique 10 minutos de meditação guiada ou livre',
-      category: 'MINDFULNESS',
-      difficulty: 'MEDIUM',
-      xpReward: 80,
-      coinsReward: 16,
-      frequency: 'DAILY',
-    },
-    {
-      title: 'Respiração consciente',
-      description: 'Faça 5 minutos de exercícios de respiração profunda',
-      category: 'MINDFULNESS',
-      difficulty: 'EASY',
-      xpReward: 50,
-      coinsReward: 10,
-      frequency: 'DAILY',
-    },
-    {
-      title: 'Refeição consciente',
-      description: 'Faça uma refeição sem distrações, focando nos sabores',
-      category: 'MINDFULNESS',
-      difficulty: 'MEDIUM',
-      xpReward: 70,
-      coinsReward: 14,
-      frequency: 'DAILY',
-    },
-    {
-      title: 'Body scan',
-      description: 'Pratique um body scan completo (escaneamento corporal)',
-      category: 'MINDFULNESS',
-      difficulty: 'HARD',
-      xpReward: 120,
-      coinsReward: 24,
-      frequency: 'DAILY',
-    },
+    // Mindfulness removido: desafios excluídos do array
   ];
 
   // Cria todos os desafios
@@ -541,7 +503,7 @@ async function seedChallenges() {
     'SLEEP',
     'SOCIAL',
     'PRODUCTIVITY',
-    'MINDFULNESS',
+  // Mindfulness removido
   ];
 
   console.log('\n📊 Resumo por categoria:');

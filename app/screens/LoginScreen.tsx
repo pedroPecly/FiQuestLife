@@ -5,13 +5,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { Header } from '../../components/layout/Header';
 import { AlertModal } from '../../components/ui/AlertModal';
@@ -23,6 +25,7 @@ import { Tag } from '../../components/ui/Tag';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
+import { registerPushToken } from '../../services/pushToken';
 import { styles } from '../styles/login.styles';
 
 const LoginScreen = () => {
@@ -159,6 +162,16 @@ const LoginScreen = () => {
         // Salva o token e dados do usuário
         await authStorage.saveAuth(result.data.token, result.data.user);
         
+        // Registra push token para o novo usuário logado
+        // Isso garante que notificações vão para o usuário correto
+        try {
+          await registerPushToken();
+          console.log('[LOGIN] Push token registrado com sucesso');
+        } catch (error) {
+          console.error('[LOGIN] Erro ao registrar push token:', error);
+          // Não bloqueia o login se houver erro no push token
+        }
+        
         // Navega para a tela principal
         router.replace('/(tabs)');
       } else {
@@ -232,6 +245,15 @@ const LoginScreen = () => {
         // Salva o token e dados do usuário
         await authStorage.saveAuth(result.data.token, result.data.user);
         
+        // Registra push token para o novo usuário
+        try {
+          await registerPushToken();
+          console.log('[REGISTER] Push token registrado com sucesso');
+        } catch (error) {
+          console.error('[REGISTER] Erro ao registrar push token:', error);
+          // Não bloqueia o cadastro se houver erro no push token
+        }
+        
         // Navega direto sem Alert para evitar problemas
         router.replace('/(tabs)');
       } else {
@@ -273,17 +295,17 @@ const LoginScreen = () => {
     <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
       <StatusBar barStyle="dark-content" />
       
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="always"
-        showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
-      >
-        <Header showNotifications={false} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <Header showNotifications={false} />
 
       <Card>
         <Tag
@@ -405,10 +427,11 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </Card>
 
-      <Text style={styles.disclaimer}>
-        Ao {isLogin ? 'entrar' : 'criar uma conta'}, você concorda com nossos <Text style={styles.link}>Termos de Uso</Text> e <Text style={styles.link}>Política de Privacidade</Text>
-      </Text>
-      </ScrollView>
+          <Text style={styles.disclaimer}>
+            Ao {isLogin ? 'entrar' : 'criar uma conta'}, você concorda com nossos <Text style={styles.link}>Termos de Uso</Text> e <Text style={styles.link}>Política de Privacidade</Text>
+          </Text>
+        </ScrollView>
+      </TouchableWithoutFeedback>
 
       <AlertModal
         visible={isVisible}

@@ -66,7 +66,7 @@
 | **Dorminhoco** | Complete 15 desafios de sono | SLEEP | 15 desafios | 🔵 RARE |
 | **Social** | Complete 10 desafios sociais | SOCIAL | 10 desafios | 🔵 RARE |
 | **Produtivo** | Complete 15 desafios de produtividade | PRODUCTIVITY | 15 desafios | 🔵 RARE |
-| **Meditador** | Complete 10 desafios de mindfulness | MINDFULNESS | 10 desafios | 🔵 RARE |
+<!-- Badge Meditador removido: era relacionado à categoria MINDFULNESS -->
 
 ---
 

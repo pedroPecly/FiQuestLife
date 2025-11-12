@@ -19,13 +19,19 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Sistema de Level Up automático (1000 XP/nível)
 
 ### **🏆 Desafios e Conquistas**
-- 43 desafios em 8 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade, Mindfulness)
+- 46 desafios em 7 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade)
+- 28 desafios com verificação por foto obrigatória (hidratação, exercícios, refeições)
+- Sistema de upload de fotos com Supabase Storage
+- Legendas opcionais para compartilhar contexto
 - 5 desafios diários atribuídos automaticamente
 - 29 badges com 4 níveis de raridade (Common, Rare, Epic, Legendary)
 - Progresso em tempo real e histórico completo
 
 ### **👥 Social**
 - Feed de atividades dos amigos em tempo real
+- Sistema de upload de fotos para desafios com verificação
+- Feed exibe fotos e legendas das conquistas
+- Curtidas e comentários (limitado a 1 comentário por usuário por post)
 - Sistema completo de amizades (busca, solicitações, gerenciamento)
 - Perfis públicos/privados com controle de privacidade
 - Rankings de amigos e global (XP, Streak, Desafios)
@@ -34,10 +40,12 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 ### **🔔 Notificações**
 - Sistema completo de notificações push (Expo Push API)
 - Notificações in-app com histórico persistente
-- 8 tipos de notificações (curtidas, comentários, amizades, conquistas, level up, desafios, streaks)
+- 8 tipos de notificações (curtidas, comentários, amizades, conquistas, level up, streaks)
+- Notificações de desafios completados desativadas por padrão
 - Lembretes diários agendados (9h e 21h)
 - Badge counter em tempo real
 - Registro automático de push tokens
+- Remoção de tokens ao fazer logout
 - Proteção contra duplicatas (5 segundos)
 
 ### **🔒 Segurança**
@@ -47,9 +55,10 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Controle de privacidade de perfis
 
 ### **🎨 Interface**
-- 35+ componentes reutilizáveis (TabBar, FilterBar, BottomSheetModal, NotificationItem, ActivityRewardBadges)
+- 35+ componentes reutilizáveis (TabBar, FilterBar, BottomSheetModal, NotificationItem, ActivityRewardBadges, PhotoCaptureModal)
 - 12 telas completas e responsivas
 - Design iOS/Android/Web
+- Melhorias de UX no teclado (dismiss ao clicar fora, KeyboardAvoidingView em modais)
 - Safe area handling e estados vazios padronizados
 - Componentização profissional e arquitetura escalável
 
@@ -143,6 +152,7 @@ FiQuestLife/
 │   │   ├── NotificationBell.tsx # 🆕 Sino de notificações com badge count (Sprint 9)
 │   │   ├── NotificationItem.tsx # 🆕 Item de notificação reutilizável (Sprint 13)
 │   │   ├── NotificationsModal.tsx # 🆕 Modal de notificações (Sprint 9/13)
+│   │   ├── PhotoCaptureModal.tsx # 🆕 Modal de captura/seleção de foto com legenda (Sprint 15)
 │   │   ├── ProfileAvatar.tsx # 🆕 Avatar com upload de foto (galeria/câmera)
 │   │   ├── RewardCard.tsx    # 🆕 Card individual de recompensa (Sprint 10)
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
@@ -363,6 +373,18 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Novembro de 2025**
+- ✅ **Sprint 15: Sistema de Fotos para Desafios** (12/11/2025)
+  - Upload de fotos obrigatório para 28 desafios (60% do total)
+  - Supabase Storage com bucket "challenge-photos"
+  - PhotoCaptureModal profissional (câmera/galeria + legenda opcional)
+  - Validação de arquivos (JPEG/PNG/WebP, 5MB max)
+  - Feed exibe fotos e legendas das conquistas
+  - ChallengeCard com badge de foto e trigger automático
+  - Backend com multipart/form-data handling
+  - Melhorias de UX no teclado iOS (dismiss ao clicar fora, KeyboardAvoidingView)
+  - Limitação de 1 comentário por usuário por post
+  - Notificações de desafios completados desativadas
+  - Código profissional com JSDoc e TypeScript
 - ✅ **Sprint 13: Notificações Push + Componentização** (04/11/2025)
   - Sistema completo de notificações push com Expo Push API
   - Registro automático de tokens no backend

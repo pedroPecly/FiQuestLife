@@ -12,6 +12,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '../types/user';
+import { unregisterPushToken } from './pushToken';
 
 // Chave para armazenar o token
 const TOKEN_KEY = '@FiQuestLife:token';
@@ -66,13 +67,28 @@ export const authStorage = {
 
   /**
    * Fazer logout (remover token e dados do usuário)
+   * Remove também o push token do backend para parar de receber notificações
    */
   async logout() {
     try {
+      // Remover push token do backend ANTES de limpar o token de autenticação
+      // Isso garante que o token ainda é válido ao chamar a API
+      try {
+        await unregisterPushToken();
+        console.log('[AUTH] Push token removido com sucesso');
+      } catch (error) {
+        console.error('[AUTH] Erro ao remover push token (continuando logout):', error);
+        // Não bloqueia o logout se houver erro ao remover push token
+      }
+
+      // Remover dados de autenticação do AsyncStorage
       await AsyncStorage.removeItem(TOKEN_KEY);
       await AsyncStorage.removeItem(USER_KEY);
+      
+      console.log('[AUTH] Logout concluído com sucesso');
       return true;
     } catch (error) {
+      console.error('[AUTH] Erro durante logout:', error);
       return false;
     }
   },

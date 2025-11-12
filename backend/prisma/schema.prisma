@@ -47,7 +47,6 @@ model User {
 /// * 
 /// * Exemplos:
 /// * - "Beber 2L de água" (DAILY, HYDRATION, EASY)
-/// * - "Meditar por 10 minutos" (DAILY, MINDFULNESS, MEDIUM)
 /// * - "Ir à academia 3x na semana" (WEEKLY, PHYSICAL_ACTIVITY, HARD)
 model Challenge {
   id             String              @id @default(uuid())
@@ -59,6 +58,7 @@ model Challenge {
   coinsReward    Int                 @map("coins_reward")
   isActive       Boolean             @default(true) @map("is_active")
   frequency      ChallengeFrequency  @default(DAILY)
+  requiresPhoto  Boolean             @default(false) @map("requires_photo")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
   userChallenges UserChallenge[]
@@ -85,6 +85,8 @@ model UserChallenge {
   completedAt DateTime?       @map("completed_at")
   progress    Int             @default(0)
   notes       String?
+  photoUrl    String?         @map("photo_url")
+  caption     String?
   challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -272,7 +274,6 @@ enum ChallengeCategory {
   SLEEP
   SOCIAL
   PRODUCTIVITY
-  MINDFULNESS
 }
 
 /// *

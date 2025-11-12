@@ -33,7 +33,12 @@ export async function registerPushToken(): Promise<boolean> {
     
     console.log('[PUSH TOKEN] ✅ Token registrado no backend');
     return true;
-  } catch (error) {
+  } catch (error: any) {
+    // Se for erro 401, não mostra erro (usuário não está autenticado)
+    if (error.response?.status === 401) {
+      console.log('[PUSH TOKEN] Usuário não autenticado - token não registrado');
+      return false;
+    }
     console.error('[PUSH TOKEN] Erro ao registrar token:', error);
     return false;
   }

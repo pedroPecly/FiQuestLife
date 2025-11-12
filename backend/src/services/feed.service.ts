@@ -118,16 +118,42 @@ export async function getActivityLikes(activityId: string) {
 
 /**
  * Adicionar comentário em uma atividade
+ * 
+ * Validações:
+ * - Conteúdo não pode ser vazio
+ * - Conteúdo limitado a 500 caracteres
+ * - Apenas 1 comentário por usuário por atividade
+ * 
+ * @param userId - ID do usuário que está comentando
+ * @param activityId - ID da atividade a ser comentada
+ * @param content - Conteúdo do comentário
+ * @returns Objeto do comentário criado com dados do usuário
+ * @throws Error se validações falharem
  */
 export async function addComment(userId: string, activityId: string, content: string) {
+  // Constantes de validação
+  const MAX_COMMENT_LENGTH = 500;
+  
   try {
     // Validar conteúdo
     if (!content || content.trim().length === 0) {
       throw new Error('Comentário não pode estar vazio');
     }
 
-    if (content.length > 500) {
-      throw new Error('Comentário não pode ter mais de 500 caracteres');
+    if (content.length > MAX_COMMENT_LENGTH) {
+      throw new Error(`Comentário não pode ter mais de ${MAX_COMMENT_LENGTH} caracteres`);
+    }
+
+    // Verificar se o usuário já comentou nesta atividade
+    const existingComment = await prisma.activityComment.findFirst({
+      where: {
+        userId,
+        activityId,
+      },
+    });
+
+    if (existingComment) {
+      throw new Error('Você já comentou nesta atividade');
     }
 
     const comment = await prisma.activityComment.create({
@@ -162,7 +188,7 @@ export async function addComment(userId: string, activityId: string, content: st
       try {
         await notifyActivityComment(
           activity.userId,
-          activityId, // ID da atividade
+          activityId,
           comment.user.name || comment.user.username,
           comment.content,
           activity.description || 'sua conquista'

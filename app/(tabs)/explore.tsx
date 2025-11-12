@@ -64,9 +64,39 @@ export default function ExploreScreen() {
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>('xp');
   const [leaderboardScope, setLeaderboardScope] = useState<'friends' | 'global'>('friends');
 
-  // Recarrega quando a tela é focada
+  /**
+   * Lifecycle: Limpar estados de loading quando o componente é montado
+   * Previne bug de loading congelado após navegação
+   */
+  useEffect(() => {
+    console.log('[EXPLORE] Componente montado - resetando estados de loading');
+    setFeedLoading(false);
+    setFeedRefreshing(false);
+    setMyPostsLoading(false);
+    setMyPostsRefreshing(false);
+  }, []);
+
+  /**
+   * Lifecycle: Recarrega dados quando a tela ganha foco
+   * Garante que dados estão atualizados após navegação
+   */
   useFocusEffect(
     useCallback(() => {
+      console.log('[EXPLORE] useFocusEffect - Tab ativa:', activeTab);
+      console.log('[EXPLORE] Estados de loading:', {
+        feedLoading,
+        feedRefreshing,
+        myPostsLoading,
+        myPostsRefreshing,
+        initialLoad,
+      });
+      
+      // Resetar estados de loading que podem ter ficado travados após navegação
+      setFeedLoading(false);
+      setFeedRefreshing(false);
+      setMyPostsLoading(false);
+      setMyPostsRefreshing(false);
+      
       if (activeTab === 'feed') {
         loadFeed(true);
       } else if (activeTab === 'myPosts') {
@@ -236,6 +266,8 @@ export default function ExploreScreen() {
   // Load initial feed
   const loadFeed = async (isRefresh = false) => {
     try {
+      console.log('[FEED] 🔄 Iniciando loadFeed - isRefresh:', isRefresh, 'offset:', offset);
+      
       if (isRefresh) {
         setFeedRefreshing(true);
       } else if (!initialLoad) {
@@ -243,7 +275,23 @@ export default function ExploreScreen() {
       }
 
       const newOffset = isRefresh ? 0 : offset;
+      console.log('[FEED] 📡 Chamando getFriendActivity com offset:', newOffset);
+      
       const data = await feedService.getFriendActivity(20, newOffset);
+      
+      console.log('[FEED] ✅ Dados recebidos:', data.length, 'atividades');
+      console.log('[FEED] 📸 Atividades com foto:', data.filter(a => a.photoUrl).length);
+      
+      // Log da primeira atividade para debug
+      if (data.length > 0) {
+        console.log('[FEED] 📝 Primeira atividade:', {
+          id: data[0].id,
+          type: data[0].type,
+          hasPhoto: !!data[0].photoUrl,
+          photoUrl: data[0].photoUrl?.substring(0, 50),
+          caption: data[0].caption,
+        });
+      }
       
       if (isRefresh) {
         setActivities(data);
@@ -255,7 +303,8 @@ export default function ExploreScreen() {
 
       setHasMore(data.length === 20);
     } catch (error: any) {
-      console.error('Erro ao carregar feed:', error);
+      console.error('❌ Erro ao carregar feed:', error);
+      console.error('❌ Error response:', error.response);
       if (error.response?.status === 500) {
         setHasMore(false);
       }
@@ -269,6 +318,8 @@ export default function ExploreScreen() {
   // Load my posts
   const loadMyPosts = async (isRefresh = false) => {
     try {
+      console.log('[MY POSTS] 🔄 Iniciando loadMyPosts - isRefresh:', isRefresh, 'offset:', myPostsOffset);
+      
       if (isRefresh) {
         setMyPostsRefreshing(true);
       } else if (!myPostsInitialLoad) {
@@ -276,7 +327,23 @@ export default function ExploreScreen() {
       }
 
       const newOffset = isRefresh ? 0 : myPostsOffset;
+      console.log('[MY POSTS] 📡 Chamando getMyActivity com offset:', newOffset);
+      
       const data = await feedService.getMyActivity(20, newOffset);
+      
+      console.log('[MY POSTS] ✅ Dados recebidos:', data.length, 'atividades');
+      console.log('[MY POSTS] 📸 Atividades com foto:', data.filter(a => a.photoUrl).length);
+      
+      // Log da primeira atividade para debug
+      if (data.length > 0) {
+        console.log('[MY POSTS] 📝 Primeira atividade:', {
+          id: data[0].id,
+          type: data[0].type,
+          hasPhoto: !!data[0].photoUrl,
+          photoUrl: data[0].photoUrl?.substring(0, 50),
+          caption: data[0].caption,
+        });
+      }
       
       if (isRefresh) {
         setMyPosts(data);
@@ -288,7 +355,8 @@ export default function ExploreScreen() {
 
       setMyPostsHasMore(data.length === 20);
     } catch (error: any) {
-      console.error('Erro ao carregar meus posts:', error);
+      console.error('❌ Erro ao carregar meus posts:', error);
+      console.error('❌ Error response:', error.response);
       if (error.response?.status === 500) {
         setMyPostsHasMore(false);
       }
@@ -326,10 +394,18 @@ export default function ExploreScreen() {
 
   // Load more on scroll (feed/myPosts only)
   const loadMore = () => {
+    console.log('[EXPLORE] 📜 loadMore chamado - tab:', activeTab);
+    console.log('[EXPLORE] Feed state:', { feedLoading, feedRefreshing, hasMore, initialLoad });
+    console.log('[EXPLORE] MyPosts state:', { myPostsLoading, myPostsRefreshing, myPostsHasMore, myPostsInitialLoad });
+    
     if (activeTab === 'feed' && !feedLoading && !feedRefreshing && hasMore && !initialLoad) {
+      console.log('[EXPLORE] ✅ Carregando mais no feed');
       loadFeed();
     } else if (activeTab === 'myPosts' && !myPostsLoading && !myPostsRefreshing && myPostsHasMore && !myPostsInitialLoad) {
+      console.log('[EXPLORE] ✅ Carregando mais em myPosts');
       loadMyPosts();
+    } else {
+      console.log('[EXPLORE] ⏸️ Não carregando mais (condições não atendidas)');
     }
   };
 
@@ -398,9 +474,20 @@ export default function ExploreScreen() {
     </View>
   );
 
-  // Loading footer
+  /**
+   * Renderiza footer de loading na lista
+   * Mostra "Carregando..." durante scroll infinito
+   * Não mostra durante: carregamento inicial, refresh (RefreshControl já mostra indicador)
+   */
   const renderFooter = () => {
-    if (!feedLoading || initialLoad) return null;
+    const isLoading = activeTab === 'feed' ? feedLoading : myPostsLoading;
+    const isRefreshing = activeTab === 'feed' ? feedRefreshing : myPostsRefreshing;
+    
+    console.log('[EXPLORE] renderFooter - Tab:', activeTab, 'Loading:', isLoading, 'Refreshing:', isRefreshing, 'InitialLoad:', initialLoad);
+    
+    // Não mostra durante o carregamento inicial ou durante refresh (RefreshControl já mostra)
+    if (!isLoading || initialLoad || isRefreshing) return null;
+    
     return (
       <View style={styles.footerLoading}>
         <Text style={styles.footerText}>Carregando...</Text>
@@ -555,7 +642,7 @@ export default function ExploreScreen() {
             </View>
           }
           ListFooterComponent={
-            myPostsLoading && !myPostsInitialLoad ? (
+            myPostsLoading && !myPostsInitialLoad && !myPostsRefreshing ? (
               <View style={styles.footerLoading}>
                 <Text style={styles.footerText}>Carregando...</Text>
               </View>

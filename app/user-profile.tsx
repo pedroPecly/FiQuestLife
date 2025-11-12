@@ -10,18 +10,19 @@
 
 import { SimpleHeader } from '@/components/layout';
 import { Avatar, BadgeItem, Button, Card, EmptyState, InfoRow, StatBox } from '@/components/ui';
+import { authService } from '@/services/api';
 import { friendService } from '@/services/friend';
 import { UserProfile, userProfileService } from '@/services/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View
+    ActivityIndicator,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,6 +34,15 @@ export default function UserProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [isPrivate, setIsPrivate] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  /**
+   * Carrega ID do usuário atualmente logado
+   * Usado para verificar se está visualizando o próprio perfil
+   */
+  useEffect(() => {
+    loadCurrentUser();
+  }, []);
 
   useEffect(() => {
     if (userId) {
@@ -40,6 +50,20 @@ export default function UserProfileScreen() {
       loadMutualFriends();
     }
   }, [userId]);
+
+  /**
+   * Busca dados do usuário atualmente logado
+   */
+  const loadCurrentUser = async () => {
+    try {
+      const result = await authService.getMe();
+      if (result.success && result.data) {
+        setCurrentUserId(result.data.id);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar usuário atual:', error);
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -92,8 +116,20 @@ export default function UserProfileScreen() {
     }
   };
 
+  /**
+   * Renderiza botão de ação apropriado baseado no relacionamento
+   * - Se é o próprio perfil: não mostra botão
+   * - Se é amigo: mostra "Remover Amigo"
+   * - Se tem solicitação pendente: mostra status apropriado
+   * - Caso contrário: mostra "Adicionar Amigo"
+   */
   const renderActionButton = () => {
     if (!profile) return null;
+
+    // Se está visualizando o próprio perfil, não mostra botão de ação
+    if (currentUserId && userId === currentUserId) {
+      return null;
+    }
 
     const { relationship } = profile;
 
