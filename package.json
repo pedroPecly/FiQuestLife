@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "update-deps": "npx expo install --fix",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@prisma/client": "^6.19.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
@@ -49,6 +50,7 @@
     "eas-cli": "^16.26.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "prisma": "^6.19.0",
     "typescript": "~5.9.2"
   },
   "private": true
