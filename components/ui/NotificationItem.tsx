@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { BackendNotification } from '../../services/notificationApi';
+import type { LocalNotification } from '../../services/localNotificationStorage';
 
 const theme = {
   colors: {
@@ -20,12 +20,12 @@ const theme = {
 };
 
 interface NotificationItemProps {
-  notification: BackendNotification;
+  notification: LocalNotification;
   onPress: () => void;
   onDelete: () => void;
 }
 
-const getNotificationIcon = (type: BackendNotification['type']): keyof typeof Ionicons.glyphMap => {
+const getNotificationIcon = (type: LocalNotification['type']): keyof typeof Ionicons.glyphMap => {
   switch (type) {
     case 'ACTIVITY_LIKE':
       return 'heart';

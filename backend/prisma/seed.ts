@@ -1,22 +1,22 @@
 /**
  * ============================================
- * SEED DE BADGES - POPULAÇÃO INICIAL DO BANCO
+ * SEED PRINCIPAL - POPULAÇÃO INICIAL DO BANCO
  * ============================================
  * 
- * Popula o banco de dados com badges iniciais organizados por categoria:
- * - BEGINNER: Badges para iniciantes (1, 5, 10, 25, 50 desafios)
- * - CONSISTENCY: Badges de streak (3, 7, 14, 30, 100 dias)
- * - MILESTONE: Badges de nível (5, 10, 20, 50)
- * - ACHIEVEMENT: Badges de categorias específicas
+ * Popula o banco de dados com:
+ * - Badges iniciais (28 badges)
+ * - Challenges iniciais (58 desafios)
  * 
  * @created 17 de outubro de 2025
+ * @updated 21 de novembro de 2025
  */
 
 import { BadgeCategory, BadgeRarity, BadgeRequirementType, PrismaClient } from '@prisma/client';
+import { seedChallenges } from './seed-challenges.js';
 
 const prisma = new PrismaClient();
 
-async function main() {
+async function seedBadges() {
   console.log('🌱 Iniciando seed de badges...\n');
 
   // ==========================================
@@ -390,6 +390,17 @@ async function main() {
   console.log('  🟣 EPIC: 5 badges');
   console.log('  🟠 LEGENDARY: 3 badges');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+}
+
+async function main() {
+  try {
+    await seedBadges();
+    await seedChallenges();
+    console.log('🎉 Seed completo concluído com sucesso!\n');
+  } catch (error) {
+    console.error('❌ Erro no seed:', error);
+    throw error;
+  }
 }
 
 main()

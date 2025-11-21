@@ -37,7 +37,6 @@ model User {
   userChallenges         UserChallenge[]
   activityLikes          ActivityLike[]
   activityComments       ActivityComment[]
-  notifications          Notification[]
 
   @@map("users")
 }
@@ -245,25 +244,6 @@ model ActivityComment {
 }
 
 /// *
-/// * Notificações do usuário
-/// * Sistema de notificações in-app
-model Notification {
-  id         String           @id @default(uuid())
-  userId     String           @map("user_id")
-  type       NotificationType
-  title      String
-  message    String
-  data       String?          @db.Text // JSON com dados extras
-  read       Boolean          @default(false)
-  createdAt  DateTime         @default(now()) @map("created_at")
-  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, read])
-  @@index([createdAt])
-  @@map("notifications")
-}
-
-/// *
 /// * Categorias de desafios disponíveis
 /// * Organiza os desafios por área da vida
 enum ChallengeCategory {
@@ -360,18 +340,4 @@ enum FriendshipStatus {
   ACCEPTED
   REJECTED
   BLOCKED
-}
-
-/// *
-/// * Tipos de notificação
-/// * Define o tipo de evento que gerou a notificação
-enum NotificationType {
-  FRIEND_REQUEST
-  FRIEND_ACCEPTED
-  ACTIVITY_LIKE
-  ACTIVITY_COMMENT
-  BADGE_EARNED
-  LEVEL_UP
-  CHALLENGE_COMPLETED
-  STREAK_MILESTONE
 }

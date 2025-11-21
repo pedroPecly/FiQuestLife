@@ -7,6 +7,7 @@
  * - Setup automático ao montar app
  * - Listeners para receber e responder notificações
  * - Navegação inteligente ao tocar em notificação
+ * - Salva notificações localmente (AsyncStorage)
  * 
  * Uso: Chamar no _layout.tsx (root do app)
  * @created 27 de outubro de 2025
@@ -15,13 +16,15 @@
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { authStorage } from '../services/auth';
+import { saveLocalNotification } from '../services/localNotificationStorage';
 import {
-    addNotificationReceivedListener,
-    addNotificationResponseListener,
-    getNotificationsEnabled,
-    requestNotificationPermissions,
-    scheduleDailyReminder,
-    scheduleStreakReminder,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  getNotificationsEnabled,
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  scheduleStreakReminder,
 } from '../services/notifications';
 import { registerPushToken } from '../services/pushToken';
 
@@ -47,9 +50,34 @@ export function useNotifications() {
       async (notification) => {
         const content = notification.request.content;
         console.log('📬 Notificação recebida:', content.title);
+        console.log('📬 Dados da notificação:', JSON.stringify(content.data));
         
-        // As notificações agora são gerenciadas pelo backend
-        // Não precisamos salvar localmente
+        // Pega userId do usuário logado
+        const user = await authStorage.getUser();
+        if (!user) {
+          console.log('⚠️ Usuário não logado, notificação não salva');
+          return;
+        }
+        
+        // Salvar notificação localmente
+        const notificationData = content.data as any;
+        const notificationType = notificationData?.type;
+        
+        console.log('📬 Tipo extraído:', notificationType);
+        
+        if (!notificationType) {
+          console.warn('⚠️ Notificação sem tipo! Dados:', JSON.stringify(notificationData));
+        }
+        
+        await saveLocalNotification({
+          userId: user.id,
+          type: notificationType || 'CHALLENGE_COMPLETED',
+          title: content.title || 'Notificação',
+          message: content.body || '',
+          data: notificationData,
+        });
+        
+        console.log('💾 Notificação salva localmente com tipo:', notificationType);
       }
     );
 
@@ -57,10 +85,37 @@ export function useNotifications() {
     responseListener.current = addNotificationResponseListener(async (response) => {
       const data = response.notification.request.content.data;
       const content = response.notification.request.content;
-      console.log('👆 Usuário tocou na notificação:', data?.type);
+      console.log('👆 Usuário tocou na notificação');
+      console.log('👆 Tipo:', data?.type);
+      console.log('👆 Dados completos:', JSON.stringify(data));
       
-      // As notificações agora são gerenciadas pelo backend
-      // Não precisamos salvar localmente
+      // Pega userId do usuário logado
+      const user = await authStorage.getUser();
+      if (!user) {
+        console.log('⚠️ Usuário não logado, notificação não salva');
+        handleNotificationTap(data);
+        return;
+      }
+      
+      // Salvar notificação localmente se ainda não foi salva
+      const notificationData = data as any;
+      const notificationType = notificationData?.type;
+      
+      console.log('👆 Tipo extraído para salvar:', notificationType);
+      
+      if (!notificationType) {
+        console.warn('⚠️ Notificação tocada sem tipo! Dados:', JSON.stringify(notificationData));
+      }
+      
+      await saveLocalNotification({
+        userId: user.id,
+        type: notificationType || 'CHALLENGE_COMPLETED',
+        title: content.title || 'Notificação',
+        message: content.body || '',
+        data: notificationData,
+      });
+      
+      console.log('💾 Notificação do toque salva com tipo:', notificationType);
       
       handleNotificationTap(data);
     });

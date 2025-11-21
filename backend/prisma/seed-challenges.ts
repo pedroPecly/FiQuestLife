@@ -1,20 +1,22 @@
 /**
  * ============================================
- * SEED DE DESAFIOS - 58 Desafios
+ * SEED DE DESAFIOS - 46 Desafios Completos
  * ============================================
  * 
- * Popula o banco com desafios variados em 8 categorias:
+ * Popula o banco com desafios variados em 7 categorias:
  * - PHYSICAL_ACTIVITY (Atividade Física) - 11 desafios
  * - NUTRITION (Nutrição) - 9 desafios
  * - HYDRATION (Hidratação) - 5 desafios
  * - MENTAL_HEALTH (Saúde Mental) - 4 desafios
  * - SLEEP (Sono) - 5 desafios
  * - SOCIAL (Social) - 5 desafios
- * - PRODUCTIVITY (Produtividade) - 8 desafios
- * (Mindfulness removido)
+ * - PRODUCTIVITY (Produtividade) - 7 desafios
+ * 
+ * IMPORTANTE: Todos os desafios incluem o campo `requiresPhoto`
+ * que define se é necessário postar foto para completar.
  * 
  * @created 20 de outubro de 2025
- * @updated 2 de novembro de 2025
+ * @updated 21 de novembro de 2025
  */
 
 import type {
@@ -27,11 +29,12 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function seedChallenges() {
-  console.log('🌱 Iniciando seed de desafios...');
+  console.log('🌱 Iniciando seed de desafios...\n');
 
-  // Limpa desafios existentes (cuidado em produção!)
+  // Limpa desafios existentes
+  console.log('🗑️  Removendo desafios anteriores...');
   await prisma.challenge.deleteMany({});
-  console.log('🗑️  Desafios anteriores removidos');
+  console.log('✅ Limpeza concluída!\n');
 
   const challenges: Array<{
     title: string;
@@ -41,6 +44,7 @@ async function seedChallenges() {
     xpReward: number;
     coinsReward: number;
     frequency: ChallengeFrequency;
+    requiresPhoto: boolean;
   }> = [
     // ============================================
     // 💪 PHYSICAL_ACTIVITY (11 desafios)
@@ -53,6 +57,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: '10.000 passos',
@@ -62,6 +67,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Treino de força',
@@ -71,6 +77,7 @@ async function seedChallenges() {
       xpReward: 120,
       coinsReward: 25,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Corrida de 5km',
@@ -80,6 +87,7 @@ async function seedChallenges() {
       xpReward: 150,
       coinsReward: 30,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Alongamento matinal',
@@ -89,6 +97,7 @@ async function seedChallenges() {
       xpReward: 40,
       coinsReward: 8,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Yoga ou Pilates',
@@ -98,6 +107,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Subir escadas',
@@ -107,6 +117,7 @@ async function seedChallenges() {
       xpReward: 30,
       coinsReward: 6,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Aula de dança',
@@ -116,6 +127,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Ciclismo 30 minutos',
@@ -125,6 +137,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Natação',
@@ -134,6 +147,7 @@ async function seedChallenges() {
       xpReward: 120,
       coinsReward: 24,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Exercícios funcionais',
@@ -143,6 +157,7 @@ async function seedChallenges() {
       xpReward: 130,
       coinsReward: 26,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
 
     // ============================================
@@ -156,6 +171,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Café da manhã saudável',
@@ -165,6 +181,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Zero açúcar refinado',
@@ -174,6 +191,7 @@ async function seedChallenges() {
       xpReward: 150,
       coinsReward: 30,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Preparar refeição caseira',
@@ -183,6 +201,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Proteína em cada refeição',
@@ -192,6 +211,7 @@ async function seedChallenges() {
       xpReward: 90,
       coinsReward: 18,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Evitar fast food',
@@ -201,6 +221,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Comer salada no almoço',
@@ -210,6 +231,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Lanches saudáveis',
@@ -219,6 +241,7 @@ async function seedChallenges() {
       xpReward: 70,
       coinsReward: 14,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Reduzir sal',
@@ -228,6 +251,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
 
     // ============================================
@@ -241,6 +265,7 @@ async function seedChallenges() {
       xpReward: 60,
       coinsReward: 12,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Água ao acordar',
@@ -250,6 +275,7 @@ async function seedChallenges() {
       xpReward: 30,
       coinsReward: 6,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Zero refrigerante',
@@ -259,6 +285,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Chá ou infusão',
@@ -268,6 +295,7 @@ async function seedChallenges() {
       xpReward: 40,
       coinsReward: 8,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Água com limão',
@@ -277,6 +305,7 @@ async function seedChallenges() {
       xpReward: 35,
       coinsReward: 7,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
 
     // ============================================
@@ -290,6 +319,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Momento sem telas',
@@ -299,6 +329,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Tempo na natureza',
@@ -308,6 +339,7 @@ async function seedChallenges() {
       xpReward: 60,
       coinsReward: 12,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Journaling',
@@ -317,6 +349,7 @@ async function seedChallenges() {
       xpReward: 70,
       coinsReward: 14,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
 
     // ============================================
@@ -330,6 +363,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto (impossível fotografar)
     },
     {
       title: 'Rotina noturna',
@@ -339,6 +373,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Dormir antes das 23h',
@@ -348,6 +383,7 @@ async function seedChallenges() {
       xpReward: 120,
       coinsReward: 24,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Cochilo power nap',
@@ -357,6 +393,7 @@ async function seedChallenges() {
       xpReward: 40,
       coinsReward: 8,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Acordar no mesmo horário',
@@ -366,6 +403,7 @@ async function seedChallenges() {
       xpReward: 90,
       coinsReward: 18,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
 
     // ============================================
@@ -379,6 +417,7 @@ async function seedChallenges() {
       xpReward: 60,
       coinsReward: 12,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Ato de bondade',
@@ -388,6 +427,7 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Encontro presencial',
@@ -397,6 +437,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'WEEKLY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Mensagem para amigo',
@@ -406,6 +447,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Participar de grupo/comunidade',
@@ -415,10 +457,11 @@ async function seedChallenges() {
       xpReward: 90,
       coinsReward: 18,
       frequency: 'WEEKLY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
 
     // ============================================
-    // 🎯 PRODUCTIVITY (8 desafios)
+    // 🎯 PRODUCTIVITY (7 desafios)
     // ============================================
     {
       title: 'Planejar o dia',
@@ -428,6 +471,7 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Pomodoro de foco',
@@ -437,6 +481,7 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Organizar espaço de trabalho',
@@ -446,6 +491,7 @@ async function seedChallenges() {
       xpReward: 40,
       coinsReward: 8,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Aprender algo novo',
@@ -455,6 +501,7 @@ async function seedChallenges() {
       xpReward: 90,
       coinsReward: 18,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Ler 20 páginas',
@@ -464,6 +511,7 @@ async function seedChallenges() {
       xpReward: 60,
       coinsReward: 12,
       frequency: 'DAILY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
     {
       title: 'Zero procrastinação',
@@ -473,6 +521,7 @@ async function seedChallenges() {
       xpReward: 130,
       coinsReward: 26,
       frequency: 'DAILY',
+      requiresPhoto: false, // Não requer foto
     },
     {
       title: 'Revisar metas semanais',
@@ -482,9 +531,8 @@ async function seedChallenges() {
       xpReward: 80,
       coinsReward: 16,
       frequency: 'WEEKLY',
+      requiresPhoto: true, // ✅ REQUER FOTO
     },
-
-    // Mindfulness removido: desafios excluídos do array
   ];
 
   // Cria todos os desafios
@@ -492,7 +540,15 @@ async function seedChallenges() {
     data: challenges,
   });
 
-  console.log(`✅ ${createdChallenges.count} desafios criados com sucesso!`);
+  console.log(`✅ ${createdChallenges.count} desafios criados com sucesso!\n`);
+
+  // Contagem de desafios que requerem foto
+  const challengesWithPhoto = challenges.filter(c => c.requiresPhoto).length;
+  const challengesWithoutPhoto = challenges.filter(c => !c.requiresPhoto).length;
+
+  console.log('📸 Requisito de foto:');
+  console.log(`   ✅ Com foto: ${challengesWithPhoto} desafios`);
+  console.log(`   ⚪ Sem foto: ${challengesWithoutPhoto} desafios\n`);
 
   // Busca e mostra resumo por categoria
   const categories = [
@@ -503,28 +559,23 @@ async function seedChallenges() {
     'SLEEP',
     'SOCIAL',
     'PRODUCTIVITY',
-  // Mindfulness removido
   ];
 
-  console.log('\n📊 Resumo por categoria:');
+  console.log('📊 Resumo por categoria:');
   for (const category of categories) {
     const count = await prisma.challenge.count({
       where: { category: category as any },
     });
-    console.log(`   ${category}: ${count} desafios`);
+    const withPhoto = await prisma.challenge.count({
+      where: { 
+        category: category as any,
+        requiresPhoto: true
+      },
+    });
+    console.log(`   ${category}: ${count} desafios (${withPhoto} com foto)`);
   }
 }
 
-async function main() {
-  try {
-    await seedChallenges();
-    console.log('\n🎉 Seed de desafios concluído!');
-  } catch (error) {
-    console.error('❌ Erro no seed:', error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
+// Exporta a função para ser usada no seed principal
+export { seedChallenges };
 
-main();

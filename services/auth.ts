@@ -68,6 +68,10 @@ export const authStorage = {
   /**
    * Fazer logout (remover token e dados do usuário)
    * Remove também o push token do backend para parar de receber notificações
+   * 
+   * IMPORTANTE: Notificações locais NÃO são limpas no logout.
+   * Elas persistem entre sessões do mesmo usuário para manter histórico.
+   * As notificações são filtradas por userId automaticamente.
    */
   async logout() {
     try {
@@ -86,6 +90,7 @@ export const authStorage = {
       await AsyncStorage.removeItem(USER_KEY);
       
       console.log('[AUTH] Logout concluído com sucesso');
+      console.log('[AUTH] ℹ️ Notificações locais mantidas para próximo login');
       return true;
     } catch (error) {
       console.error('[AUTH] Erro durante logout:', error);

@@ -3,7 +3,8 @@
  * NOTIFICATIONS MODAL
  * ============================================
  * 
- * Modal para exibir lista de notificações
+ * Modal para exibir lista de notificações locais
+ * As notificações são armazenadas apenas no AsyncStorage
  */
 
 import { Ionicons } from '@expo/vector-icons';
@@ -17,8 +18,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import type { BackendNotification } from '../../services/notificationApi';
-import * as notificationApi from '../../services/notificationApi';
+import { authStorage } from '../../services/auth';
+import type { LocalNotification } from '../../services/localNotificationStorage';
+import {
+    clearUserNotifications,
+    deleteLocalNotification,
+    getLocalNotifications,
+    getLocalUnreadCount,
+    markAllLocalNotificationsAsRead,
+    markLocalNotificationAsRead,
+} from '../../services/localNotificationStorage';
 import { navigateFromNotification } from '../../services/notificationNavigation';
 import { BottomSheetModal } from './BottomSheetModal';
 import { NotificationItem } from './NotificationItem';
@@ -46,7 +55,7 @@ interface NotificationsModalProps {
 }
 
 export function NotificationsModal({ visible, onClose, onUnreadCountChange }: NotificationsModalProps) {
-  const [notifications, setNotifications] = useState<BackendNotification[]>([]);
+  const [notifications, setNotifications] = useState<LocalNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -58,13 +67,22 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
         setLoading(true);
       }
 
-      console.log('[NOTIFICATIONS MODAL] Carregando notificações do backend...');
-      const data = await notificationApi.getNotifications(false, 50);
+      // Pega userId do usuário logado
+      const user = await authStorage.getUser();
+      if (!user) {
+        console.log('[NOTIFICATIONS MODAL] Usuário não logado');
+        setNotifications([]);
+        onUnreadCountChange?.(0);
+        return;
+      }
+
+      console.log('[NOTIFICATIONS MODAL] Carregando notificações locais...');
+      const data = await getLocalNotifications(user.id, false);
       console.log('[NOTIFICATIONS MODAL] Notificações recebidas:', data.length);
       setNotifications(data);
 
       // Atualizar contagem de não lidas
-      const unreadCount = data.filter((n) => !n.read).length;
+      const unreadCount = await getLocalUnreadCount(user.id);
       console.log('[NOTIFICATIONS MODAL] Não lidas:', unreadCount);
       onUnreadCountChange?.(unreadCount);
     } catch (error) {
@@ -83,7 +101,10 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
       // Marca todas como lidas automaticamente após 1 segundo
       setTimeout(async () => {
         try {
-          await notificationApi.markAllAsRead();
+          const user = await authStorage.getUser();
+          if (!user) return;
+          
+          await markAllLocalNotificationsAsRead(user.id);
           console.log('[NOTIFICATIONS MODAL] Todas marcadas como lidas');
           
           // Atualiza estado local
@@ -96,7 +117,7 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
     }
   }, [visible, onUnreadCountChange]);
 
-  const handleNotificationPress = async (notification: BackendNotification) => {
+  const handleNotificationPress = async (notification: LocalNotification) => {
     console.log('[NOTIFICATIONS MODAL] ========================================');
     console.log('[NOTIFICATIONS MODAL] Notificação clicada:', notification.type);
     console.log('[NOTIFICATIONS MODAL] ID:', notification.id);
@@ -106,7 +127,10 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
     // Marca como lida se ainda não estiver
     if (!notification.read) {
       try {
-        await notificationApi.markAsRead(notification.id);
+        const user = await authStorage.getUser();
+        if (!user) return;
+        
+        await markLocalNotificationAsRead(user.id, notification.id);
         
         // Atualizar localmente
         setNotifications((prev) =>
@@ -114,7 +138,7 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
         );
 
         // Atualizar contagem
-        const unreadCount = notifications.filter((n) => !n.read && n.id !== notification.id).length;
+        const unreadCount = await getLocalUnreadCount(user.id);
         onUnreadCountChange?.(unreadCount);
       } catch (error) {
         console.error('Erro ao marcar como lida:', error);
@@ -134,13 +158,16 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
 
   const handleDelete = async (notificationId: string) => {
     try {
-      await notificationApi.deleteNotification(notificationId);
+      const user = await authStorage.getUser();
+      if (!user) return;
+      
+      await deleteLocalNotification(user.id, notificationId);
       
       // Remover localmente
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
       
       // Atualizar contagem de não lidas
-      const unreadCount = notifications.filter((n) => !n.read && n.id !== notificationId).length;
+      const unreadCount = await getLocalUnreadCount(user.id);
       onUnreadCountChange?.(unreadCount);
     } catch (error) {
       console.error('Erro ao deletar notificação:', error);
@@ -149,8 +176,10 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
 
   const handleClearAll = async () => {
     try {
-      // Deletar todas as notificações no backend
-      await Promise.all(notifications.map(n => notificationApi.deleteNotification(n.id)));
+      const user = await authStorage.getUser();
+      if (!user) return;
+      
+      await clearUserNotifications(user.id);
       
       // Limpar localmente
       setNotifications([]);
@@ -162,7 +191,7 @@ export function NotificationsModal({ visible, onClose, onUnreadCountChange }: No
     }
   };
 
-  const renderNotification = ({ item }: { item: BackendNotification }) => (
+  const renderNotification = ({ item }: { item: LocalNotification }) => (
     <NotificationItem
       notification={item}
       onPress={() => handleNotificationPress(item)}

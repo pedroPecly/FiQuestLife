@@ -25,7 +25,6 @@ import feedRoutes from './routes/feed.routes.js';
 import friendRoutes from './routes/friend.routes.js';
 import healthRoutes from './routes/health.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
-import { notificationRoutes } from './routes/notification.routes.js';
 import pushTokenRoutes from './routes/push-token.routes.js';
 import rewardRoutes from './routes/reward.js';
 import userProfileRoutes from './routes/user-profile.routes.js';
@@ -109,9 +108,6 @@ app.route('/users', userProfileRoutes);
 
 // Registra as rotas de leaderboard (/leaderboard/friends, /leaderboard/global)
 app.route('/leaderboard', leaderboardRoutes);
-
-// Registra as rotas de notificações (/notifications, /notifications/unread-count)
-app.route('/notifications', notificationRoutes);
 
 // Registra as rotas de push token (/push-token)
 app.route('/push-token', pushTokenRoutes);

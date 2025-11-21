@@ -28,24 +28,15 @@ interface CreateNotificationData {
 }
 
 /**
- * Criar notificação no banco
+ * Criar notificação (somente push, dados salvos localmente no frontend)
  */
 export async function createNotification(notificationData: CreateNotificationData) {
   try {
-    const notification = await prisma.notification.create({
-      data: {
-        userId: notificationData.userId,
-        type: notificationData.type,
-        title: notificationData.title,
-        message: notificationData.message,
-        data: notificationData.data ? JSON.stringify(notificationData.data) : null,
-      },
-    });
-
     // ============================================
-    // PUSH NOTIFICATION: Fallback para usuários offline
+    // PUSH NOTIFICATION: Para usuários offline
     // ============================================
-    // Enviar push notification
+    // Notificações são salvas LOCALMENTE no frontend (AsyncStorage)
+    // Backend apenas envia push notification
     try {
       const user = await prisma.user.findUnique({
         where: { id: notificationData.userId },
@@ -69,7 +60,17 @@ export async function createNotification(notificationData: CreateNotificationDat
       console.error('[NOTIFICATION SERVICE] Erro ao enviar push (continuando):', pushError);
     }
 
-    return notification;
+    // Retorna os dados da notificação para o frontend salvar localmente
+    return {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: notificationData.userId,
+      type: notificationData.type,
+      title: notificationData.title,
+      message: notificationData.message,
+      data: notificationData.data,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
   } catch (error) {
     console.error('[NOTIFICATION SERVICE] Erro ao criar notificação:', error);
     throw error;
@@ -78,125 +79,48 @@ export async function createNotification(notificationData: CreateNotificationDat
 
 /**
  * Buscar notificações do usuário
+ * NOTA: Notificações são armazenadas localmente no frontend (AsyncStorage)
+ * Esta função não é mais usada, mas mantida para compatibilidade
  */
 export async function getUserNotifications(userId: string, limit: number = 50, onlyUnread = false) {
-  try {
-    console.log('[NOTIFICATION SERVICE] Buscando notificações - userId:', userId, 'limit:', limit, 'onlyUnread:', onlyUnread);
-    
-    const notifications = await prisma.notification.findMany({
-      where: {
-        userId,
-        ...(onlyUnread ? { read: false } : {}),
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    });
-
-    console.log('[NOTIFICATION SERVICE] Notificações encontradas no DB:', notifications.length);
-    if (notifications.length > 0) {
-      console.log('[NOTIFICATION SERVICE] Primeira notificação:', {
-        id: notifications[0].id,
-        type: notifications[0].type,
-        title: notifications[0].title,
-        read: notifications[0].read,
-        createdAt: notifications[0].createdAt,
-      });
-    }
-
-    return notifications.map((n) => ({
-      ...n,
-      data: n.data ? JSON.parse(n.data) : null,
-    }));
-  } catch (error) {
-    console.error('[NOTIFICATION SERVICE] Erro ao buscar notificações:', error);
-    throw error;
-  }
+  console.log('[NOTIFICATION SERVICE] getUserNotifications chamada - retornando array vazio (notificações são locais)');
+  return [];
 }
 
 /**
  * Marcar notificação como lida
+ * NOTA: Notificações são gerenciadas localmente no frontend
  */
 export async function markAsRead(notificationId: string, userId: string) {
-  try {
-    const notification = await prisma.notification.updateMany({
-      where: {
-        id: notificationId,
-        userId, // Garantir que é do usuário
-      },
-      data: {
-        read: true,
-      },
-    });
-
-    return notification;
-  } catch (error) {
-    console.error('[NOTIFICATION SERVICE] Erro ao marcar como lida:', error);
-    throw error;
-  }
+  console.log('[NOTIFICATION SERVICE] markAsRead chamada - operação local no frontend');
+  return { success: true };
 }
 
 /**
  * Marcar todas como lidas
+ * NOTA: Notificações são gerenciadas localmente no frontend
  */
 export async function markAllAsRead(userId: string) {
-  try {
-    const result = await prisma.notification.updateMany({
-      where: {
-        userId,
-        read: false,
-      },
-      data: {
-        read: true,
-      },
-    });
-
-    return result;
-  } catch (error) {
-    console.error('[NOTIFICATION SERVICE] Erro ao marcar todas como lidas:', error);
-    throw error;
-  }
+  console.log('[NOTIFICATION SERVICE] markAllAsRead chamada - operação local no frontend');
+  return { count: 0 };
 }
 
 /**
  * Contar notificações não lidas
+ * NOTA: Contagem é feita localmente no frontend
  */
 export async function getUnreadCount(userId: string) {
-  try {
-    console.log('[NOTIFICATION SERVICE] Contando não lidas para userId:', userId);
-    
-    const count = await prisma.notification.count({
-      where: {
-        userId,
-        read: false,
-      },
-    });
-    
-    console.log('[NOTIFICATION SERVICE] Total de não lidas:', count);
-
-    return count;
-  } catch (error) {
-    console.error('[NOTIFICATION SERVICE] Erro ao contar não lidas:', error);
-    throw error;
-  }
+  console.log('[NOTIFICATION SERVICE] getUnreadCount chamada - retornando 0 (contagem é local)');
+  return 0;
 }
 
 /**
  * Deletar notificação
+ * NOTA: Notificações são gerenciadas localmente no frontend
  */
 export async function deleteNotification(notificationId: string, userId: string) {
-  try {
-    await prisma.notification.deleteMany({
-      where: {
-        id: notificationId,
-        userId, // Garantir que é do usuário
-      },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error('[NOTIFICATION SERVICE] Erro ao deletar notificação:', error);
-    throw error;
-  }
+  console.log('[NOTIFICATION SERVICE] deleteNotification chamada - operação local no frontend');
+  return { success: true };
 }
 
 /**
@@ -217,6 +141,7 @@ export async function notifyActivityLike(
     title: 'Nova curtida! ❤️',
     message: `${likerName} curtiu sua conquista: ${activityDescription}`,
     data: {
+      type: 'ACTIVITY_LIKE',
       activityId,
       likerName,
       activityDescription,
@@ -242,6 +167,7 @@ export async function notifyActivityComment(
     title: 'Novo comentário! 💬',
     message: `${commenterName} comentou: "${commentContent.substring(0, 50)}${commentContent.length > 50 ? '...' : ''}"`,
     data: {
+      type: 'ACTIVITY_COMMENT',
       activityId,
       commenterName,
       commentContent,
@@ -254,56 +180,30 @@ export async function notifyActivityComment(
 }
 
 export async function notifyFriendRequest(receiverId: string, senderName: string) {
-  // Verificar se já existe notificação similar recente (últimos 5 segundos)
-  const recentNotification = await prisma.notification.findFirst({
-    where: {
-      userId: receiverId,
-      type: 'FRIEND_REQUEST',
-      createdAt: {
-        gte: new Date(Date.now() - 5000), // 5 segundos atrás
-      },
-    },
-  });
-
-  if (recentNotification) {
-    console.log('[NOTIFICATION SERVICE] Notificação de friend request duplicada bloqueada');
-    return recentNotification;
-  }
-
+  console.log('[NOTIFICATION SERVICE] Criando notificação de friend request para:', receiverId);
+  
   return createNotification({
     userId: receiverId,
     type: 'FRIEND_REQUEST',
     title: 'Nova solicitação de amizade! 🤝',
     message: `${senderName} quer ser seu amigo!`,
     data: {
+      type: 'FRIEND_REQUEST',
       senderName,
     },
   });
 }
 
 export async function notifyFriendAccepted(senderId: string, accepterName: string) {
-  // Verificar se já existe notificação similar recente (últimos 5 segundos)
-  const recentNotification = await prisma.notification.findFirst({
-    where: {
-      userId: senderId,
-      type: 'FRIEND_ACCEPTED',
-      createdAt: {
-        gte: new Date(Date.now() - 5000), // 5 segundos atrás
-      },
-    },
-  });
-
-  if (recentNotification) {
-    console.log('[NOTIFICATION SERVICE] Notificação de friend accepted duplicada bloqueada');
-    return recentNotification;
-  }
-
+  console.log('[NOTIFICATION SERVICE] Criando notificação de friend accepted para:', senderId);
+  
   return createNotification({
     userId: senderId,
     type: 'FRIEND_ACCEPTED',
     title: 'Solicitação aceita! 🎉',
     message: `${accepterName} aceitou sua solicitação de amizade!`,
     data: {
+      type: 'FRIEND_ACCEPTED',
       accepterName,
     },
   });
@@ -325,6 +225,7 @@ export async function notifyBadgeEarned(userId: string, badgeName: string, rarit
     title: `${emoji} Conquista Desbloqueada!`,
     message: `Parabéns! Você desbloqueou "${badgeName}"`,
     data: {
+      type: 'BADGE_EARNED',
       badgeName,
       rarity,
     },
@@ -338,6 +239,7 @@ export async function notifyLevelUp(userId: string, newLevel: number) {
     title: '🎉 Level Up!',
     message: `Incrível! Você subiu para o nível ${newLevel}!`,
     data: {
+      type: 'LEVEL_UP',
       level: newLevel,
     },
   });
@@ -355,6 +257,7 @@ export async function notifyChallengeCompleted(
     title: '✅ Desafio Completado!',
     message: `Você completou "${challengeName}" e ganhou ${xpEarned} XP e ${coinsEarned} moedas!`,
     data: {
+      type: 'CHALLENGE_COMPLETED',
       challengeName,
       xpEarned,
       coinsEarned,
@@ -376,6 +279,7 @@ export async function notifyStreakMilestone(userId: string, streakDays: number) 
     title: '🔥 Streak Impressionante!',
     message: `Você está em chamas! ${streakDays} dias consecutivos!`,
     data: {
+      type: 'STREAK_MILESTONE',
       streakDays,
     },
   });

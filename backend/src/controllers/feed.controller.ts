@@ -13,14 +13,19 @@ import * as feedService from '../services/feed.service.js';
  */
 export async function toggleLike(c: Context) {
   try {
+    console.log('🔥 [FEED CONTROLLER] toggleLike chamado!');
     const userId = c.get('userId');
     const { activityId } = c.req.param();
+    
+    console.log('🔥 [FEED CONTROLLER] userId:', userId, 'activityId:', activityId);
 
     if (!activityId) {
       return c.json({ error: 'ID da atividade é obrigatório' }, 400);
     }
 
     const result = await feedService.toggleLike(userId, activityId);
+    
+    console.log('🔥 [FEED CONTROLLER] Resultado:', result);
 
     return c.json({
       message: result.liked ? 'Atividade curtida!' : 'Curtida removida',

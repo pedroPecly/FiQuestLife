@@ -8,12 +8,12 @@
  */
 
 import { router } from 'expo-router';
-import type { BackendNotification } from './notificationApi';
+import type { LocalNotification } from './localNotificationStorage';
 
 /**
  * Navega para o destino apropriado baseado no tipo e dados da notificação
  */
-export const navigateFromNotification = (notification: BackendNotification): void => {
+export const navigateFromNotification = (notification: LocalNotification): void => {
   console.log('[NOTIFICATION NAV] Navegando:', notification.type, notification.data);
 
   try {
@@ -62,7 +62,7 @@ export const navigateFromNotification = (notification: BackendNotification): voi
  * Handler para solicitação de amizade
  * Navega para a aba de amigos com a tab de solicitações recebidas
  */
-const handleFriendRequest = (notification: BackendNotification): void => {
+const handleFriendRequest = (notification: LocalNotification): void => {
   const friendId = notification.data?.friendId || notification.data?.userId;
   
   router.push({
@@ -79,7 +79,7 @@ const handleFriendRequest = (notification: BackendNotification): void => {
  * Handler para amizade aceita
  * Navega para o perfil do novo amigo
  */
-const handleFriendAccepted = (notification: BackendNotification): void => {
+const handleFriendAccepted = (notification: LocalNotification): void => {
   const friendId = notification.data?.friendId || notification.data?.userId;
   
   if (friendId) {
@@ -100,7 +100,7 @@ const handleFriendAccepted = (notification: BackendNotification): void => {
  * Handler para likes em atividades
  * SEMPRE navega para "Meus Posts" pois notificações de like são sobre SUAS postagens
  */
-const handleActivityLike = (notification: BackendNotification): void => {
+const handleActivityLike = (notification: LocalNotification): void => {
   const activityId = notification.data?.activityId;
   
   console.log('[NOTIFICATION NAV] ========================================');
@@ -139,7 +139,7 @@ const handleActivityLike = (notification: BackendNotification): void => {
  * Handler para comentários em atividades
  * SEMPRE navega para "Meus Posts" e abre o modal de comentários
  */
-const handleActivityComment = (notification: BackendNotification): void => {
+const handleActivityComment = (notification: LocalNotification): void => {
   const activityId = notification.data?.activityId;
   
   console.log('[NOTIFICATION NAV] ========================================');
@@ -179,7 +179,7 @@ const handleActivityComment = (notification: BackendNotification): void => {
  * Handler para badge conquistado
  * Navega para a aba de badges
  */
-const handleBadgeEarned = (notification: BackendNotification): void => {
+const handleBadgeEarned = (notification: LocalNotification): void => {
   router.push('/(tabs)/badges');
 };
 
@@ -187,7 +187,7 @@ const handleBadgeEarned = (notification: BackendNotification): void => {
  * Handler para level up
  * Navega para a tela de perfil do usuário
  */
-const handleLevelUp = (notification: BackendNotification): void => {
+const handleLevelUp = (notification: LocalNotification): void => {
   router.push('/screens/ProfileScreen');
 };
 
@@ -195,7 +195,7 @@ const handleLevelUp = (notification: BackendNotification): void => {
  * Handler para desafio completado
  * Navega para a tela de desafios
  */
-const handleChallengeCompleted = (notification: BackendNotification): void => {
+const handleChallengeCompleted = (notification: LocalNotification): void => {
   router.push('/(tabs)');
 };
 
@@ -203,6 +203,6 @@ const handleChallengeCompleted = (notification: BackendNotification): void => {
  * Handler para marco de streak
  * Navega para a tela de desafios onde o streak é exibido
  */
-const handleStreakMilestone = (notification: BackendNotification): void => {
+const handleStreakMilestone = (notification: LocalNotification): void => {
   router.push('/(tabs)');
 };
