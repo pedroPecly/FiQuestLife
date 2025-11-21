@@ -82,7 +82,7 @@ export async function createNotification(notificationData: CreateNotificationDat
  * NOTA: Notificações são armazenadas localmente no frontend (AsyncStorage)
  * Esta função não é mais usada, mas mantida para compatibilidade
  */
-export async function getUserNotifications(userId: string, limit: number = 50, onlyUnread = false) {
+export async function getUserNotifications(_userId: string, _limit: number = 50, _onlyUnread = false) {
   console.log('[NOTIFICATION SERVICE] getUserNotifications chamada - retornando array vazio (notificações são locais)');
   return [];
 }
@@ -91,7 +91,7 @@ export async function getUserNotifications(userId: string, limit: number = 50, o
  * Marcar notificação como lida
  * NOTA: Notificações são gerenciadas localmente no frontend
  */
-export async function markAsRead(notificationId: string, userId: string) {
+export async function markAsRead(_notificationId: string, _userId: string) {
   console.log('[NOTIFICATION SERVICE] markAsRead chamada - operação local no frontend');
   return { success: true };
 }
@@ -100,7 +100,7 @@ export async function markAsRead(notificationId: string, userId: string) {
  * Marcar todas como lidas
  * NOTA: Notificações são gerenciadas localmente no frontend
  */
-export async function markAllAsRead(userId: string) {
+export async function markAllAsRead(_userId: string) {
   console.log('[NOTIFICATION SERVICE] markAllAsRead chamada - operação local no frontend');
   return { count: 0 };
 }
@@ -109,7 +109,7 @@ export async function markAllAsRead(userId: string) {
  * Contar notificações não lidas
  * NOTA: Contagem é feita localmente no frontend
  */
-export async function getUnreadCount(userId: string) {
+export async function getUnreadCount(_userId: string) {
   console.log('[NOTIFICATION SERVICE] getUnreadCount chamada - retornando 0 (contagem é local)');
   return 0;
 }
@@ -118,7 +118,7 @@ export async function getUnreadCount(userId: string) {
  * Deletar notificação
  * NOTA: Notificações são gerenciadas localmente no frontend
  */
-export async function deleteNotification(notificationId: string, userId: string) {
+export async function deleteNotification(_notificationId: string, _userId: string) {
   console.log('[NOTIFICATION SERVICE] deleteNotification chamada - operação local no frontend');
   return { success: true };
 }
