@@ -83,7 +83,13 @@ export async function addComment(c: Context) {
 
     return c.json({
       message: 'Comentário adicionado com sucesso!',
-      comment,
+      comment: {
+        id: comment.id,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt,
+        user: comment.user,
+      },
     });
   } catch (error: any) {
     console.error('[FEED CONTROLLER] Erro ao adicionar comentário:', error);

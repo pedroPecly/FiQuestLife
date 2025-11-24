@@ -23,13 +23,14 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
-  SafeAreaView,
+  // Remover SafeAreaView do react-native
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
@@ -316,7 +317,7 @@ export default function SettingsScreen() {
   // ==========================================
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
@@ -330,7 +331,7 @@ export default function SettingsScreen() {
   // MAIN RENDER
   // ==========================================
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       {/* Header Simples */}

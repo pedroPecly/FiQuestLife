@@ -1,17 +1,18 @@
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 interface PhotoCaptureModalProps {
@@ -109,76 +110,84 @@ export default function PhotoCaptureModal({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <View style={styles.overlay}>
         <KeyboardAvoidingView
-          style={styles.container}
+          style={{width: '100%', maxWidth: 500}}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
+          keyboardVerticalOffset={Platform.OS === 'android' ? 20 : 0}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>📸 Adicionar Foto</Text>
-            <Text style={styles.subtitle}>{challengeTitle}</Text>
-          </View>
+          <ScrollView
+            contentContainerStyle={{flexGrow: 1, paddingBottom: 32}}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.container}>
+              {/* Header */}
+              <View style={styles.header}>
+                <Text style={styles.title}>📸 Adicionar Foto</Text>
+                <Text style={styles.subtitle}>{challengeTitle}</Text>
+              </View>
 
-          {/* Preview da foto */}
-          {photoUri ? (
-            <View style={styles.previewContainer}>
-              <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="cover" />
-              <TouchableOpacity style={styles.changePhotoButton} onPress={pickImage}>
-                <Text style={styles.changePhotoText}>Trocar Foto</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.photoButtons}>
-              <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-                <Text style={styles.photoButtonIcon}>📷</Text>
-                <Text style={styles.photoButtonText}>Tirar Foto</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-                <Text style={styles.photoButtonIcon}>🖼️</Text>
-                <Text style={styles.photoButtonText}>Escolher da Galeria</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Campo de legenda */}
-          <View style={styles.captionContainer}>
-            <Text style={styles.captionLabel}>Legenda (opcional)</Text>
-            <TextInput
-              style={styles.captionInput}
-              placeholder="Adicione uma legenda..."
-              placeholderTextColor="#999"
-              value={caption}
-              onChangeText={setCaption}
-              maxLength={200}
-              multiline
-              numberOfLines={3}
-            />
-            <Text style={styles.captionCounter}>{caption.length}/200</Text>
-          </View>
-
-          {/* Botões de ação */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={handleClose}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.actionButton, styles.submitButton]}
-              onPress={handleSubmit}
-              disabled={isSubmitting || !photoUri}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator color="#fff" />
+              {/* Preview da foto */}
+              {photoUri ? (
+                <View style={styles.previewContainer}>
+                  <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="cover" />
+                  <TouchableOpacity style={styles.changePhotoButton} onPress={pickImage}>
+                    <Text style={styles.changePhotoText}>Trocar Foto</Text>
+                  </TouchableOpacity>
+                </View>
               ) : (
-                <Text style={styles.submitButtonText}>Concluir Desafio</Text>
+                <View style={styles.photoButtons}>
+                  <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+                    <Text style={styles.photoButtonIcon}>📷</Text>
+                    <Text style={styles.photoButtonText}> Tirar Foto</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+                    <Text style={styles.photoButtonIcon}>🖼️</Text>
+                    <Text style={styles.photoButtonText}> Galeria</Text>
+                  </TouchableOpacity>
+                </View>
               )}
-            </TouchableOpacity>
-          </View>
+
+              {/* Campo de legenda */}
+              <View style={styles.captionContainer}>
+                <Text style={styles.captionLabel}>Legenda (opcional)</Text>
+                <TextInput
+                  style={styles.captionInput}
+                  placeholder="Adicione uma legenda..."
+                  placeholderTextColor="#999"
+                  value={caption}
+                  onChangeText={setCaption}
+                  maxLength={200}
+                  multiline
+                  numberOfLines={3}
+                />
+                <Text style={styles.captionCounter}>{caption.length}/200</Text>
+              </View>
+
+              {/* Botões de ação */}
+              <View style={[styles.actions, {marginBottom: 16}]}> 
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.cancelButton]}
+                  onPress={handleClose}
+                  disabled={isSubmitting}
+                >
+                  <Text style={styles.cancelButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.submitButton]}
+                  onPress={handleSubmit}
+                  disabled={isSubmitting || !photoUri}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.submitButtonText}>Concluir Desafio</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -186,45 +195,55 @@ export default function PhotoCaptureModal({
 }
 
 const styles = StyleSheet.create({
+    header: {
+      marginBottom: 10,
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#222',
+    },
+    subtitle: {
+      fontSize: 16,
+      color: '#666',
+      marginTop: 2,
+      textAlign: 'center',
+    },
+    photoButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    photoButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f5f5f5',
+      borderRadius: 12,
+      marginHorizontal: 6,
+      paddingVertical: 12,
+    },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 0,
   },
   container: {
-    width: '100%',
+    width: '96%',
     maxWidth: 500,
     backgroundColor: '#fff',
     borderRadius: 20,
-    padding: 24,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-  },
-  photoButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
-  },
-  photoButton: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
     padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    alignSelf: 'center',
   },
   photoButtonIcon: {
     fontSize: 32,

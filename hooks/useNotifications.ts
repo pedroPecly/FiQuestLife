@@ -17,7 +17,7 @@ import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { authStorage } from '../services/auth';
-import { saveLocalNotification } from '../services/localNotificationStorage';
+import { getLocalNotifications, saveLocalNotification } from '../services/localNotificationStorage';
 import {
   addNotificationReceivedListener,
   addNotificationResponseListener,
@@ -56,6 +56,21 @@ export function useNotifications() {
         const user = await authStorage.getUser();
         if (!user) {
           console.log('⚠️ Usuário não logado, notificação não salva');
+          return;
+        }
+        
+        // Verificar se já existe uma notificação similar recente (evitar duplicatas)
+        const existingNotifications = await getLocalNotifications(user.id, false);
+        const similarNotification = existingNotifications.find(n => 
+          n.type === content.data?.type && 
+          n.title === content.title && 
+          n.message === content.body &&
+          // Verificar se foi criada nos últimos 30 segundos
+          (Date.now() - new Date(n.createdAt).getTime()) < 30000
+        );
+        
+        if (similarNotification) {
+          console.log('⚠️ Notificação duplicada detectada, ignorando:', content.title);
           return;
         }
         

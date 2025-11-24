@@ -1,7 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as NavigationBar from 'expo-navigation-bar';
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFriendRequestNotifications } from '../../hooks/useFriendRequestNotifications';
 import { friendService } from '../../services/friend';
 
@@ -10,14 +12,30 @@ export default function TabLayout() {
   useFriendRequestNotifications();
   
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     loadPendingRequests();
-    
+
     // Atualiza a cada 30 segundos
     const interval = setInterval(loadPendingRequests, 30000);
-    
+
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Configura visual da navigation bar no Android para ficar consistente
+    // com a tab bar do app (cores / contraste dos botões do sistema).
+    if (Platform.OS === 'android') {
+      (async () => {
+        try {
+          await NavigationBar.setBackgroundColorAsync('#FFFFFF');
+          await NavigationBar.setButtonStyleAsync('dark');
+        } catch (err) {
+          // ignore errors in environments where navigation bar API não está disponível
+        }
+      })();
+    }
   }, []);
 
   const loadPendingRequests = async () => {
@@ -38,9 +56,12 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E0E0E0',
-          height: Platform.select({ web: 70, default: 85 }),
-          paddingBottom: Platform.select({ web: 12, default: 25 }),
-          paddingTop: Platform.select({ web: 12, default: 15 }),
+          // Ajusta a altura/padding considerando safe area do dispositivo (gestos / navbar)
+          // Reduzimos a base para uma nav bar mais compacta
+          height: Platform.select({ web: 70, default: 50 + (insets.bottom || 0) }),
+          paddingBottom: Platform.select({ web: 12, default: 8 + (insets.bottom || 0) }),
+          // Espaçamento superior reduzido para aproximar os ícones do topo
+          paddingTop: Platform.select({ web: 12, default: 8 }),
         },
         tabBarLabelStyle: {
           fontSize: Platform.select({ web: 12, default: 11 }),

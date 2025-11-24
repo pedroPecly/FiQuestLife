@@ -416,6 +416,83 @@ export async function notifyFriendRequest(senderName: string, senderUsername: st
   }
 }
 
+/**
+ * Notifica quando recebe uma curtida (local)
+ * @param activityOwnerId ID do dono da atividade
+ * @param activityId ID da atividade
+ * @param likerName Nome de quem curtiu
+ * @param activityDescription Descrição da atividade
+ */
+export async function notifyActivityLike(
+  activityOwnerId: string,
+  activityId: string,
+  likerName: string,
+  activityDescription: string
+): Promise<void> {
+  try {
+    // Envia notificação local
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Nova curtida! ❤️',
+        body: `${likerName} curtiu sua conquista: ${activityDescription}`,
+        data: {
+          type: 'ACTIVITY_LIKE',
+          activityId,
+          likerName,
+          activityDescription,
+        },
+        sound: true,
+        badge: 1,
+      },
+      trigger: null, // Envia imediatamente
+    });
+
+    console.log(`✅ Notificação local de curtida enviada`);
+  } catch (error) {
+    console.error('❌ Erro ao notificar curtida:', error);
+  }
+}
+
+/**
+ * Notifica quando recebe um comentário (local)
+ * @param activityOwnerId ID do dono da atividade
+ * @param activityId ID da atividade
+ * @param commenterName Nome de quem comentou
+ * @param commentContent Conteúdo do comentário
+ * @param activityDescription Descrição da atividade
+ */
+export async function notifyActivityComment(
+  activityOwnerId: string,
+  activityId: string,
+  commenterName: string,
+  commentContent: string,
+  activityDescription: string
+): Promise<void> {
+  try {
+    // Envia notificação local
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Novo comentário! 💬',
+        body: `${commenterName} comentou: "${commentContent.substring(0, 50)}${commentContent.length > 50 ? '...' : ''}"`,
+        data: {
+          type: 'ACTIVITY_COMMENT',
+          activityId,
+          commenterName,
+          commentContent,
+          activityDescription,
+        },
+        sound: true,
+        badge: 1,
+      },
+      trigger: null, // Envia imediatamente
+    });
+
+    console.log(`✅ Notificação local de comentário enviada`);
+  } catch (error) {
+    console.error('❌ Erro ao notificar comentário:', error);
+  }
+}
+
 // ==========================================
 // UTILITÁRIOS
 // ==========================================

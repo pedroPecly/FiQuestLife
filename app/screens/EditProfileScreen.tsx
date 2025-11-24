@@ -26,13 +26,14 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  // Remover SafeAreaView do react-native
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { SimpleHeader } from '../../components/layout';
 import { AlertModal } from '../../components/ui';
 import { Button } from '../../components/ui/Button';
@@ -314,7 +315,7 @@ export const EditProfileScreen = () => {
   // ==========================================
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4CAF50" />
@@ -328,7 +329,7 @@ export const EditProfileScreen = () => {
   // MAIN RENDER
   // ==========================================
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       {/* Header Simples */}

@@ -6,7 +6,10 @@
  * Gerencia curtidas e comentários em atividades do feed
  */
 
+import { Platform } from 'react-native';
 import api from './api';
+import { authStorage } from './auth';
+import { notifyActivityComment, notifyActivityLike } from './notifications';
 
 export interface FeedComment {
   id: string;
@@ -39,6 +42,17 @@ export const feedInteractionsService = {
   async toggleLike(activityId: string) {
     try {
       const response = await api.post(`/feed/${activityId}/like`);
+      
+      // Se curtida foi adicionada e há dados para notificação, enviar local no Android
+      if (response.data.liked && response.data.notificationData && Platform.OS === 'android') {
+        const { activityOwnerId, likerName, activityDescription } = response.data.notificationData;
+        // Só notificar se não é o próprio usuário
+        const user = await authStorage.getUser();
+        if (user && activityOwnerId !== user.id) {
+          await notifyActivityLike(activityOwnerId, activityId, likerName, activityDescription);
+        }
+      }
+      
       return { 
         success: true, 
         data: response.data,
@@ -77,6 +91,17 @@ export const feedInteractionsService = {
   async addComment(activityId: string, content: string) {
     try {
       const response = await api.post(`/feed/${activityId}/comment`, { content });
+      
+      // Se comentário foi adicionado e há dados para notificação, enviar local no Android
+      if (response.data.notificationData && Platform.OS === 'android') {
+        const { activityOwnerId, commenterName, commentContent, activityDescription } = response.data.notificationData;
+        // Só notificar se não é o próprio usuário
+        const user = await authStorage.getUser();
+        if (user && activityOwnerId !== user.id) {
+          await notifyActivityComment(activityOwnerId, activityId, commenterName, commentContent, activityDescription);
+        }
+      }
+      
       return { 
         success: true, 
         data: response.data.comment as FeedComment,
