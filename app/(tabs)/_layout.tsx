@@ -14,6 +14,11 @@ export default function TabLayout() {
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const insets = useSafeAreaInsets();
 
+  // Fallback para aparelhos antigos com botões físicos onde insets.bottom pode ser 0
+  const rawBottom = insets?.bottom ?? 0;
+  const bottomFallback = Platform.OS === 'android' && rawBottom === 0 ? 10 : rawBottom;
+  const baseTabBarHeight = 50; // altura base compacta
+
   useEffect(() => {
     loadPendingRequests();
 
@@ -57,11 +62,11 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: '#E0E0E0',
           // Ajusta a altura/padding considerando safe area do dispositivo (gestos / navbar)
-          // Reduzimos a base para uma nav bar mais compacta
-          height: Platform.select({ web: 70, default: 50 + (insets.bottom || 0) }),
-          paddingBottom: Platform.select({ web: 12, default: 8 + (insets.bottom || 0) }),
-          // Espaçamento superior reduzido para aproximar os ícones do topo
-          paddingTop: Platform.select({ web: 12, default: 8 }),
+          // Usa fallback em aparelhos antigos para evitar corte por botões físicos
+          height: Platform.select({ web: 70, default: baseTabBarHeight + bottomFallback }),
+          paddingBottom: Platform.select({ web: 12, default: 8 + bottomFallback }),
+          // Espaçamento superior reduzido para aproximar os ícones do topo em telas pequenas
+          paddingTop: Platform.select({ web: 12, default: 6 }),
         },
         tabBarLabelStyle: {
           fontSize: Platform.select({ web: 12, default: 11 }),

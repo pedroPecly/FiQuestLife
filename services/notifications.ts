@@ -74,10 +74,11 @@ const STORAGE_KEY = '@fiquestlife:notifications_enabled';
  * @returns true se permissão concedida, false caso contrário
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
-  // Notificações não funcionam no simulador/emulador
+  // Emuladores/simuladores podem ter comportamento limitado para push tokens,
+  // mas ainda podemos tentar configurar permissões e canais para testar
+  // notificações locais. Não abortamos aqui para permitir testes locais.
   if (!Device.isDevice) {
-    console.warn('⚠️ Notificações não funcionam no simulador');
-    return false;
+    console.warn('⚠️ Você está em um simulador/emulador. Push tokens podem não funcionar, mas permissões locais serão tentadas.');
   }
 
   // Verifica permissão atual
@@ -98,14 +99,19 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
   // Configurar canal de notificação (Android obrigatório)
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'FiQuestLife',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#20B2AA',
-      sound: 'default',
-      enableVibrate: true,
-    });
+    try {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'FiQuestLife',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#20B2AA',
+        sound: 'default',
+        enableVibrate: true,
+      });
+      console.log('✅ Canal Android de notificações criado/atualizado: default');
+    } catch (err) {
+      console.warn('⚠️ Falha ao criar canal Android de notificação:', err);
+    }
   }
 
   console.log('✅ Permissão de notificação concedida');
@@ -153,6 +159,7 @@ export async function scheduleDailyReminder(): Promise<void> {
         title: '🎯 Novos Desafios Disponíveis!',
         body: 'Seus desafios diários já estão prontos. Vamos conquistá-los?',
         data: { type: 'DAILY_REMINDER' },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -200,6 +207,7 @@ export async function scheduleStreakReminder(): Promise<void> {
           type: 'STREAK_REMINDER',
           saveToFeed: true, // Flag para salvar no feed ao receber
         },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -275,6 +283,7 @@ export async function notifyBadgeEarned(badgeName: string, rarity: string): Prom
         title: `${emoji} Conquista Desbloqueada!`,
         body: `Parabéns! Você desbloqueou "${badgeName}"`,
         data: { type: 'BADGE_EARNED', badgeName, rarity },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -299,6 +308,7 @@ export async function notifyLevelUp(newLevel: number): Promise<void> {
         title: '🎉 Level Up!',
         body: `Incrível! Você subiu para o nível ${newLevel}!`,
         data: { type: 'LEVEL_UP', level: newLevel },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -404,6 +414,7 @@ export async function notifyFriendRequest(senderName: string, senderUsername: st
           senderName, 
           senderUsername,
         },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -441,6 +452,7 @@ export async function notifyActivityLike(
           likerName,
           activityDescription,
         },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
@@ -481,6 +493,7 @@ export async function notifyActivityComment(
           commentContent,
           activityDescription,
         },
+        channelId: 'default',
         sound: true,
         badge: 1,
       },
