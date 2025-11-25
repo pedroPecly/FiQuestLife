@@ -13,11 +13,12 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { FeedComment, feedInteractionsService } from '../../services/feedInteractions';
 import { Avatar } from './Avatar';
@@ -35,6 +36,7 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -96,90 +98,95 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
       transparent={true}
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
-        <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Comentários</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={28} color="#666" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Lista de comentários */}
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#20B2AA" />
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          style={styles.overlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Removendo deslocamento desnecessário
+        >
+          <View style={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Comentários</Text>
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={28} color="#666" />
+              </TouchableOpacity>
             </View>
-          ) : (
-            <FlatList
-              data={comments}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.commentItem}>
-                  <Avatar
-                    imageUrl={item.user.avatarUrl}
-                    initials={item.user.name.substring(0, 2)}
-                    size={40}
-                  />
-                  <View style={styles.commentContent}>
-                    <View style={styles.commentHeader}>
-                      <Text style={styles.commentAuthor}>{item.user.name}</Text>
-                      <Text style={styles.commentTime}>
-                        {new Date(item.createdAt).toLocaleDateString('pt-BR')}
-                      </Text>
-                    </View>
-                    <Text style={styles.commentText}>{item.content}</Text>
-                  </View>
-                </View>
-              )}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Ionicons name="chatbubble-outline" size={48} color="#CCC" />
-                  <Text style={styles.emptyText}>Nenhum comentário ainda</Text>
-                  <Text style={styles.emptySubtext}>Seja o primeiro a comentar!</Text>
-                </View>
-              }
-              contentContainerStyle={styles.listContent}
-            />
-          )}
 
-          {/* Input de comentário */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Escreva um comentário..."
-              value={newComment}
-              onChangeText={setNewComment}
-              multiline
-              maxLength={500}
-            />
-            <TouchableOpacity
-              style={[styles.sendButton, (!newComment.trim() || sending) && styles.sendButtonDisabled]}
-              onPress={handleSendComment}
-              disabled={!newComment.trim() || sending}
-            >
-              {sending ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <Ionicons name="send" size={20} color="#FFF" />
-              )}
-            </TouchableOpacity>
+            {/* Lista de comentários */}
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#20B2AA" />
+              </View>
+            ) : (
+              <FlatList
+                data={comments}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.commentItem}>
+                    <Avatar
+                      imageUrl={item.user.avatarUrl}
+                      initials={item.user.name.substring(0, 2)}
+                      size={40}
+                    />
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeader}>
+                        <Text style={styles.commentAuthor}>{item.user.name}</Text>
+                        <Text style={styles.commentTime}>
+                          {new Date(item.createdAt).toLocaleDateString('pt-BR')}
+                        </Text>
+                      </View>
+                      <Text style={styles.commentText}>{item.content}</Text>
+                    </View>
+                  </View>
+                )}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Ionicons name="chatbubble-outline" size={48} color="#CCC" />
+                    <Text style={styles.emptyText}>Nenhum comentário ainda</Text>
+                    <Text style={styles.emptySubtext}>Seja o primeiro a comentar!</Text>
+                  </View>
+                }
+                contentContainerStyle={styles.listContent}
+              />
+            )}
+
+            {/* Input de comentário */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Escreva um comentário..."
+                value={newComment}
+                onChangeText={setNewComment}
+                multiline
+                maxLength={500}
+              />
+              <TouchableOpacity
+                style={[styles.sendButton, (!newComment.trim() || sending) && styles.sendButtonDisabled]}
+                onPress={handleSendComment}
+                disabled={!newComment.trim() || sending}
+              >
+                {sending ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <Ionicons name="send" size={20} color="#FFF" />
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  safeArea: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  overlay: {
+    flex: 1,
     justifyContent: 'flex-end',
   },
   container: {

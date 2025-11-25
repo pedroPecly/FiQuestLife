@@ -1,22 +1,22 @@
-
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { styles } from '../../app/styles/BadgeDetailModal.styles';
 import type { BadgeWithProgress } from '../../services/badge';
 import {
-    CATEGORY_ICONS,
-    CATEGORY_LABELS,
-    formatBadgeProgress,
-    getRarityEmoji,
-    RARITY_COLORS,
-    RARITY_LABELS,
+  CATEGORY_ICONS,
+  CATEGORY_LABELS,
+  formatBadgeProgress,
+  getRarityEmoji,
+  RARITY_COLORS,
+  RARITY_LABELS,
 } from '../../services/badge';
 
 // ==========================================
@@ -35,6 +35,8 @@ interface BadgeDetailModalProps {
 // ==========================================
 // COMPONENTE
 // ==========================================
+
+const { width } = Dimensions.get('window');
 
 const formatDate = (dateString: string): string => {
   try {
@@ -112,7 +114,7 @@ export const BadgeDetailModal: React.FC<BadgeDetailModalProps> = ({
                   {getCategoryIcon(badge.category)}
                 </Text>
               ) : (
-                <MaterialCommunityIcons name="lock" size={70} color="#9CA3AF" />
+                <MaterialCommunityIcons name="lock" size={Math.min(width * 0.15, 70)} color="#9CA3AF" />
               )}
             </View>
 

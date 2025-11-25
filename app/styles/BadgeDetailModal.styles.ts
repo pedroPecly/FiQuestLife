@@ -1,4 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   modalOverlay: {
@@ -12,9 +14,10 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 0,
-    width: '100%',
-    maxWidth: 420,
+    width: '90%', // Responsivo
+    maxWidth: Math.min(width * 0.9, 500), // Limite máximo para telas grandes
     maxHeight: '85%',
+    minHeight: 300, // Garantir tamanho mínimo
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
@@ -45,9 +48,9 @@ export const styles = StyleSheet.create({
     elevation: 3,
   },
   modalIcon: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: Math.min(width * 0.3, 140), // Responsivo
+    height: Math.min(width * 0.3, 140),
+    borderRadius: Math.min(width * 0.15, 70),
     backgroundColor: '#E5E7EB',
     justifyContent: 'center',
     alignItems: 'center',
