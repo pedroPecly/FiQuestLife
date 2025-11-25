@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import * as NavigationBar from 'expo-navigation-bar';
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -16,7 +17,11 @@ export default function TabLayout() {
 
   // Fallback para aparelhos antigos com botões físicos onde insets.bottom pode ser 0
   const rawBottom = insets?.bottom ?? 0;
-  const bottomFallback = Platform.OS === 'android' && rawBottom === 0 ? 10 : rawBottom;
+  // Se estivermos em standalone (APK) e o inset for 0, usamos fallback maior
+  const isStandalone = Constants.appOwnership !== 'expo';
+  const bottomFallback = Platform.OS === 'android' && rawBottom === 0
+    ? (isStandalone ? 16 : 10)
+    : rawBottom;
   const baseTabBarHeight = 50; // altura base compacta
 
   useEffect(() => {
@@ -64,12 +69,13 @@ export default function TabLayout() {
           // Ajusta a altura/padding considerando safe area do dispositivo (gestos / navbar)
           // Usa fallback em aparelhos antigos para evitar corte por botões físicos
           height: Platform.select({ web: 70, default: baseTabBarHeight + bottomFallback }),
-          paddingBottom: Platform.select({ web: 12, default: 8 + bottomFallback }),
-          // Espaçamento superior reduzido para aproximar os ícones do topo em telas pequenas
-          paddingTop: Platform.select({ web: 12, default: 6 }),
+          paddingBottom: Platform.select({ web: 12, default: 4 + bottomFallback }),
+          // Espaçamento superior levemente aumentado para dar mais distância
+          // entre a nav bar e a área de ação em aparelhos menores
+          paddingTop: Platform.select({ web: 12, default: 2 }),
         },
         tabBarLabelStyle: {
-          fontSize: Platform.select({ web: 12, default: 11 }),
+          fontSize: Platform.select({ web: 12, default: 9 }),
           fontWeight: '600',
         },
         // Animações de transição entre tabs
