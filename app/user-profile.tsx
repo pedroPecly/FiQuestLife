@@ -17,14 +17,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function UserProfileScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -175,7 +175,7 @@ export default function UserProfileScreen() {
   // Private profile state
   if (isPrivate) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <SafeAreaView edges={["top"]} style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar barStyle="dark-content" />
         <SimpleHeader title="Perfil Privado" />
@@ -195,14 +195,14 @@ export default function UserProfileScreen() {
             />
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   // Loading state
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <SafeAreaView edges={["top"]} style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar barStyle="dark-content" />
         <SimpleHeader title="Perfil" />
@@ -211,14 +211,14 @@ export default function UserProfileScreen() {
           <ActivityIndicator size="large" color="#20B2AA" />
           <Text style={styles.loadingText}>Carregando perfil...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   // No profile found
   if (!profile) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <SafeAreaView edges={["top"]} style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar barStyle="dark-content" />
         <SimpleHeader title="Perfil" />
@@ -228,26 +228,24 @@ export default function UserProfileScreen() {
           title="Usuário não encontrado"
           description="Não foi possível carregar este perfil."
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView edges={["top", "bottom"]} style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" />
       <SimpleHeader title="Perfil" />
-      
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
+
+      <ScrollView
+        contentContainerStyle={{ ...styles.scrollContent, paddingBottom: insets.bottom + 20 }}
         showsVerticalScrollIndicator={false}
       >
 
         {/* CARD DE PERFIL */}
         <Card style={styles.profileCard}>
-          <Text style={styles.cardTitle}>
-            {"@" + profile.user.username}
-          </Text>
+          <Text style={styles.cardTitle}>{"@" + profile.user.username}</Text>
           <Text style={styles.cardSubtitle}>
             Membro desde {new Date(profile.user.memberSince).toLocaleDateString('pt-BR', {
               day: '2-digit',
@@ -257,7 +255,7 @@ export default function UserProfileScreen() {
           </Text>
 
           <View style={styles.avatarContainer}>
-            <Avatar 
+            <Avatar
               initials={profile.user.username.substring(0, 2).toUpperCase()}
               imageUrl={profile.user.avatarUrl || undefined}
               size={80}
@@ -270,7 +268,7 @@ export default function UserProfileScreen() {
               label="Nome Completo"
               value={profile.user.name || 'Não informado'}
             />
-            
+
             {/* Mutual Friends */}
             {mutualFriendsCount > 0 && (
               <InfoRow
@@ -279,67 +277,31 @@ export default function UserProfileScreen() {
                 value={`${mutualFriendsCount} amigo${mutualFriendsCount > 1 ? 's' : ''}`}
               />
             )}
-            
+
             {/* Bio */}
             {profile.user.bio && (
-              <InfoRow
-                icon="information-outline"
-                label="Bio"
-                value={profile.user.bio}
-              />
+              <InfoRow icon="information-outline" label="Bio" value={profile.user.bio} />
             )}
           </View>
 
           <View style={styles.statsContainer}>
-            <StatBox
-              icon="fire"
-              value={profile.user.currentStreak || 0}
-              label="Sequência"
-              iconColor="#FF6347"
-            />
+            <StatBox icon="fire" value={profile.user.currentStreak || 0} label="Sequência" iconColor="#FF6347" />
 
-            <StatBox
-              icon="trophy"
-              value={profile.user.level || 1}
-              label="Level"
-              iconColor="#FFD700"
-            />
+            <StatBox icon="trophy" value={profile.user.level || 1} label="Level" iconColor="#FFD700" />
 
-            <StatBox
-              icon="star"
-              value={profile.user.xp || 0}
-              label="XP"
-              iconColor="#20B2AA"
-            />
+            <StatBox icon="star" value={profile.user.xp || 0} label="XP" iconColor="#20B2AA" />
           </View>
 
           <View style={styles.statsContainer}>
-            <StatBox
-              icon="flag-checkered"
-              value={profile.stats.completedChallenges}
-              label="Desafios"
-              iconColor="#4CAF50"
-            />
+            <StatBox icon="flag-checkered" value={profile.stats.completedChallenges} label="Desafios" iconColor="#4CAF50" />
 
-            <StatBox
-              icon="trophy-award"
-              value={profile.stats.badgesCount}
-              label="Conquistas"
-              iconColor="#9C27B0"
-            />
+            <StatBox icon="trophy-award" value={profile.stats.badgesCount} label="Conquistas" iconColor="#9C27B0" />
 
-            <StatBox
-              icon="account-group"
-              value={profile.stats.friendsCount}
-              label="Amigos"
-              iconColor="#007AFF"
-            />
+            <StatBox icon="account-group" value={profile.stats.friendsCount} label="Amigos" iconColor="#007AFF" />
           </View>
 
           {/* Action Button */}
-          <View style={styles.actionButtonContainer}>
-            {renderActionButton()}
-          </View>
+          <View style={styles.actionButtonContainer}>{renderActionButton()}</View>
         </Card>
 
         {/* SEÇÃO DE BADGES EM DESTAQUE */}
@@ -347,25 +309,12 @@ export default function UserProfileScreen() {
           <Card style={styles.badgesCard}>
             <View style={styles.badgesSectionHeader}>
               <Text style={styles.badgesSectionTitle}>🏆 Conquistas Recentes</Text>
-              <Text style={styles.badgesSectionSubtitle}>
-                Últimas conquistas desbloqueadas
-              </Text>
+              <Text style={styles.badgesSectionSubtitle}>Últimas conquistas desbloqueadas</Text>
             </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.badgesScrollContainer}
-            >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesScrollContainer}>
               {profile.badges.map((badge) => (
-                <BadgeItem
-                  key={badge.id}
-                  name={badge.name}
-                  earnedAt={badge.earnedAt}
-                  rarity={badge.rarity as any}
-                  variant="mini"
-                  onPress={() => {}}
-                />
+                <BadgeItem key={badge.id} name={badge.name} earnedAt={badge.earnedAt} rarity={badge.rarity as any} variant="mini" onPress={() => {}} />
               ))}
             </ScrollView>
           </Card>
@@ -376,18 +325,14 @@ export default function UserProfileScreen() {
           <Card style={styles.challengesCard}>
             <View style={styles.badgesSectionHeader}>
               <Text style={styles.badgesSectionTitle}>⚡ Desafios Recentes</Text>
-              <Text style={styles.badgesSectionSubtitle}>
-                Desafios completados recentemente
-              </Text>
+              <Text style={styles.badgesSectionSubtitle}>Desafios completados recentemente</Text>
             </View>
 
             {profile.recentChallenges.map((challenge) => (
               <View key={challenge.id} style={styles.challengeItem}>
                 <View style={styles.challengeContent}>
                   <Text style={styles.challengeTitle}>{challenge.title}</Text>
-                  <Text style={styles.challengeCategory}>
-                    {challenge.category.replace('_', ' ')} • {challenge.difficulty}
-                  </Text>
+                  <Text style={styles.challengeCategory}>{challenge.category.replace('_', ' ')} • {challenge.difficulty}</Text>
                 </View>
                 <View style={styles.xpBadge}>
                   <MaterialCommunityIcons name="star" size={14} color="#FFD60A" />
@@ -398,7 +343,7 @@ export default function UserProfileScreen() {
           </Card>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
