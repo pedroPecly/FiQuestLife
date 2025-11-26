@@ -2,6 +2,7 @@
   "expo": {
     "name": "FiQuestLife",
     "slug": "FiQuestLife",
+    "platforms": ["ios", "android"],
     "version": "0.11.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo.jpeg",

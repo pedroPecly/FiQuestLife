@@ -518,7 +518,7 @@ export default function ExploreScreen() {
             ? 'Suas conquistas e interações! 🎯'
             : 'Veja quem está no topo! 🏆'
         }
-        showNotifications={false}
+        showNotifications={true}
       />
 
       {/* Tabs com visual de card */}

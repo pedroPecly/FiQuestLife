@@ -3,12 +3,12 @@
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '../../components/layout/Header';
@@ -177,15 +177,15 @@ const ProfileScreen = () => {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
-      
+      <Header
+        title="FiQuestLife"
+        subtitle="Bem-vindo à sua jornada! 🎯"
+      />
+
       <ScrollView 
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { justifyContent: 'flex-start' }]}
         showsVerticalScrollIndicator={false}
       >
-        <Header
-          title="FiQuestLife"
-          subtitle="Bem-vindo à sua jornada! 🎯"
-        />
 
         {/* CARD DE PERFIL */}
         <Card style={styles.profileCard}>
