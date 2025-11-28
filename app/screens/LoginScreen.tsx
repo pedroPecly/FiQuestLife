@@ -5,23 +5,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import { Header } from '../../components/layout/Header';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertModal } from '../../components/ui/AlertModal';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DateInput } from '../../components/ui/DateInput';
 import { Input } from '../../components/ui/Input';
-import { Tag } from '../../components/ui/Tag';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
@@ -30,6 +30,7 @@ import { styles } from '../styles/login.styles';
 
 const LoginScreen = () => {
   const { alert, alertConfig, isVisible, hideAlert } = useAlert();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [name, setName] = useState(''); // Nome completo (obrigatório)
@@ -293,25 +294,28 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="dark-content" />
       
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView 
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
-          <Header showNotifications={false} />
+          <View style={styles.headerContainer}>
+            <Image
+              source={require('../../assets/images/logo.jpeg')}
+              style={{ width: 150, height: 150, borderRadius: 12, marginBottom: 20 }}
+              resizeMode="contain"
+            />
+            <Text style={styles.slogan}>Transforme sua saúde em uma aventura épica!</Text>
+          </View>
 
-      <Card>
-        <Tag
-          icon="star-circle"
-          text={isLogin ? 'Missão de Retorno' : 'Missão de Boas-Vindas'}
-        />
+        <Card>
         
         <Text style={styles.cardTitle}>
           {isLogin ? 'Entrar na Jornada' : 'Iniciar Jornada'}

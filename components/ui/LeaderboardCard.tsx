@@ -65,7 +65,7 @@ export function LeaderboardCard({ position, user, stat, statType, isCurrentUser 
         return {
           icon: 'logo-bitcoin' as const,
           color: COLORS.warning,
-          label: 'Coins',
+          label: 'FiCoins',
         };
       case 'streak':
         return {

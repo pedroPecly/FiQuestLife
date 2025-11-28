@@ -204,8 +204,8 @@ export default function RewardHistoryScreen() {
       case 'COINS':
         return {
           icon: '💰',
-          title: 'Nenhuma moeda ganha ainda',
-          text: 'Ganhe moedas completando desafios e alcançando marcos importantes!',
+          title: 'Nenhuma FiCoin ganha ainda',
+          text: 'Ganhe FiCoins completando desafios e alcançando marcos importantes!',
         };
       case 'BADGE':
         return {
@@ -268,11 +268,11 @@ export default function RewardHistoryScreen() {
             <Text style={styles.statLabel}>XP Total</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <Text style={styles.statIcon}>💰</Text>
-            <Text style={styles.statValue}>{stats.totalCoins.toLocaleString('pt-BR')}</Text>
-            <Text style={styles.statLabel}>Moedas</Text>
-          </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statIcon}>💰</Text>
+              <Text style={styles.statValue}>{stats.totalCoins.toLocaleString('pt-BR')}</Text>
+              <Text style={styles.statLabel}>FiCoins</Text>
+            </View>
 
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>🏆</Text>
@@ -317,7 +317,7 @@ export default function RewardHistoryScreen() {
         >
           <Text style={styles.filterIcon}>💰</Text>
           <Text style={[styles.filterText, selectedFilter === 'COINS' && styles.filterTextActive]}>
-            Moedas
+            FiCoins
           </Text>
         </TouchableOpacity>
 

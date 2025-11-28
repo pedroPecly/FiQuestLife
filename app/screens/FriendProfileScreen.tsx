@@ -141,7 +141,7 @@ export default function FriendProfileScreen() {
           />
           <StatBox
             icon="currency-usd"
-            label="Moedas"
+            label="FiCoins"
             value={friend.coins.toString()}
             iconColor="#34C759"
           />

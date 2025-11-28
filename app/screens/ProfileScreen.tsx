@@ -244,7 +244,7 @@ const ProfileScreen = () => {
             <StatBox
               icon="cash"
               value={user.coins || 0}
-              label="Moedas"
+              label="FiCoins"
               iconColor="#FFD700"
             />
 

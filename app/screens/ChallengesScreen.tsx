@@ -3,16 +3,16 @@ import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
 import {
-    cancelStreakReminder,
+  cancelStreakReminder,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    RefreshControl,
-    ScrollView,
-    Text,
-    View,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/challenges.styles';
@@ -83,7 +83,7 @@ export default function ChallengesScreen() {
 
       // Verifica se completou TODOS os desafios diários
       const allCompleted = updatedChallenges.every((c) => c.status === 'COMPLETED');
-      
+
       if (allCompleted) {
         // Cancela lembrete de streak (completou todos os desafios!)
         await cancelStreakReminder();
@@ -102,7 +102,7 @@ export default function ChallengesScreen() {
       }
 
       // Construir mensagem de sucesso
-      let successMessage = `+${response.userChallenge.challenge.xpReward} XP\n+${response.userChallenge.challenge.coinsReward} coins!`;
+      let successMessage = `+${response.userChallenge.challenge.xpReward} XP\n+${response.userChallenge.challenge.coinsReward} FiCoins!`;
 
       console.log('📊 Response completa:', JSON.stringify(response, null, 2));
       console.log('🎯 leveledUp:', response.leveledUp, '| newLevel:', response.newLevel);
@@ -150,8 +150,9 @@ export default function ChallengesScreen() {
           <Text style={styles.greeting}>Olá, {user?.name || 'Usuário'}! 👋</Text>
 
           <View style={styles.statsRow}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelText}>Nível {user?.level || 1}</Text>
+            <View style={styles.statItem}>
+              <Text style={styles.statIcon}>🏆</Text>
+              <Text style={styles.statValue}>Nível {user?.level || 1}</Text>
             </View>
 
             <View style={styles.statItem}>

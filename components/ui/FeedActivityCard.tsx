@@ -200,7 +200,7 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
           </View>
         )}
         
-        {/* Badges de recompensas (XP e Moedas) */}
+        {/* Badges de recompensas (XP e FiCoins) */}
         {(xp > 0 || coins > 0) && (
           <ActivityRewardBadges xp={xp} coins={coins} size="small" />
         )}

@@ -11,7 +11,7 @@ import { friendService } from '../../services/friend';
 export default function TabLayout() {
   // Hook que verifica novas solicitações de amizade periodicamente
   useFriendRequestNotifications();
-  
+
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const insets = useSafeAreaInsets();
 
@@ -90,10 +90,10 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'home' : 'home-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'home' : 'home-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}
@@ -103,23 +103,23 @@ export default function TabLayout() {
         options={{
           title: 'Desafios',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'trophy' : 'trophy-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'trophy' : 'trophy-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="badges"
+        name="explore"
         options={{
-          title: 'Conquistas',
+          title: 'Explorar',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'shield-star' : 'shield-star-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'view-dashboard' : 'view-dashboard-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}
@@ -130,23 +130,23 @@ export default function TabLayout() {
           title: 'Amigos',
           tabBarBadge: pendingRequestsCount > 0 ? pendingRequestsCount : undefined,
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'account-group' : 'account-group-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'account-group' : 'account-group-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="badges"
         options={{
-          title: 'Feed',
+          title: 'Conquistas',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'view-dashboard' : 'view-dashboard-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'shield-star' : 'shield-star-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}
@@ -156,10 +156,10 @@ export default function TabLayout() {
         options={{
           title: 'Usuário',
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons 
-              name={focused ? 'account' : 'account-outline'} 
-              size={28} 
-              color={color} 
+            <MaterialCommunityIcons
+              name={focused ? 'account' : 'account-outline'}
+              size={28}
+              color={color}
             />
           ),
         }}

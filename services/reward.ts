@@ -91,7 +91,7 @@ export const REWARD_TYPE_ICONS: Record<RewardType, string> = {
  */
 export const REWARD_TYPE_LABELS: Record<RewardType, string> = {
   XP: 'Experiência',
-  COINS: 'Moedas',
+  COINS: 'FiCoins',
   BADGE: 'Conquista',
   ITEM: 'Item',
 };
@@ -193,7 +193,7 @@ export const formatRewardAmount = (type: RewardType, amount: number): string => 
     case 'XP':
       return `+${amount} XP`;
     case 'COINS':
-      return `+${amount} ${amount === 1 ? 'moeda' : 'moedas'}`;
+        return `+${amount} ${amount === 1 ? 'FiCoin' : 'FiCoins'}`;
     case 'BADGE':
       return 'Nova conquista!';
     case 'ITEM':

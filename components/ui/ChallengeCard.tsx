@@ -82,7 +82,7 @@ export default function ChallengeCard({
 
           <View style={styles.rewardItem}>
             <Text style={styles.rewardIcon}>💰</Text>
-            <Text style={styles.rewardText}>{challenge.coinsReward} coins</Text>
+              <Text style={styles.rewardText}>{challenge.coinsReward} FiCoins</Text>
           </View>
         </View>
 

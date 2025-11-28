@@ -426,7 +426,7 @@ export default function FriendsScreen() {
       <Header 
         title="Amigos"
         subtitle="Conecte-se com outros aventureiros! 👥"
-        showNotifications={false}
+        showNotifications={true}
       />
       <TabBar 
         tabs={tabs}
