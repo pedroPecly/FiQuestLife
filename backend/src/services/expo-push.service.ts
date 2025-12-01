@@ -23,9 +23,37 @@ export async function sendPushNotification(message: PushMessage): Promise<boolea
   try {
     // Valida token
     if (!message.to || !message.to.startsWith('ExponentPushToken[')) {
-      console.error('[PUSH] Token inválido:', message.to);
+      console.error('[PUSH] ❌ Token inválido:', message.to);
       return false;
     }
+
+    console.log('[PUSH] 📤 Enviando notificação para:', message.to);
+    console.log('[PUSH] 📤 Título:', message.title);
+    console.log('[PUSH] 📤 Corpo:', message.body);
+    console.log('[PUSH] 📤 Dados:', JSON.stringify(message.data));
+
+    // Payload otimizado para Android
+    const payload = {
+      to: message.to,
+      title: message.title,
+      body: message.body,
+      data: message.data || {},
+      sound: message.sound || 'default',
+      badge: message.badge,
+      priority: message.priority || 'high',
+      channelId: 'default',
+      // Configurações específicas do Android
+      android: {
+        channelId: 'default',
+        priority: 'max',
+        sound: 'default',
+        vibrate: [0, 250, 250, 250],
+      },
+      // Time to live - 1 dia (86400 segundos)
+      ttl: 86400,
+      // Expiração - tempo atual + 1 dia
+      expiration: Math.floor(Date.now() / 1000) + 86400,
+    };
 
     const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
@@ -33,25 +61,23 @@ export async function sendPushNotification(message: PushMessage): Promise<boolea
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        to: message.to,
-        title: message.title,
-        body: message.body,
-        data: message.data || {},
-        sound: message.sound || 'default',
-        badge: message.badge,
-        priority: message.priority || 'high',
-        channelId: 'default',
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data: any = await response.json();
 
+    console.log('[PUSH] 📥 Resposta do Expo:', JSON.stringify(data));
+
     if (data.data?.status === 'ok') {
       console.log('[PUSH] ✅ Notificação enviada com sucesso');
+      console.log('[PUSH] ✅ Ticket ID:', data.data.id);
       return true;
+    } else if (data.data?.status === 'error') {
+      console.error('[PUSH] ❌ Erro do Expo:', data.data.message);
+      console.error('[PUSH] ❌ Detalhes:', data.data.details);
+      return false;
     } else {
-      console.error('[PUSH] ❌ Erro ao enviar:', data);
+      console.error('[PUSH] ❌ Resposta inesperada:', JSON.stringify(data));
       return false;
     }
   } catch (error) {

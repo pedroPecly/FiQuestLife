@@ -1,0 +1,9 @@
+{
+  "name": "social-features-setup",
+  "version": "1.0.0",
+  "scripts": {
+    "setup": "npm run migrate && npm run seed",
+    "migrate": "npx prisma migrate dev --name add_social_features",
+    "seed": "npx tsx prisma/add-social-challenges-and-badges.ts"
+  }
+}

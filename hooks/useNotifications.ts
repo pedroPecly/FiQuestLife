@@ -19,38 +19,48 @@ import { useEffect, useRef, useState } from 'react';
 import { authStorage } from '../services/auth';
 import { getLocalNotifications, saveLocalNotification } from '../services/localNotificationStorage';
 import {
-  addNotificationReceivedListener,
-  addNotificationResponseListener,
-  getNotificationsEnabled,
-  requestNotificationPermissions,
-  scheduleDailyReminder,
-  scheduleStreakReminder,
+    addNotificationReceivedListener,
+    addNotificationResponseListener,
+    getNotificationsEnabled,
+    requestNotificationPermissions,
+    scheduleDailyReminder,
+    scheduleStreakReminder,
 } from '../services/notifications';
 import { registerPushToken } from '../services/pushToken';
+
+// Flag global para garantir que setup só execute uma vez na vida do app
+let globalSetupCompleted = false;
 
 export function useNotifications() {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
-  const setupCompleted = useRef(false); // Flag para evitar setup múltiplo
 
   useEffect(() => {
-    // Evita setup duplicado
-    if (setupCompleted.current) {
-      console.log('⚠️ Setup de notificações já foi executado, pulando...');
+    // Evita setup duplicado usando flag global
+    if (globalSetupCompleted) {
+      console.log('⚠️ Setup de notificações já foi executado globalmente, pulando...');
+      setIsReady(true);
       return;
     }
     
-    setupCompleted.current = true;
+    globalSetupCompleted = true;
     setupNotifications();
 
     // Listener para notificações recebidas (app aberto)
     notificationListener.current = addNotificationReceivedListener(
       async (notification) => {
         const content = notification.request.content;
-        console.log('📬 Notificação recebida:', content.title);
-        console.log('📬 Dados da notificação:', JSON.stringify(content.data));
+        console.log('===============================================');
+        console.log('📦 NOTIFICAÇÃO RECEBIDA (APP ABERTO)');
+        console.log('===============================================');
+        console.log('📝 Título:', content.title);
+        console.log('📝 Corpo:', content.body);
+        console.log('📝 Dados completos:', JSON.stringify(content.data, null, 2));
+        console.log('📝 Channel ID:', content.channelId);
+        console.log('📝 Som:', content.sound);
+        console.log('===============================================');
         
         // Pega userId do usuário logado
         const user = await authStorage.getUser();
@@ -78,7 +88,8 @@ export function useNotifications() {
         const notificationData = content.data as any;
         const notificationType = notificationData?.type;
         
-        console.log('📬 Tipo extraído:', notificationType);
+        console.log('📑 Tipo extraído:', notificationType);
+        console.log('📑 Salvando para usuário:', user.id);
         
         if (!notificationType) {
           console.warn('⚠️ Notificação sem tipo! Dados:', JSON.stringify(notificationData));
@@ -92,7 +103,8 @@ export function useNotifications() {
           data: notificationData,
         });
         
-        console.log('💾 Notificação salva localmente com tipo:', notificationType);
+        console.log('✅ Notificação salva localmente com tipo:', notificationType);
+        console.log('===============================================');
       }
     );
 
@@ -100,9 +112,13 @@ export function useNotifications() {
     responseListener.current = addNotificationResponseListener(async (response) => {
       const data = response.notification.request.content.data;
       const content = response.notification.request.content;
-      console.log('👆 Usuário tocou na notificação');
-      console.log('👆 Tipo:', data?.type);
-      console.log('👆 Dados completos:', JSON.stringify(data));
+      console.log('===============================================');
+      console.log('👆 USUÁRIO TOCOU NA NOTIFICAÇÃO');
+      console.log('===============================================');
+      console.log('📝 Título:', content.title);
+      console.log('📝 Tipo:', data?.type);
+      console.log('📝 Dados completos:', JSON.stringify(data, null, 2));
+      console.log('===============================================');
       
       // Pega userId do usuário logado
       const user = await authStorage.getUser();
@@ -116,7 +132,7 @@ export function useNotifications() {
       const notificationData = data as any;
       const notificationType = notificationData?.type;
       
-      console.log('👆 Tipo extraído para salvar:', notificationType);
+      console.log('📑 Tipo extraído para salvar:', notificationType);
       
       if (!notificationType) {
         console.warn('⚠️ Notificação tocada sem tipo! Dados:', JSON.stringify(notificationData));
@@ -130,7 +146,8 @@ export function useNotifications() {
         data: notificationData,
       });
       
-      console.log('💾 Notificação do toque salva com tipo:', notificationType);
+      console.log('✅ Notificação do toque salva com tipo:', notificationType);
+      console.log('===============================================');
       
       handleNotificationTap(data);
     });

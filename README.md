@@ -19,13 +19,34 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Sistema de Level Up automático (1000 XP/nível)
 
 ### **🏆 Desafios e Conquistas**
-- 46 desafios em 7 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade)
+- 50 desafios em 8 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade, Meditação)
+- **7 desafios sociais auto-verificáveis** que completam automaticamente ao realizar ações no app:
+  - 🎯 Desafiar um Amigo (convite enviado)
+  - 🤝 Aceitar um Desafio (convite aceito)
+  - ❤️ Curtir uma Postagem (like no feed)
+  - 💬 Comentar em uma Postagem (comentário enviado)
+  - 👥 Conectar-se com um Novo Amigo (amizade criada)
+  - 🎉 Conquistar uma Nova Badge (badge desbloqueado)
+  - 🔥 Manter sua Sequência (3+ desafios completados)
 - 28 desafios com verificação por foto obrigatória (hidratação, exercícios, refeições)
 - Sistema de upload de fotos com Supabase Storage
 - Legendas opcionais para compartilhar contexto
 - 5 desafios diários atribuídos automaticamente
-- 29 badges com 4 níveis de raridade (Common, Rare, Epic, Legendary)
+- **Sistema de Convites de Desafios:**
+  - Desafie amigos com seus desafios diários
+  - Cada amigo pode ser desafiado 1x por dia
+  - Cada desafio pode desafiar 1 pessoa por dia
+  - Desafios auto-verificáveis não mostram botão "Concluir"
+- **47 badges progressivos** organizados em 6 séries:
+  - **Série Curtidas (6 badges):** Curtir 1, 25, 100, 500, 2500, 10000 postagens
+  - **Série Comentários (6 badges):** Comentar 1, 25, 100, 500, 2500, 10000 vezes
+  - **Série Amizades (6 badges):** Adicionar 1, 5, 20, 100, 500, 2000 amigos
+  - **Série Desafios Enviados (6 badges):** Enviar 1, 10, 50, 250, 1000, 5000 convites
+  - **Série Desafios Aceitos (6 badges):** Aceitar 1, 10, 50, 250, 1000, 5000 convites
+  - **Série Sequência (6 badges):** Completar 3+ desafios em 1, 7, 30, 100, 365, 1000 dias
+- 29 badges tradicionais com 4 níveis de raridade (Common, Rare, Epic, Legendary)
 - Progresso em tempo real e histórico completo
+- Sistema de auto-verificação com eventos rastreados no banco
 
 ### **👥 Social**
 - Feed de atividades dos amigos em tempo real
@@ -33,6 +54,13 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Feed exibe fotos e legendas das conquistas
 - Curtidas e comentários (limitado a 1 comentário por usuário por post)
 - Sistema completo de amizades (busca, solicitações, gerenciamento)
+- **Sistema de Convites de Desafios:**
+  - Envie convites de desafios aos seus amigos
+  - Aceite ou rejeite convites recebidos
+  - Cada amigo pode receber 1 convite por dia
+  - Cada desafio pode ser usado para 1 convite por dia
+  - Badge visual indica desafios recebidos de amigos
+  - Histórico completo de convites enviados/recebidos
 - Perfis públicos/privados com controle de privacidade
 - Rankings de amigos e global (XP, Streak, Desafios)
 - Navegação recursiva entre perfis
@@ -136,7 +164,8 @@ FiQuestLife/
 │   │   ├── BottomSheetModal.tsx # 🆕 Modal bottom sheet genérico (Sprint 13)
 │   │   ├── Button.tsx        # Botão com variantes (primary, secondary, danger)
 │   │   ├── Card.tsx          # Container com sombra e padding
-│   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com badges e botão de completar
+│   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com auto-verify badge
+│   │   ├── ChallengeInvitesModal.tsx # 🆕 Modal de convites de desafios
 │   │   ├── CommentModal.tsx  # 🆕 Modal de comentários em atividades (Sprint 12)
 │   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── EmptyState.tsx    # 🆕 Estado vazio genérico reutilizável (Sprint 11)
@@ -156,6 +185,7 @@ FiQuestLife/
 │   │   ├── ProfileAvatar.tsx # 🆕 Avatar com upload de foto (galeria/câmera)
 │   │   ├── RewardCard.tsx    # 🆕 Card individual de recompensa (Sprint 10)
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
+│   │   ├── SelectFriendModal.tsx # 🆕 Modal de seleção de amigo para convite
 │   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
 │   │   ├── TabBar.tsx        # 🆕 Sistema de abas horizontal reutilizável (Sprint 13)
@@ -188,11 +218,12 @@ FiQuestLife/
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
+│   ├── challengeInvitation.ts # 🆕 Serviço de convites de desafios
 │   ├── feed.ts               # 🆕 Serviço de feed social (Sprint 12)
 │   ├── feedInteractions.ts   # 🆕 Serviço de curtidas/comentários (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
 │   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
-│   ├── notificationApi.ts    # 🆕 Serviço de notificações backend (Sprint 13)
+│   ├── localNotificationStorage.ts # 🆕 Armazenamento local de notificações
 │   ├── notificationNavigation.ts # 🆕 Navegação de notificações (Sprint 14)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
@@ -212,6 +243,7 @@ FiQuestLife/
 │   │   │   ├── auth.controller.ts       # Login, Register, Profile
 │   │   │   ├── badge.controller.ts      # 🆕 Gerenciamento de badges (3 endpoints)
 │   │   │   ├── challenge.controller.ts  # 🆕 Gerenciamento de desafios (4 endpoints)
+│   │   │   ├── challenge-invitation.controller.ts # 🆕 Convites de desafios (5 endpoints)
 │   │   │   ├── feed.controller.ts       # 🆕 Feed de atividades (Sprint 12)
 │   │   │   ├── friend.controller.ts     # 🆕 Gerenciamento de amigos (12 endpoints - Sprint 11)
 │   │   │   ├── health.controller.ts     # Health check
@@ -221,8 +253,10 @@ FiQuestLife/
 │   │   │   ├── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
 │   │   │   └── user.controller.ts       # 🆕 Perfis públicos (Sprint 12)
 │   │   ├── services/         # 🔧 Lógica de Negócio
+│   │   │   ├── auto-verify.service.ts   # 🆕 Auto-verificação de desafios sociais (354 linhas)
 │   │   │   ├── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
 │   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
+│   │   │   ├── challenge-invitation.service.ts # 🆕 Convites de desafios (474 linhas)
 │   │   │   ├── expo-push.service.ts     # 🆕 Serviço Expo Push API (Sprint 13)
 │   │   │   ├── feed.service.ts          # 🆕 Feed social (Sprint 12)
 │   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (774 linhas - Sprint 11)
@@ -233,6 +267,7 @@ FiQuestLife/
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
 │   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
+│   │   │   ├── challenge-invitation.routes.ts # 🆕 Rotas de convites (protegidas)
 │   │   │   ├── feed.routes.ts           # 🆕 Rotas de feed (protegidas - Sprint 12)
 │   │   │   ├── friend.routes.ts         # 🆕 Rotas de amigos (protegidas - Sprint 11)
 │   │   │   ├── health.ts                # Health check
@@ -251,10 +286,12 @@ FiQuestLife/
 │   │   │   └── validation.ts            # 🆕 Validação UUID e sanitização (Sprint 12)
 │   │   └── index.ts          # Entry point do servidor (rotas registradas)
 │   ├── prisma/
-│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (10 models)
-│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges)
-│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (43 desafios em 8 categorias)
-│   │   ├── migrations/       # Histórico de mudanças do DB (7 migrations)
+│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (12 models)
+│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges tradicionais)
+│   │   ├── add-badges.ts     # 🆕 Seed de badges progressivos (18 badges sociais)
+│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (43 desafios base)
+│   │   ├── add-challenges.ts # 🆕 Seed de desafios sociais auto-verificáveis (7 desafios)
+│   │   ├── migrations/       # Histórico de mudanças do DB (11 migrations)
 │   │   │   ├── migration_lock.toml
 │   │   │   ├── 20251016122028_add_username/
 │   │   │   ├── 20251016131113_add_gamification_fields/
@@ -262,7 +299,11 @@ FiQuestLife/
 │   │   │   ├── 20251017122341_make_name_and_birthdate_required/
 │   │   │   ├── 20251017145006_add_badges_and_rewards/
 │   │   │   ├── 20251017145348_fix_reward_and_badge_models/
-│   │   │   └── 20251101_add_friends_system/ # 🆕 Sistema de amigos (Sprint 11)
+│   │   │   ├── 20251101_add_friends_system/ # 🆕 Sistema de amigos (Sprint 11)
+│   │   │   ├── 20251201_add_challenge_invitations/ # 🆕 Convites de desafios
+│   │   │   ├── 20251201_add_social_features/ # 🆕 Auto-verificação (autoVerifiable, verificationEvent)
+│   │   │   ├── 20251201_make_imageurl_optional/ # 🆕 Badge.imageUrl opcional
+│   │   │   └── 20251201_add_social_badge_enums/ # 🆕 BadgeCategory.SOCIAL + BadgeRequirementType.EVENT_COUNT
 │   │   └── scripts/
 │   │       └── clear-database.sql # Script para limpar DB
 │   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
@@ -371,6 +412,52 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ---
 
 ## 🆕 Últimas Atualizações
+
+### **Dezembro de 2025**
+- ✅ **Sistema de Auto-Verificação e Badges Progressivos** (01/12/2025)
+  - **7 desafios sociais auto-verificáveis** que completam automaticamente:
+    - Enviar convite de desafio (CHALLENGE_INVITE_SENT)
+    - Aceitar convite de desafio (CHALLENGE_INVITE_ACCEPTED)
+    - Curtir postagem no feed (POST_LIKED)
+    - Comentar em postagem (POST_COMMENTED)
+    - Adicionar novo amigo (FRIENDSHIP_CREATED)
+    - Desbloquear badge (BADGE_EARNED)
+    - Completar 3+ desafios diários (DAILY_CHALLENGES_COMPLETED)
+  - **18 badges progressivos em 6 séries** com contadores de eventos:
+    - Curtidas: 1, 25, 100, 500, 2500, 10000
+    - Comentários: 1, 25, 100, 500, 2500, 10000
+    - Amizades: 1, 5, 20, 100, 500, 2000
+    - Desafios Enviados: 1, 10, 50, 250, 1000, 5000
+    - Desafios Aceitos: 1, 10, 50, 250, 1000, 5000
+    - Sequência: 1, 7, 30, 100, 365, 1000 dias
+  - **Sistema de Convites de Desafios:**
+    - Envie convites de desafios aos amigos
+    - Modal dedicado para aceitar/rejeitar convites
+    - Badge visual indica desafios recebidos de amigos
+    - Validações: 1 convite/amigo/dia, 1 convite/desafio/dia
+    - Botão de desafiar amigo em cada ChallengeCard
+    - Histórico completo no banco (ChallengeInvitation)
+  - **Backend auto-verify.service.ts (354 linhas):**
+    - verifyAndCompleteChallenge: completa desafio + atualiza XP/coins
+    - checkAndAwardBadges: conta eventos + verifica requisitos + concede badges
+    - handleSocialEvent: dispara ambos em paralelo
+    - Integrado em 3 serviços (challenge-invitation, feed, friend)
+    - Transações atômicas com Prisma $transaction
+    - Auditoria completa via RewardHistory
+  - **Schema do banco atualizado:**
+    - Challenge: +autoVerifiable (Boolean), +verificationEvent (String?)
+    - Badge: +requiredCount (Int?), +event (String?), +requirement (String?), +icon (String?), +xpReward/coinsReward (Int), +imageUrl (String? opcional)
+    - ChallengeInvitation: model completo (8 campos)
+    - BadgeCategory enum: +SOCIAL
+    - BadgeRequirementType enum: +EVENT_COUNT
+  - **UX melhorada:**
+    - Desafios auto-verificáveis mostram badge verde "Completa automaticamente"
+    - Botão "Concluir" escondido para desafios auto-verificáveis
+    - Alertas de sucesso removidos (aceitar/rejeitar convites)
+    - SelectFriendModal reutilizável para convites
+  - **4 migrations aplicadas:** add_social_features, make_imageurl_optional, add_social_badge_enums, challenge_invitations
+  - **2 seeds criados:** add-challenges.ts (7 desafios sociais), add-badges.ts (18 badges progressivos)
+  - Código production-ready com segurança (rate limiting, validação, duplicatas)
 
 ### **Novembro de 2025**
 - ✅ **Sprint 15: Sistema de Fotos para Desafios** (12/11/2025)

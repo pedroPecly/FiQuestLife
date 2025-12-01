@@ -1,43 +1,101 @@
-import { ChallengeCard, LoadingScreen } from '@/components/ui';
+import { ChallengeCard, LoadingScreen, NotificationBell, NotificationsModal } from '@/components/ui';
+import { ChallengeInvitesModal } from '@/components/ui/ChallengeInvitesModal';
 import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
+import { getChallengesAlreadyUsedToday, getPendingInvites } from '@/services/challengeInvitation';
 import {
-  cancelStreakReminder,
+    cancelStreakReminder,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { authStorage } from '../../services/auth';
+import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import { styles } from '../styles/challenges.styles';
 
 export default function ChallengesScreen() {
+  const { alert } = useAlert();
   const [user, setUser] = useState<User | null>(null);
   const [challenges, setChallenges] = useState<UserChallenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [completingId, setCompletingId] = useState<string | null>(null);
-  const { alert } = useAlert();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [feedVisible, setFeedVisible] = useState(false);
+  const [invitesVisible, setInvitesVisible] = useState(false);
+  const [pendingInvitesCount, setPendingInvitesCount] = useState(0);
+  const [usedChallengeIds, setUsedChallengeIds] = useState<string[]>([]);
+  
+  // Carrega count de notificações não lidas
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const user = await authStorage.getUser();
+      if (!user) {
+        setUnreadCount(0);
+        return;
+      }
+      const count = await getLocalUnreadCount(user.id);
+      setUnreadCount(count);
+    } catch (error) {
+      setUnreadCount(0);
+    }
+  }, []);
+
+  // Carrega count de convites pendentes
+  const loadPendingInvitesCount = useCallback(async () => {
+    try {
+      const invites = await getPendingInvites();
+      setPendingInvitesCount(invites.length);
+    } catch (error) {
+      setPendingInvitesCount(0);
+    }
+  }, []);
+
+  // Recarrega lista de desafios já usados
+  const loadUsedChallenges = useCallback(async () => {
+    try {
+      const usedChallenges = await getChallengesAlreadyUsedToday();
+      setUsedChallengeIds(usedChallenges);
+    } catch (error) {
+      console.error('Erro ao carregar desafios usados:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUnreadCount();
+    loadPendingInvitesCount();
+    const interval = setInterval(() => {
+      loadUnreadCount();
+      loadPendingInvitesCount();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [loadUnreadCount, loadPendingInvitesCount]);
 
   // Carregar usuário e desafios
   const loadData = async () => {
     try {
       // Token é injetado automaticamente pelo interceptor do axios
-      const [userResponse, challengesData] = await Promise.all([
+      const [userResponse, challengesData, usedChallenges] = await Promise.all([
         authService.getMe(),
         challengeService.getDailyChallenges(),
+        getChallengesAlreadyUsedToday(),
       ]);
 
       if (userResponse.success) {
         setUser(userResponse.data);
       }
       setChallenges(challengesData);
+      setUsedChallengeIds(usedChallenges);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       alert.error('Erro', error.response?.data?.error || 'Não foi possível carregar os dados');
@@ -134,6 +192,8 @@ export default function ChallengesScreen() {
   const totalCount = challenges.length;
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -148,6 +208,15 @@ export default function ChallengesScreen() {
         {/* Header com saudação e stats */}
         <View style={styles.header}>
           <Text style={styles.greeting}>Olá, {user?.name || 'Usuário'}! 👋</Text>
+
+          <View style={styles.notificationContainer}>
+            <NotificationBell
+              unreadCount={unreadCount}
+              onPress={() => setFeedVisible(true)}
+              size={26}
+              color="#2F4F4F"
+            />
+          </View>
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
@@ -194,9 +263,37 @@ export default function ChallengesScreen() {
           )}
         </View>
 
+        {/* Modal de notificações */}
+        <NotificationsModal
+          visible={feedVisible}
+          onClose={() => {
+            setFeedVisible(false);
+            loadUnreadCount();
+          }}
+          onUnreadCountChange={setUnreadCount}
+        />
+
         {/* Lista de desafios */}
         <View style={styles.challengesSection}>
-          <Text style={styles.sectionTitle}>Seus Desafios</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Seus Desafios</Text>
+            
+            {/* Botão para ver convites */}
+            {pendingInvitesCount > 0 && (
+              <TouchableOpacity
+                style={styles.invitesButton}
+                onPress={() => setInvitesVisible(true)}
+              >
+                <Ionicons name="mail" size={20} color="#FFF" />
+                {pendingInvitesCount > 0 && (
+                  <View style={styles.invitesBadge}>
+                    <Text style={styles.invitesBadgeText}>{pendingInvitesCount}</Text>
+                  </View>
+                )}
+                <Text style={styles.invitesButtonText}>Convites</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           {challenges.length === 0 ? (
             <View style={styles.emptyState}>
@@ -211,11 +308,23 @@ export default function ChallengesScreen() {
                 userChallenge={userChallenge}
                 onComplete={handleCompleteChallenge}
                 isCompleting={completingId === userChallenge.id}
+                alreadyUsedToChallenge={usedChallengeIds.includes(userChallenge.challenge.id)}
+                onInviteSent={loadUsedChallenges}
               />
             ))
           )}
         </View>
       </ScrollView>
+
+      {/* Modal de convites de desafios */}
+      <ChallengeInvitesModal
+        visible={invitesVisible}
+        onClose={() => setInvitesVisible(false)}
+        onInviteProcessed={() => {
+          loadData();
+          loadPendingInvitesCount();
+        }}
+      />
     </SafeAreaView>
   );
 }

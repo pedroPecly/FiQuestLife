@@ -171,11 +171,54 @@ export const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#2F4F4F', // Cor padrão de títulos
-    marginBottom: 16,
+  },
+
+  invitesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#20B2AA',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    position: 'relative',
+  },
+
+  invitesButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  invitesBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+
+  invitesBadgeText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
 
   // ==========================================
@@ -216,5 +259,10 @@ export const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: 14,
     color: '#666', // Cor padrão de texto secundário
+  },
+  notificationContainer: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
 });

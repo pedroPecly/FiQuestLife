@@ -1,3 +1,4 @@
+import { useAlert } from '@/hooks/useAlert';
 import {
     CATEGORY_COLORS,
     CATEGORY_ICONS,
@@ -6,24 +7,49 @@ import {
     DIFFICULTY_LABELS,
     UserChallenge,
 } from '@/services/challenge';
-import React, { useState } from 'react';
+import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/challengeInvitation';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import PhotoCaptureModal from './PhotoCaptureModal';
+import { SelectFriendModal } from './SelectFriendModal';
 
 interface ChallengeCardProps {
   userChallenge: UserChallenge;
   onComplete: (id: string, photo?: { uri: string; type: string; name: string }, caption?: string) => void;
   isCompleting?: boolean;
+  alreadyUsedToChallenge?: boolean;
+  onInviteSent?: () => void;
 }
 
 export default function ChallengeCard({
   userChallenge,
   onComplete,
   isCompleting = false,
+  alreadyUsedToChallenge = false,
+  onInviteSent,
 }: ChallengeCardProps) {
   const { challenge, status, id } = userChallenge;
   const isCompleted = status === 'COMPLETED';
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showFriendModal, setShowFriendModal] = useState(false);
+  const [invitation, setInvitation] = useState<any>(null);
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const { alert } = useAlert();
+
+  // Carrega informação de convite se existir
+  useEffect(() => {
+    loadInvitation();
+  }, [id]);
+
+  const loadInvitation = async () => {
+    try {
+      const inv = await getInvitationByUserChallenge(id);
+      setInvitation(inv);
+    } catch (error) {
+      console.error('Erro ao carregar convite:', error);
+    }
+  };
 
   const categoryColor = CATEGORY_COLORS[challenge.category];
   const categoryLabel = CATEGORY_LABELS[challenge.category];
@@ -47,9 +73,39 @@ export default function ChallengeCard({
     onComplete(id, photo, caption);
   };
 
+  const handleChallengeFriend = async (friendId: string, friendName: string) => {
+    setSendingInvite(true);
+    try {
+      await createChallengeInvite({
+        challengeId: challenge.id,
+        toUserId: friendId,
+      });
+      alert.success('Convite enviado!', `${friendName} foi desafiado! 🎯`);
+      setShowFriendModal(false);
+      // Notifica o pai para atualizar a lista de desafios usados
+      if (onInviteSent) {
+        onInviteSent();
+      }
+    } catch (error: any) {
+      alert.error('Erro', error.message || 'Não foi possível enviar o convite');
+    } finally {
+      setSendingInvite(false);
+    }
+  };
+
   return (
     <>
       <View style={[styles.container, isCompleted && styles.completedContainer]}>
+        {/* Badge de desafio recebido de amigo */}
+        {invitation && (
+          <View style={styles.inviteBadge}>
+            <Ionicons name="person" size={12} color="#FFF" />
+            <Text style={styles.inviteBadgeText}>
+              Desafiado por {invitation.fromUser?.name}
+            </Text>
+          </View>
+        )}
+
         {/* Header com categorias e dificuldade */}
         <View style={styles.header}>
           <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
@@ -67,7 +123,7 @@ export default function ChallengeCard({
         <Text style={styles.description}>{challenge.description}</Text>
 
         {/* Badge de foto obrigatória */}
-        {challenge.requiresPhoto && !isCompleted && (
+        {challenge.requiresPhoto && (
           <View style={styles.photoBadge}>
             <Text style={styles.photoBadgeText}>📸 Foto obrigatória</Text>
           </View>
@@ -82,32 +138,65 @@ export default function ChallengeCard({
 
           <View style={styles.rewardItem}>
             <Text style={styles.rewardIcon}>💰</Text>
-              <Text style={styles.rewardText}>{challenge.coinsReward} FiCoins</Text>
+            <Text style={styles.rewardText}>{challenge.coinsReward} FiCoins</Text>
           </View>
         </View>
 
-        {/* Botão de completar */}
-        <TouchableOpacity
-          style={[
-            styles.button,
-            isCompleted && styles.buttonCompleted,
-            isCompleting && styles.buttonCompleting,
-          ]}
-          onPress={handleComplete}
-          disabled={isCompleted || isCompleting}
-        >
-          {isCompleting ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>
-              {isCompleted
-                ? '✓ Concluído'
-                : challenge.requiresPhoto
-                  ? '📸 Adicionar Foto'
-                  : 'Concluir Desafio'}
-            </Text>
+        {/* Botões de ação */}
+        <View style={styles.actionsContainer}>
+          {/* Botão de completar - esconde para desafios auto-verificáveis */}
+          {!challenge.autoVerifiable && (
+            <TouchableOpacity
+              style={[
+                styles.button,
+                isCompleted && styles.buttonCompleted,
+                isCompleting && styles.buttonCompleting,
+                !isCompleted && styles.buttonPrimary,
+              ]}
+              onPress={handleComplete}
+              disabled={isCompleted || isCompleting}
+            >
+              {isCompleting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {isCompleted
+                    ? '✓ Concluído'
+                    : challenge.requiresPhoto
+                      ? '📸 Adicionar Foto'
+                      : 'Concluir Desafio'}
+                </Text>
+              )}
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
+
+          {/* Mostra badge "Auto" para desafios auto-verificáveis */}
+          {challenge.autoVerifiable && !isCompleted && (
+            <View style={styles.autoVerifyBadge}>
+              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Text style={styles.autoVerifyText}>Completa automaticamente</Text>
+            </View>
+          )}
+
+          {/* Botão de desafiar amigo */}
+          <TouchableOpacity
+            style={[
+              styles.challengeButton,
+              (sendingInvite || alreadyUsedToChallenge) && styles.buttonDisabled,
+              alreadyUsedToChallenge && styles.challengeButtonUsed,
+            ]}
+            onPress={() => setShowFriendModal(true)}
+            disabled={sendingInvite || alreadyUsedToChallenge}
+          >
+            {sendingInvite ? (
+              <ActivityIndicator size="small" color="#20B2AA" />
+            ) : alreadyUsedToChallenge ? (
+              <Ionicons name="checkmark-done" size={20} color="#999" />
+            ) : (
+              <Ionicons name="person-add" size={20} color="#20B2AA" />
+            )}
+          </TouchableOpacity>
+        </View>
 
         {/* Overlay de completado */}
         {isCompleted && <View style={styles.completedOverlay} />}
@@ -120,6 +209,13 @@ export default function ChallengeCard({
         onClose={() => setShowPhotoModal(false)}
         onSubmit={handlePhotoSubmit}
         isSubmitting={isCompleting}
+      />
+
+      {/* Modal de seleção de amigo */}
+      <SelectFriendModal
+        visible={showFriendModal}
+        onClose={() => setShowFriendModal(false)}
+        onSelectFriend={handleChallengeFriend}
       />
     </>
   );
@@ -150,6 +246,24 @@ const styles = StyleSheet.create({
   },
   completedContainer: {
     opacity: 0.8,
+  },
+  inviteBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#20B2AA',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    zIndex: 10,
+  },
+  inviteBadgeText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
@@ -228,19 +342,60 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2F4F4F', // Cor padrão do projeto
   },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  autoVerifyBadge: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  autoVerifyText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#10B981',
+  },
   button: {
-    backgroundColor: '#10B981',
+    flex: 1,
+    backgroundColor: '#9CA3AF',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
   },
+  buttonPrimary: {
+    backgroundColor: '#10B981',
+  },
   buttonCompleted: {
     backgroundColor: '#9CA3AF',
   },
   buttonCompleting: {
     backgroundColor: '#059669',
+  },
+  challengeButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    borderWidth: 2,
+    borderColor: '#20B2AA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  challengeButtonUsed: {
+    backgroundColor: '#F0F0F0',
+    borderColor: '#CCC',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
     color: '#FFFFFF',

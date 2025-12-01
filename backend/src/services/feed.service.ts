@@ -11,6 +11,7 @@
  */
 
 import { prisma } from '../lib/prisma.js';
+import { handleSocialEvent } from './auto-verify.service.js';
 import { notifyActivityComment, notifyActivityLike } from './notification.service.js';
 
 /**
@@ -75,6 +76,11 @@ export async function toggleLike(userId: string, activityId: string) {
           // Não falha se notificação der erro
         }
       }
+
+      // Verifica e completa desafios auto-verificáveis (ex: "Curta uma Postagem")
+      handleSocialEvent(userId, 'POST_LIKED').catch((error) => {
+        console.error('[FEED SERVICE] Erro ao verificar desafios automáticos:', error);
+      });
 
       return { liked: true };
     }
@@ -198,6 +204,11 @@ export async function addComment(userId: string, activityId: string, content: st
         // Não falha se notificação der erro
       }
     }
+
+    // Verifica e completa desafios auto-verificáveis (ex: "Comente em uma Postagem")
+    handleSocialEvent(userId, 'POST_COMMENTED').catch((error) => {
+      console.error('[FEED SERVICE] Erro ao verificar desafios automáticos:', error);
+    });
 
     return {
       id: comment.id,

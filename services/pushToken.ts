@@ -39,6 +39,13 @@ export async function registerPushToken(): Promise<boolean> {
       console.log('[PUSH TOKEN] Usuário não autenticado - token não registrado');
       return false;
     }
+    
+    // Se for erro do serviço Expo (503, timeout, etc), apenas loga silenciosamente
+    if (error.message?.includes('503') || error.message?.includes('upstream connect error')) {
+      console.log('[PUSH TOKEN] ⚠️ Serviço Expo temporariamente indisponível - tentará novamente depois');
+      return false;
+    }
+    
     console.error('[PUSH TOKEN] Erro ao registrar token:', error);
     return false;
   }

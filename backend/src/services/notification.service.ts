@@ -17,7 +17,9 @@ export type NotificationType =
   | 'BADGE_EARNED'
   | 'LEVEL_UP'
   | 'CHALLENGE_COMPLETED'
-  | 'STREAK_MILESTONE';
+  | 'STREAK_MILESTONE'
+  | 'CHALLENGE_INVITE'
+  | 'CHALLENGE_ACCEPTED';
 
 interface CreateNotificationData {
   userId: string;
@@ -133,7 +135,10 @@ export async function notifyActivityLike(
   likerName: string,
   activityDescription: string
 ) {
-  console.log('[NOTIFICATION SERVICE] Criando notificação de curtida para:', activityOwnerId);
+  console.log('[NOTIFICATION SERVICE] 💖 Criando notificação de curtida');
+  console.log('[NOTIFICATION SERVICE] 💖 Owner ID:', activityOwnerId);
+  console.log('[NOTIFICATION SERVICE] 💖 Activity ID:', activityId);
+  console.log('[NOTIFICATION SERVICE] 💖 Liker:', likerName);
   
   const notification = await createNotification({
     userId: activityOwnerId,
@@ -148,7 +153,7 @@ export async function notifyActivityLike(
     },
   });
   
-  console.log('[NOTIFICATION SERVICE] Notificação criada:', notification?.id);
+  console.log('[NOTIFICATION SERVICE] ✅ Notificação de curtida processada:', notification?.id);
   return notification;
 }
 
@@ -159,7 +164,11 @@ export async function notifyActivityComment(
   commentContent: string,
   activityDescription: string
 ) {
-  console.log('[NOTIFICATION SERVICE] Criando notificação de comentário para:', activityOwnerId);
+  console.log('[NOTIFICATION SERVICE] 💬 Criando notificação de comentário');
+  console.log('[NOTIFICATION SERVICE] 💬 Owner ID:', activityOwnerId);
+  console.log('[NOTIFICATION SERVICE] 💬 Activity ID:', activityId);
+  console.log('[NOTIFICATION SERVICE] 💬 Commenter:', commenterName);
+  console.log('[NOTIFICATION SERVICE] 💬 Comment:', commentContent.substring(0, 100));
   
   const notification = await createNotification({
     userId: activityOwnerId,
@@ -175,7 +184,7 @@ export async function notifyActivityComment(
     },
   });
   
-  console.log('[NOTIFICATION SERVICE] Notificação criada:', notification?.id);
+  console.log('[NOTIFICATION SERVICE] ✅ Notificação de comentário processada:', notification?.id);
   return notification;
 }
 
@@ -281,6 +290,60 @@ export async function notifyStreakMilestone(userId: string, streakDays: number) 
     data: {
       type: 'STREAK_MILESTONE',
       streakDays,
+    },
+  });
+}
+
+export async function notifyChallengeInvite(invitation: any) {
+  console.log('[NOTIFICATION SERVICE] 🎯 Criando notificação de convite de desafio');
+  console.log('[NOTIFICATION SERVICE] 🎯 Para:', invitation.toUser.name);
+  console.log('[NOTIFICATION SERVICE] 🎯 De:', invitation.fromUser.name);
+  console.log('[NOTIFICATION SERVICE] 🎯 Desafio:', invitation.challenge.title);
+
+  return createNotification({
+    userId: invitation.toUserId,
+    type: 'CHALLENGE_INVITE',
+    title: '🎯 Novo Desafio!',
+    message: `${invitation.fromUser.name} desafiou você em "${invitation.challenge.title}"${invitation.message ? ` - ${invitation.message}` : ''}`,
+    data: {
+      type: 'CHALLENGE_INVITE',
+      invitationId: invitation.id,
+      challengeId: invitation.challengeId,
+      challengeTitle: invitation.challenge.title,
+      fromUserId: invitation.fromUserId,
+      fromUserName: invitation.fromUser.name,
+      message: invitation.message,
+    },
+  });
+}
+
+export async function notifyChallengeAccepted(invitation: any) {
+  console.log('[NOTIFICATION SERVICE] ✅ Criando notificação de desafio aceito');
+  console.log('[NOTIFICATION SERVICE] ✅ Para:', invitation.fromUser?.name);
+  console.log('[NOTIFICATION SERVICE] ✅ Desafio:', invitation.challenge?.title);
+
+  // Verifica se tem todas as informações necessárias
+  if (!invitation.toUser || !invitation.fromUser || !invitation.challenge) {
+    console.error('[NOTIFICATION SERVICE] ❌ Dados incompletos para notificação:', {
+      hasToUser: !!invitation.toUser,
+      hasFromUser: !!invitation.fromUser,
+      hasChallenge: !!invitation.challenge,
+    });
+    throw new Error('Dados incompletos para criar notificação');
+  }
+
+  return createNotification({
+    userId: invitation.fromUserId,
+    type: 'CHALLENGE_ACCEPTED',
+    title: '✅ Desafio Aceito!',
+    message: `${invitation.toUser.name} aceitou seu desafio em "${invitation.challenge.title}"!`,
+    data: {
+      type: 'CHALLENGE_ACCEPTED',
+      invitationId: invitation.id,
+      challengeId: invitation.challengeId,
+      challengeTitle: invitation.challenge.title,
+      toUserId: invitation.toUserId,
+      toUserName: invitation.toUser.name,
     },
   });
 }

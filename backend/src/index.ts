@@ -20,6 +20,7 @@ import { logger } from 'hono/logger'; // Mostra logs no terminal de cada requisi
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.js';
 import badgeRoutes from './routes/badge.routes.js';
+import challengeInvitationRoutes from './routes/challenge-invitation.routes.js';
 import challengeRoutes from './routes/challenge.routes.js';
 import feedRoutes from './routes/feed.routes.js';
 import friendRoutes from './routes/friend.routes.js';
@@ -90,6 +91,9 @@ app.route('/user', userRoutes);
 
 // Registra as rotas de desafios (/challenges/daily, /challenges/:id/complete)
 app.route('/challenges', challengeRoutes);
+
+// Registra as rotas de convites de desafios (/challenge-invitations)
+app.route('/challenge-invitations', challengeInvitationRoutes);
 
 // Registra as rotas de badges (/badges/all, /badges/user, /badges/progress)
 app.route('/badges', badgeRoutes);

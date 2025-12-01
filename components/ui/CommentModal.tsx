@@ -2,24 +2,30 @@
  * ============================================
  * COMMENT MODAL - MODAL DE COMENTÁRIOS
  * ============================================
+ * 
+ * Modal otimizada com KeyboardAwareScrollView para:
+ * - Teclado que move conteúdo automaticamente
+ * - Safe Area nativa Android/iOS
+ * - Performance e simplicidade
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedComment, feedInteractionsService } from '../../services/feedInteractions';
 import { Avatar } from './Avatar';
 
@@ -36,11 +42,16 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (visible) {
       loadComments();
+    } else {
+      // Limpar estado ao fechar
+      setNewComment('');
+      Keyboard.dismiss();
     }
   }, [visible, activityId]);
 
@@ -98,32 +109,44 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
       transparent={true}
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          style={styles.overlay}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Removendo deslocamento desnecessário
-        >
-          <View style={styles.container}>
+      <View style={styles.flex}>
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+            style={styles.modalContainer}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+          >
             {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>Comentários</Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity 
+                onPress={onClose} 
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <Ionicons name="close" size={28} color="#666" />
               </TouchableOpacity>
             </View>
 
-            {/* Lista de comentários */}
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#20B2AA" />
-              </View>
-            ) : (
-              <FlatList
-                data={comments}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.commentItem}>
+            {/* Conteúdo Scrollável */}
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={true}
+            >
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#20B2AA" />
+                </View>
+              ) : comments.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="chatbubble-outline" size={48} color="#CCC" />
+                  <Text style={styles.emptyText}>Nenhum comentário ainda</Text>
+                  <Text style={styles.emptySubtext}>Seja o primeiro a comentar!</Text>
+                </View>
+              ) : (
+                comments.map((item) => (
+                  <View key={item.id} style={styles.commentItem}>
                     <Avatar
                       imageUrl={item.user.avatarUrl}
                       initials={item.user.name.substring(0, 2)}
@@ -139,27 +162,24 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
                       <Text style={styles.commentText}>{item.content}</Text>
                     </View>
                   </View>
-                )}
-                ListEmptyComponent={
-                  <View style={styles.emptyContainer}>
-                    <Ionicons name="chatbubble-outline" size={48} color="#CCC" />
-                    <Text style={styles.emptyText}>Nenhum comentário ainda</Text>
-                    <Text style={styles.emptySubtext}>Seja o primeiro a comentar!</Text>
-                  </View>
-                }
-                contentContainerStyle={styles.listContent}
-              />
-            )}
+                ))
+              )}
+            </ScrollView>
 
-            {/* Input de comentário */}
-            <View style={styles.inputContainer}>
+            {/* Input de comentário - fixo no bottom */}
+            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom - 8, 8) }]}>
               <TextInput
+                ref={inputRef}
                 style={styles.input}
                 placeholder="Escreva um comentário..."
+                placeholderTextColor="#999"
                 value={newComment}
                 onChangeText={setNewComment}
                 multiline
                 maxLength={500}
+                returnKeyType="send"
+                blurOnSubmit={false}
+                onSubmitEditing={handleSendComment}
               />
               <TouchableOpacity
                 style={[styles.sendButton, (!newComment.trim() || sending) && styles.sendButtonDisabled]}
@@ -173,53 +193,76 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+          </KeyboardAvoidingView>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  flex: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  overlay: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  container: {
+  modalContainer: {
     backgroundColor: '#FFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: '80%',
+    maxHeight: '80%',
+    minHeight: 400,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
+    backgroundColor: '#FFF',
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1A1A1A',
   },
-  loadingContainer: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 0,
+  },
+  loadingContainer: {
+    paddingVertical: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  listContent: {
-    padding: 16,
-    flexGrow: 1,
+  emptyContainer: {
+    paddingVertical: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#999',
+    marginTop: 12,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#CCC',
+    marginTop: 4,
   },
   commentItem: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   commentContent: {
     flex: 1,
@@ -228,6 +271,7 @@ const styles = StyleSheet.create({
   commentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
   commentAuthor: {
@@ -244,29 +288,14 @@ const styles = StyleSheet.create({
     color: '#333',
     lineHeight: 20,
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#999',
-    marginTop: 12,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#CCC',
-    marginTop: 4,
-  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#EEE',
+    backgroundColor: '#FFF',
   },
   input: {
     flex: 1,
@@ -274,8 +303,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
+    paddingTop: 10,
     maxHeight: 100,
     fontSize: 14,
+    color: '#1A1A1A',
   },
   sendButton: {
     backgroundColor: '#20B2AA',
@@ -284,7 +315,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: 10,
   },
   sendButtonDisabled: {
     backgroundColor: '#CCC',

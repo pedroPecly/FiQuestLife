@@ -1,6 +1,7 @@
 import { FriendshipStatus } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { validateSearchTerm } from '../utils/validation.js';
+import { handleSocialEvent } from './auto-verify.service.js';
 import { notifyFriendAccepted, notifyFriendRequest } from './notification.service.js';
 
 const MAX_FRIENDS = 500;
@@ -219,6 +220,15 @@ export async function acceptFriendRequest(userId: string, requestId: string) {
     } catch (error) {
       console.error('[FRIEND SERVICE] Erro ao criar notificação de friend accepted:', error);
     }
+
+    // Verifica e completa desafios auto-verificáveis para ambos usuários
+    // (ex: "Conecte-se com um Novo Amigo")
+    handleSocialEvent(request.senderId, 'FRIENDSHIP_CREATED').catch((error) => {
+      console.error('[FRIEND SERVICE] Erro ao verificar desafios automáticos (sender):', error);
+    });
+    handleSocialEvent(userId, 'FRIENDSHIP_CREATED').catch((error) => {
+      console.error('[FRIEND SERVICE] Erro ao verificar desafios automáticos (receiver):', error);
+    });
   }
 
   return result;

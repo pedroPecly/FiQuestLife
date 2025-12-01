@@ -37,6 +37,8 @@ model User {
   userChallenges         UserChallenge[]
   activityLikes          ActivityLike[]
   activityComments       ActivityComment[]
+  sentChallengeInvites   ChallengeInvitation[] @relation("SentInvites")
+  receivedChallengeInvites ChallengeInvitation[] @relation("ReceivedInvites")
 
   @@map("users")
 }
@@ -58,9 +60,12 @@ model Challenge {
   isActive       Boolean             @default(true) @map("is_active")
   frequency      ChallengeFrequency  @default(DAILY)
   requiresPhoto  Boolean             @default(false) @map("requires_photo")
+  autoVerifiable Boolean             @default(false) @map("auto_verifiable")
+  verificationEvent String?          @map("verification_event")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
   userChallenges UserChallenge[]
+  challengeInvitations ChallengeInvitation[]
 
   @@map("challenges")
 }
@@ -88,6 +93,7 @@ model UserChallenge {
   caption     String?
   challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeInvitation ChallengeInvitation?
 
   @@unique([userId, challengeId, assignedAt])
   @@index([userId, status])
@@ -107,11 +113,17 @@ model Badge {
   id               String               @id @default(uuid())
   name             String               @unique
   description      String
-  imageUrl         String               @map("image_url")
+  imageUrl         String?              @map("image_url")
   category         BadgeCategory
   rarity           BadgeRarity          @default(COMMON)
   requirementType  BadgeRequirementType @map("requirement_type")
   requirementValue Int                  @map("requirement_value")
+  requiredCount    Int?                 @map("required_count")
+  event            String?
+  requirement      String?
+  icon             String?
+  xpReward         Int                  @default(0) @map("xp_reward")
+  coinsReward      Int                  @default(0) @map("coins_reward")
   isActive         Boolean              @default(true) @map("is_active")
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
@@ -244,6 +256,35 @@ model ActivityComment {
 }
 
 /// *
+/// * Convites de Desafios Entre Amigos
+/// * 
+/// * Permite que usuários desafiem amigos em desafios específicos.
+/// * O amigo recebe notificação e o desafio aparece marcado como "Desafiado por X".
+/// * Se o amigo já tem o desafio, vincula ao existente. Se não, cria um novo como extra.
+model ChallengeInvitation {
+  id              String                    @id @default(uuid())
+  fromUserId      String                    @map("from_user_id")
+  toUserId        String                    @map("to_user_id")
+  challengeId     String                    @map("challenge_id")
+  userChallengeId String?                   @unique @map("user_challenge_id")
+  date            DateTime                  @default(now())
+  status          ChallengeInvitationStatus @default(PENDING)
+  message         String?
+  createdAt       DateTime                  @default(now()) @map("created_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
+  fromUser        User                      @relation("SentInvites", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser          User                      @relation("ReceivedInvites", fields: [toUserId], references: [id], onDelete: Cascade)
+  challenge       Challenge                 @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userChallenge   UserChallenge?            @relation(fields: [userChallengeId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, challengeId, date])
+  @@index([toUserId, status])
+  @@index([fromUserId])
+  @@index([date])
+  @@map("challenge_invitations")
+}
+
+/// *
 /// * Categorias de desafios disponíveis
 /// * Organiza os desafios por área da vida
 enum ChallengeCategory {
@@ -297,6 +338,7 @@ enum BadgeCategory {
   SPECIAL
   SEASONAL
   ACHIEVEMENT
+  SOCIAL
 }
 
 /// *
@@ -310,6 +352,7 @@ enum BadgeRequirementType {
   SPECIFIC_CHALLENGE
   CATEGORY_MASTER
   SOCIAL_INTERACTION
+  EVENT_COUNT
 }
 
 /// *
@@ -340,4 +383,14 @@ enum FriendshipStatus {
   ACCEPTED
   REJECTED
   BLOCKED
+}
+
+/// *
+/// * Status de convite de desafio
+/// * Define o estado atual do convite
+enum ChallengeInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
 }

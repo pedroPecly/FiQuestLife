@@ -10,6 +10,7 @@
  */
 
 import { Hono } from 'hono';
+import { challengeInvitationController } from '../controllers/challenge-invitation.controller.js';
 import {
     completeChallengeById,
     getAllChallengesController,
@@ -28,6 +29,12 @@ challengeRoutes.use('*', authMiddleware);
  * Busca ou atribui desafios diários
  */
 challengeRoutes.get('/daily', getDailyChallenges);
+
+/**
+ * POST /challenges/:id/invite
+ * Convida um amigo para um desafio
+ */
+challengeRoutes.post('/:id/invite', challengeInvitationController.createInvite);
 
 /**
  * POST /challenges/:id/complete
