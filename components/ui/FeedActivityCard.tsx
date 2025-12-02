@@ -88,6 +88,9 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [liking, setLiking] = useState(false);
   
+  // Verifica se é um desafio vindo de convite
+  const isFromInvitation = activity.type === 'CHALLENGE_COMPLETED' && activity.invitedBy;
+  
   // Sincronizar estado quando activity prop mudar (após refreshStats)
   useEffect(() => {
     setLiked(activity.isLikedByUser || false);
@@ -159,9 +162,13 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
   return (
     <View style={[
       styles.container,
-      isHighlighted && styles.highlighted
+      isHighlighted && styles.highlighted,
+      isFromInvitation && styles.invitationCard,
     ]}>
-      <View style={[styles.colorStrip, { backgroundColor: bgColor }]} />
+      <View style={[
+        styles.colorStrip, 
+        { backgroundColor: isFromInvitation ? '#FF6B35' : bgColor }
+      ]} />
       <View style={styles.iconBadge}>{getActivityIcon(activity.type)}</View>
       <View style={styles.content}>
         <TouchableOpacity 
@@ -181,6 +188,17 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
             <Text style={styles.timeAgo}>{getTimeAgo(activity.createdAt)}</Text>
           </View>
         </TouchableOpacity>
+        
+        {/* Badge de "Desafiado por X" */}
+        {isFromInvitation && activity.invitedBy && (
+          <View style={styles.invitationBadge}>
+            <Ionicons name="trophy" size={16} color="#FF6B35" />
+            <Text style={styles.invitationText}>
+              Desafiado por <Text style={styles.invitationName}>@{activity.invitedBy.username}</Text>
+            </Text>
+          </View>
+        )}
+        
         <Text style={styles.description}>{String(activity.description)}</Text>
         {metaText.length > 0 && (
           <Text style={[styles.metadata, { color: metaColor }]}>{metaText}</Text>
@@ -294,6 +312,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+  invitationCard: {
+    borderColor: '#FF6B35',
+    borderWidth: 2,
+    backgroundColor: '#FFF5F2',
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 5,
+  },
   colorStrip: {
     position: 'absolute',
     left: 0,
@@ -354,6 +382,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textSecondary,
     marginTop: 2,
+  },
+  invitationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: '#FF6B35',
+    alignSelf: 'flex-start',
+  },
+  invitationText: {
+    fontSize: 13,
+    color: '#666',
+    marginLeft: 6,
+    fontWeight: '500',
+  },
+  invitationName: {
+    color: '#FF6B35',
+    fontWeight: '700',
   },
   description: {
     fontSize: 14,

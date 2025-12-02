@@ -38,6 +38,13 @@ export interface FeedActivity {
   likesCount?: number;
   commentsCount?: number;
   isLikedByUser?: boolean;
+  // Informação de convite de desafio
+  invitedBy?: {
+    id: string;
+    name: string;
+    username: string;
+    avatarUrl: string | null;
+  } | null;
 }
 
 // ============================================

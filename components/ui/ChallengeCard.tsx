@@ -1,11 +1,11 @@
 import { useAlert } from '@/hooks/useAlert';
 import {
-    CATEGORY_COLORS,
-    CATEGORY_ICONS,
-    CATEGORY_LABELS,
-    DIFFICULTY_COLORS,
-    DIFFICULTY_LABELS,
-    UserChallenge,
+  CATEGORY_COLORS,
+  CATEGORY_ICONS,
+  CATEGORY_LABELS,
+  DIFFICULTY_COLORS,
+  DIFFICULTY_LABELS,
+  UserChallenge,
 } from '@/services/challenge';
 import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/challengeInvitation';
 import { Ionicons } from '@expo/vector-icons';
@@ -96,16 +96,6 @@ export default function ChallengeCard({
   return (
     <>
       <View style={[styles.container, isCompleted && styles.completedContainer]}>
-        {/* Badge de desafio recebido de amigo */}
-        {invitation && (
-          <View style={styles.inviteBadge}>
-            <Ionicons name="person" size={12} color="#FFF" />
-            <Text style={styles.inviteBadgeText}>
-              Desafiado por {invitation.fromUser?.name}
-            </Text>
-          </View>
-        )}
-
         {/* Header com categorias e dificuldade */}
         <View style={styles.header}>
           <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
@@ -116,6 +106,16 @@ export default function ChallengeCard({
           <View style={[styles.difficultyBadge, { backgroundColor: difficultyColor }]}>
             <Text style={styles.difficultyText}>{difficultyLabel}</Text>
           </View>
+
+          {/* Badge de desafio recebido de amigo - ao lado da dificuldade */}
+          {invitation && (
+            <View style={styles.inviteBadge}>
+              <Ionicons name="trophy" size={12} color="#FF6B35" />
+              <Text style={styles.inviteBadgeText}>
+                desafiado por @{invitation.fromUser?.username}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Título e descrição */}
@@ -248,28 +248,28 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   inviteBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#20B2AA',
+    backgroundColor: '#FFF',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#FF6B35',
     gap: 4,
-    zIndex: 10,
+    marginLeft: 8,
   },
   inviteBadgeText: {
-    color: '#FFF',
+    color: '#FF6B35',
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   categoryBadge: {
     flexDirection: 'row',

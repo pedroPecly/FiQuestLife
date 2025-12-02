@@ -55,7 +55,6 @@
         {
           "icon": "./assets/images/logo.jpeg",
           "color": "#20B2AA",
-          "sounds": ["./assets/sounds/notification.wav"],
           "mode": "production",
           "android": {
             "icon": "./assets/images/logo.jpeg",

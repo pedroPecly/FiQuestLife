@@ -702,6 +702,33 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
       userChallenges.map(uc => [uc.id, uc])
     );
 
+    // Buscar convites associados aos UserChallenges (para saber se foi desafiado por alguém)
+    const invitations = challengeCompletionIds.length > 0
+      ? await prisma.challengeInvitation.findMany({
+          where: {
+            userChallengeId: { in: challengeCompletionIds },
+            status: 'ACCEPTED', // Apenas convites aceitos
+          },
+          select: {
+            userChallengeId: true,
+            fromUser: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        })
+      : [];
+
+    const invitationMap = new Map(
+      invitations.map(inv => [inv.userChallengeId, inv])
+    );
+
+    console.log('[FEED SERVICE] 🎯 Convites encontrados:', invitations.length);
+
     // Agrupar por sourceId (unificar XP + Moedas de uma mesma tarefa)
     const groupedMap = new Map<string, any>();
     
@@ -797,7 +824,25 @@ export async function getFriendActivity(userId: string, limit: number = 20, offs
         createdAt: activity.createdAt.toISOString(),
         xpReward: activity.xpAmount, // XP total (somado)
         coinsReward: activity.coinsAmount, // Moedas total (somado)
+        invitedBy: null as any, // Será preenchido se houver convite
       };
+
+      // Se for um desafio completado e houver um convite vinculado, incluir informação de quem desafiou
+      if (activity.source === 'CHALLENGE_COMPLETION' && activity.sourceId) {
+        const invitation = invitationMap.get(activity.sourceId);
+        if (invitation?.fromUser) {
+          result.invitedBy = {
+            id: invitation.fromUser.id,
+            name: invitation.fromUser.name,
+            username: invitation.fromUser.username,
+            avatarUrl: invitation.fromUser.avatarUrl,
+          };
+          console.log('[FEED SERVICE] 🎯 Desafio com convite detectado:', {
+            activityId: result.id,
+            invitedBy: result.invitedBy.name,
+          });
+        }
+      }
 
       // Log detalhado para debug
       if (activity.photoUrl) {

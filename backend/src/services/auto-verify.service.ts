@@ -104,8 +104,8 @@ export const verifyAndCompleteChallenge = async (
                 userId,
                 type: 'XP',
                 amount: challenge.xpReward,
-                source: 'CHALLENGE_COMPLETED',
-                sourceId: challenge.id,
+                source: 'CHALLENGE_COMPLETION',
+                sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
                 description: `Desafio "${challenge.title}" completado automaticamente`,
               },
             });
@@ -117,8 +117,8 @@ export const verifyAndCompleteChallenge = async (
                 userId,
                 type: 'COINS',
                 amount: challenge.coinsReward,
-                source: 'CHALLENGE_COMPLETED',
-                sourceId: challenge.id,
+                source: 'CHALLENGE_COMPLETION',
+                sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
                 description: `Desafio "${challenge.title}" completado automaticamente`,
               },
             });

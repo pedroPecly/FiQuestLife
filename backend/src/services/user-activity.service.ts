@@ -86,6 +86,34 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
     console.log('[USER ACTIVITY SERVICE] 📦 UserChallenges encontrados:', userChallenges.length);
     console.log('[USER ACTIVITY SERVICE] 📸 UserChallenges com foto:', userChallenges.filter(uc => uc.photoUrl).length);
 
+    // Buscar convites de desafios para as atividades de CHALLENGE_COMPLETION
+    const invitations = challengeCompletionIds.length > 0
+      ? await prisma.challengeInvitation.findMany({
+          where: {
+            userChallengeId: { in: challengeCompletionIds },
+            status: 'ACCEPTED',
+          },
+          select: {
+            userChallengeId: true,
+            fromUser: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        })
+      : [];
+
+    console.log('[USER ACTIVITY SERVICE] 🎯 Convites encontrados:', invitations.length);
+
+    // Criar mapa de convites para acesso rápido
+    const invitationMap = new Map(
+      invitations.map(inv => [inv.userChallengeId, inv])
+    );
+
     // Criar mapa de UserChallenges para acesso rápido
     const userChallengeMap = new Map(
       userChallenges.map(uc => [uc.id, uc])
@@ -206,7 +234,21 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
         createdAt: activity.createdAt.toISOString(),
         xpReward: activity.xpAmount, // XP total (somado)
         coinsReward: activity.coinsAmount, // Moedas total (somado)
+        invitedBy: null as any,
       };
+
+      // Adicionar informação de convite se existir
+      if (activity.source === 'CHALLENGE_COMPLETION' && activity.sourceId) {
+        const invitation = invitationMap.get(activity.sourceId);
+        if (invitation?.fromUser) {
+          result.invitedBy = {
+            id: invitation.fromUser.id,
+            name: invitation.fromUser.name,
+            username: invitation.fromUser.username,
+            avatarUrl: invitation.fromUser.avatarUrl,
+          };
+        }
+      }
 
       // Log detalhado para debug
       if (activity.photoUrl) {

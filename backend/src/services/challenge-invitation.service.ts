@@ -307,7 +307,8 @@ export const acceptChallengeInvitation = async (invitationId: string, userId: st
 };
 
 /**
- * Rejeita um convite de desafio
+ * Rejeita um convite de desafio e o deleta do banco
+ * Convites rejeitados não precisam ser mantidos
  */
 export const rejectChallengeInvitation = async (invitationId: string, userId: string) => {
   const invitation = await prisma.challengeInvitation.findUnique({
@@ -326,21 +327,13 @@ export const rejectChallengeInvitation = async (invitationId: string, userId: st
     throw new Error('Este convite já foi processado');
   }
 
-  return prisma.challengeInvitation.update({
+  // Deleta o convite ao invés de marcar como REJECTED
+  // Convites rejeitados não precisam histórico
+  await prisma.challengeInvitation.delete({
     where: { id: invitationId },
-    data: { status: ChallengeInvitationStatus.REJECTED },
-    include: {
-      challenge: true,
-      fromUser: {
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          avatarUrl: true,
-        },
-      },
-    },
   });
+
+  return { success: true, message: 'Convite rejeitado' };
 };
 
 /**
@@ -430,4 +423,64 @@ export const getChallengeInvitationByUserChallenge = async (userChallengeId: str
       },
     },
   });
+};
+
+/**
+ * Limpa convites aceitos após o desafio ser completado
+ * Mantém o registro apenas durante o período ativo do desafio
+ * Depois de 7 dias da conclusão, o convite pode ser deletado
+ */
+export const cleanupCompletedInvitations = async () => {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  // Busca convites aceitos cujo UserChallenge foi completado há mais de 7 dias
+  const completedInvitations = await prisma.challengeInvitation.findMany({
+    where: {
+      status: ChallengeInvitationStatus.ACCEPTED,
+      userChallenge: {
+        status: 'COMPLETED',
+        completedAt: {
+          lt: sevenDaysAgo,
+        },
+      },
+    },
+    select: { id: true },
+  });
+
+  if (completedInvitations.length > 0) {
+    const deletedCount = await prisma.challengeInvitation.deleteMany({
+      where: {
+        id: {
+          in: completedInvitations.map(inv => inv.id),
+        },
+      },
+    });
+
+    console.log(`[CLEANUP] 🧹 Deletados ${deletedCount.count} convites de desafios completados`);
+    return deletedCount.count;
+  }
+
+  return 0;
+};
+
+/**
+ * Limpa convites pendentes expirados (mais de 7 dias)
+ * Convites não respondidos após 7 dias podem ser deletados
+ */
+export const cleanupExpiredInvitations = async () => {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const deletedCount = await prisma.challengeInvitation.deleteMany({
+    where: {
+      status: ChallengeInvitationStatus.PENDING,
+      createdAt: {
+        lt: sevenDaysAgo,
+      },
+    },
+  });
+
+  console.log(`[CLEANUP] 🧹 Deletados ${deletedCount.count} convites pendentes expirados`);
+  return deletedCount.count;
 };

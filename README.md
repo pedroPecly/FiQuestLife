@@ -414,6 +414,41 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Dezembro de 2025**
+- ✅ **Sistema de Identificação de Convites no Feed** (02/12/2025)
+  - **Badge visual "Desafiado por @usuario"** em posts que vieram de convites:
+    - Aparece no feed de amigos (FeedActivityCard)
+    - Aparece em "Meus Posts" (tab Explorar)
+    - Badge compacto com ícone de troféu 🏆 e borda laranja
+    - Posicionado ao lado do tipo do desafio para layout harmonioso
+  - **Distinção visual no ChallengeCard:**
+    - Badge "desafiado por @usuario" integrado ao header
+    - Layout flexível com categoria, dificuldade e badge de convite
+    - Estilo consistente (branco com borda laranja)
+  - **Backend otimizado:**
+    - friend.service.ts: busca ChallengeInvitation com status ACCEPTED
+    - user-activity.service.ts: inclui invitedBy nos "Meus Posts"
+    - Queries eficientes com Map para lookup O(1)
+    - Campo invitedBy opcional na interface FeedActivity
+  - **Sistema de limpeza de convites implementado:**
+    - Convites rejeitados → Deletados imediatamente (não ocupa espaço)
+    - Convites aceitos + desafio completado > 7 dias → Deletados automaticamente
+    - Convites pendentes > 7 dias → Deletados automaticamente
+    - Job de limpeza: cleanup-invitations.job.ts (execução manual/agendada)
+    - Rota /challenge-invitations/cleanup para admin
+    - Documentação completa: INVITATIONS_CLEANUP_STRATEGY.md
+    - Reduz crescimento da tabela de ~12k/ano para ~50-200 registros ativos
+  - **Bug crítico corrigido:** Desafios auto-verificáveis não apareciam no feed
+    - Causa: auto-verify.service.ts usava source "CHALLENGE_COMPLETED" (errado)
+    - Correção: Mudado para "CHALLENGE_COMPLETION" (nomenclatura correta)
+    - Correção: sourceId agora usa userChallenge.id ao invés de challenge.id
+    - Impacto: Agora todas as atividades auto-verificáveis aparecem no feed
+  - **Segurança e profissionalismo:**
+    - Todas as queries com Prisma ORM (previne SQL Injection)
+    - Validações de permissão adequadas
+    - Performance otimizada com índices e Maps
+    - Dados críticos (UserChallenge, RewardHistory) preservados
+    - Sistema de archive opcional para histórico de longo prazo
+
 - ✅ **Sistema de Auto-Verificação e Badges Progressivos** (01/12/2025)
   - **7 desafios sociais auto-verificáveis** que completam automaticamente:
     - Enviar convite de desafio (CHALLENGE_INVITE_SENT)

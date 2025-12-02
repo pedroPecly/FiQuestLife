@@ -15,6 +15,7 @@ export interface Challenge {
   frequency: ChallengeFrequency;
   isActive: boolean;
   requiresPhoto: boolean;
+  autoVerifiable?: boolean;
   createdAt: string;
   updatedAt: string;
 }
