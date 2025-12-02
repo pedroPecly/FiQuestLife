@@ -340,9 +340,6 @@ export const checkAndAwardBadges = async (
             // Auditoria falhou mas badge foi concedida - apenas loga
             console.error(`[BADGE-CHECK] Erro na auditoria (badge concedida):`, auditError.message);
           }
-            // Auditoria falhou mas badge foi concedida - apenas loga
-            console.error(`[BADGE-CHECK] Erro na auditoria (badge concedida):`, auditError.message);
-          }
 
           console.log(`[BADGE-CHECK] 🏆 Badge "${badge.name}" desbloqueada!`);
           console.log(`[BADGE-CHECK] +${badge.xpReward} XP, +${badge.coinsReward} moedas`);
