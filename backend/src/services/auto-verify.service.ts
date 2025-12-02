@@ -265,72 +265,98 @@ export const checkAndAwardBadges = async (
 
       // Verifica se atingiu o requisito
       if (eventCount >= (badge.requiredCount || 0)) {
-        // Usa transação para evitar race conditions
-        await prisma.$transaction(async (tx) => {
-          // Concede a badge
-          await tx.userBadge.create({
-            data: {
-              userId,
-              badgeId: badge.id,
-            },
+        try {
+          // Operação crítica: apenas badge + update de user (RÁPIDA)
+          await prisma.$transaction(async (tx) => {
+            // Double-check: evita race condition
+            const exists = await tx.userBadge.findUnique({
+              where: {
+                userId_badgeId: { userId, badgeId: badge.id },
+              },
+            });
+
+            if (exists) {
+              console.log(`[BADGE-CHECK] Badge já existe (race condition evitada): ${badge.name}`);
+              return;
+            }
+
+            // 1. Concede a badge
+            await tx.userBadge.create({
+              data: { userId, badgeId: badge.id },
+            });
+
+            // 2. Atualiza XP e moedas (incremento atômico)
+            if (badge.xpReward > 0 || badge.coinsReward > 0) {
+              await tx.user.update({
+                where: { id: userId },
+                data: {
+                  xp: { increment: badge.xpReward },
+                  coins: { increment: badge.coinsReward },
+                },
+              });
+            }
           });
 
-          // Adiciona recompensas
-          if (badge.xpReward > 0 || badge.coinsReward > 0) {
-            await tx.user.update({
-              where: { id: userId },
-              data: {
-                xp: { increment: badge.xpReward },
-                coins: { increment: badge.coinsReward },
-              },
-            });
-          }
-
-          // Registra no histórico de recompensas
-          await tx.rewardHistory.create({
-            data: {
-              userId,
-              type: 'BADGE',
-              amount: 1,
-              source: 'BADGE_EARNED',
-              sourceId: badge.id,
-              description: `Badge "${badge.name}" desbloqueada`,
-            },
-          });
-
-          if (badge.xpReward > 0) {
-            await tx.rewardHistory.create({
+          // Registros de auditoria FORA da transação (não-críticos)
+          // Se falharem, não afetam a concessão da badge
+          try {
+            await prisma.rewardHistory.create({
               data: {
                 userId,
-                type: 'XP',
-                amount: badge.xpReward,
+                type: 'BADGE',
+                amount: 1,
                 source: 'BADGE_EARNED',
                 sourceId: badge.id,
-                description: `Recompensa por badge "${badge.name}"`,
+                description: `Badge "${badge.name}" desbloqueada`,
               },
             });
+
+            if (badge.xpReward > 0) {
+              await prisma.rewardHistory.create({
+                data: {
+                  userId,
+                  type: 'XP',
+                  amount: badge.xpReward,
+                  source: 'BADGE_EARNED',
+                  sourceId: badge.id,
+                  description: `Recompensa por badge "${badge.name}"`,
+                },
+              });
+            }
+
+            if (badge.coinsReward > 0) {
+              await prisma.rewardHistory.create({
+                data: {
+                  userId,
+                  type: 'COINS',
+                  amount: badge.coinsReward,
+                  source: 'BADGE_EARNED',
+                  sourceId: badge.id,
+                  description: `Recompensa por badge "${badge.name}"`,
+                },
+              });
+            }
+          } catch (auditError: any) {
+            // Auditoria falhou mas badge foi concedida - apenas loga
+            console.error(`[BADGE-CHECK] Erro na auditoria (badge concedida):`, auditError.message);
+          }
+            // Auditoria falhou mas badge foi concedida - apenas loga
+            console.error(`[BADGE-CHECK] Erro na auditoria (badge concedida):`, auditError.message);
           }
 
-          if (badge.coinsReward > 0) {
-            await tx.rewardHistory.create({
-              data: {
-                userId,
-                type: 'COINS',
-                amount: badge.coinsReward,
-                source: 'BADGE_EARNED',
-                sourceId: badge.id,
-                description: `Recompensa por badge "${badge.name}"`,
-              },
-            });
+          console.log(`[BADGE-CHECK] 🏆 Badge "${badge.name}" desbloqueada!`);
+          console.log(`[BADGE-CHECK] +${badge.xpReward} XP, +${badge.coinsReward} moedas`);
+
+          // Dispara evento recursivo para badges de badges (assíncrono, não bloqueia)
+          if (eventName !== 'BADGE_EARNED') {
+            // Fire-and-forget: não aguarda para não aumentar latência
+            checkAndAwardBadges(userId, 'BADGE_EARNED').catch((err) =>
+              console.error('[BADGE-CHECK] Erro no evento recursivo:', err.message)
+            );
           }
-        });
-
-        console.log(`[BADGE-CHECK] 🏆 Badge "${badge.name}" desbloqueada!`);
-        console.log(`[BADGE-CHECK] +${badge.xpReward} XP, +${badge.coinsReward} moedas`);
-
-        // Dispara evento recursivo para badges de badges
-        if (eventName !== 'BADGE_EARNED') {
-          await checkAndAwardBadges(userId, 'BADGE_EARNED');
+        } catch (error: any) {
+          // Falha crítica na concessão da badge
+          console.error(`[BADGE-CHECK] Erro ao conceder badge "${badge.name}":`, error.message);
         }
       }
     }
