@@ -14,8 +14,10 @@
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:seed-challenges": "tsx prisma/seed-challenges.ts",
+    "prisma:seed-shop": "tsx prisma/seed-shop.ts",
     "prisma:add-challenges": "tsx prisma/add-challenges.ts",
-    "prisma:add-badges": "tsx prisma/add-badges.ts"
+    "prisma:add-badges": "tsx prisma/add-badges.ts",
+    "test:shop": "tsx src/tests/shop.service.test.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

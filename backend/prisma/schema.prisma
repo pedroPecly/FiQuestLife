@@ -39,6 +39,9 @@ model User {
   activityComments       ActivityComment[]
   sentChallengeInvites   ChallengeInvitation[] @relation("SentInvites")
   receivedChallengeInvites ChallengeInvitation[] @relation("ReceivedInvites")
+  inventory              UserInventory[]
+  purchases              Purchase[]
+  activeBoosts           ActiveBoost[]
 
   @@map("users")
 }
@@ -393,4 +396,132 @@ enum ChallengeInvitationStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+}
+
+/// *
+/// * Tipos de itens da loja
+/// * Define o comportamento do item no sistema
+enum ShopItemType {
+  COSMETIC   // Não expira, pode equipar/desequipar
+  CONSUMABLE // Uso único, decrementa quantidade
+  BOOST      // Temporário, cria ActiveBoost
+  PACK       // Pacote de múltiplos itens
+}
+
+/// *
+/// * Raridade dos itens da loja
+/// * Define o valor e exclusividade do item
+enum ShopItemRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+/// *
+/// * Catálogo de Itens da Loja
+/// * 
+/// * Define todos os itens disponíveis para compra com FiCoins.
+/// * Exemplos:
+/// * - Moldura dourada para avatar (COSMETIC, EPIC, 250 coins)
+/// * - Boost XP +50% 24h (BOOST, RARE, 200 coins)
+/// * - Proteção de Streak (CONSUMABLE, LEGENDARY, 400 coins)
+model ShopItem {
+  id          String         @id @default(uuid())
+  sku         String         @unique
+  title       String
+  description String
+  price       Int
+  type        ShopItemType
+  category    String?
+  rarity      ShopItemRarity
+  metadata    Json
+  imageUrl    String         @map("image_url")
+  stock       Int?
+  isActive    Boolean        @default(true) @map("is_active")
+  isFeatured  Boolean        @default(false) @map("is_featured")
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  purchases   Purchase[]
+  inventories UserInventory[]
+
+  @@index([type, isActive])
+  @@index([rarity])
+  @@index([isFeatured, order])
+  @@map("shop_items")
+}
+
+/// *
+/// * Inventário do Usuário
+/// * 
+/// * Registra todos os itens que o usuário possui.
+/// * Para consumíveis: quantity > 1 (pode empilhar)
+/// * Para cosméticos: isEquipped define se está ativo
+/// * Para boosts: ao usar, cria ActiveBoost
+model UserInventory {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  itemId     String   @map("item_id")
+  quantity   Int      @default(1)
+  isEquipped Boolean  @default(false) @map("is_equipped")
+  metadata   Json?
+  acquiredAt DateTime @default(now()) @map("acquired_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item       ShopItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, itemId])
+  @@index([userId, isEquipped])
+  @@map("user_inventory")
+}
+
+/// *
+/// * Histórico de Compras
+/// * 
+/// * Registra todas as compras feitas na loja para auditoria.
+/// * Salva o preço pago (pode mudar no futuro) e saldo antes/depois.
+/// * Imutável - nunca deve ser deletado.
+model Purchase {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  itemId        String   @map("item_id")
+  quantity      Int      @default(1)
+  price         Int
+  totalCost     Int      @map("total_cost")
+  balanceBefore Int      @map("balance_before")
+  balanceAfter  Int      @map("balance_after")
+  metadata      Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item          ShopItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([itemId])
+  @@map("purchases")
+}
+
+/// *
+/// * Boosts Temporários Ativos
+/// * 
+/// * Registra boosts atualmente ativos do usuário.
+/// * Boosts são criados ao usar item do tipo BOOST.
+/// * Expiram automaticamente após o período definido.
+/// * Exemplos:
+/// * - XP +50% por 24h
+/// * - Coins +20% por 12h
+/// * - Proteção de streak por 1 dia
+model ActiveBoost {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  itemSku   String   @map("item_sku")
+  type      String
+  value     Float
+  expiresAt DateTime @map("expires_at")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive, expiresAt])
+  @@map("active_boosts")
 }

@@ -48,6 +48,41 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Progresso em tempo real e histórico completo
 - Sistema de auto-verificação com eventos rastreados no banco
 
+### **🛒 Loja e Inventário**
+- **Sistema completo de economia virtual:**
+  - Compre itens com moedas ganhas completando desafios
+  - 4 tipos de itens: Cosméticos, Consumíveis, Boosts, Pacotes
+  - 4 níveis de raridade: Comum, Raro, Épico, Lendário
+  - Itens em destaque com badges especiais
+  - Sistema de estoque limitado (opcional)
+- **Loja Profissional:**
+  - Filtros por tipo e raridade
+  - Busca em tempo real (título, descrição, SKU)
+  - Ordenação por preço (mais barato primeiro)
+  - Cards com imagem, preço, raridade e indicador de saldo
+  - Modal de compra com preview e seleção de quantidade
+  - Indicadores visuais (saldo insuficiente, esgotado)
+- **Inventário Gerenciável:**
+  - Visualização de todos os itens possuídos
+  - Filtros por tipo e status (equipado/não equipado)
+  - Ações contextuais: Usar, Equipar, Desequipar
+  - Sistema de boosts ativos com tempo restante
+  - Multiplicadores de XP e moedas aplicados automaticamente
+  - Consumíveis com quantidade gerenciada
+- **Interface Unificada:**
+  - Tabs internas: 🛒 Loja / 🎒 Mochila
+  - Navegação fluida sem reload (telas mantidas montadas)
+  - Saldo de moedas visível em tempo real
+  - Teclado fecha ao clicar fora
+  - Confirmações removidas para UX mais ágil
+- **Backend Robusto:**
+  - Transações atômicas (compra = débito + inventário + auditoria)
+  - Rate limiting anti-spam (5s entre compras do mesmo item)
+  - Validações de saldo e estoque em tempo real
+  - Sistema de auditoria completo (tabela Purchase)
+  - Retry automático em falhas de rede
+  - 7 endpoints RESTful protegidos por autenticação
+
 ### **👥 Social**
 - Feed de atividades dos amigos em tempo real
 - Sistema de upload de fotos para desafios com verificação
@@ -131,9 +166,12 @@ FiQuestLife/
 │   │   ├── EditProfileScreen.tsx # ✏️ Edição de perfil profissional
 │   │   ├── FriendProfileScreen.tsx # 🆕 Perfil de amigo (Sprint 11)
 │   │   ├── FriendsScreen.tsx # 🆕 Tela principal de amigos (Sprint 11)
+│   │   ├── InventoryScreen.tsx # 🆕 Tela de inventário/mochila (Sprint 16)
 │   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
 │   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
-│   │   └── RewardHistoryScreen.tsx # 🆕 Tela de histórico de recompensas (Sprint 10)
+│   │   ├── RewardHistoryScreen.tsx # 🆕 Tela de histórico de recompensas (Sprint 10)
+│   │   ├── ShopAndInventoryScreen.tsx # 🆕 Tela unificada Loja+Inventário (Sprint 16)
+│   │   └── ShopScreen.tsx    # 🆕 Tela da loja de itens (Sprint 16)
 │   ├── styles/                # 🎨 Estilos separados por tela
 │   │   ├── index.ts          # Barrel export
 │   │   ├── login.styles.ts   # Estilos do LoginScreen
@@ -175,6 +213,7 @@ FiQuestLife/
 │   │   ├── FriendRequestCard.tsx # 🆕 Card de solicitação de amizade (Sprint 11)
 │   │   ├── InfoRow.tsx       # Linha de informação (label + valor)
 │   │   ├── Input.tsx         # Input com ícone e multiline + efeitos foco
+│   │   ├── InventoryItemCard.tsx # 🆕 Card de item do inventário (Sprint 16)
 │   │   ├── LeaderboardCard.tsx # 🆕 Card de ranking com posição (Sprint 12)
 │   │   ├── LoadingScreen.tsx # Tela de loading reutilizável
 │   │   ├── LogoutButton.tsx  # Botão de logout com confirmação
@@ -187,6 +226,8 @@ FiQuestLife/
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
 │   │   ├── SelectFriendModal.tsx # 🆕 Modal de seleção de amigo para convite
 │   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações
+│   │   ├── ShopItemCard.tsx  # 🆕 Card de item da loja (Sprint 16)
+│   │   ├── ShopPurchaseModal.tsx # 🆕 Modal de compra da loja (Sprint 16)
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
 │   │   ├── TabBar.tsx        # 🆕 Sistema de abas horizontal reutilizável (Sprint 13)
 │   │   ├── Tag.tsx           # Badge/Tag com ícone
@@ -228,6 +269,7 @@ FiQuestLife/
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
 │   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
+│   ├── shop.ts               # 🆕 Serviço de loja e inventário (Sprint 16)
 │   └── userProfile.ts        # 🆕 Serviço de perfis públicos (Sprint 12)
 │
 ├── constants/                 # 🎨 Constantes e Temas
@@ -251,6 +293,7 @@ FiQuestLife/
 │   │   │   ├── notification.controller.ts # 🆕 Notificações backend (Sprint 13)
 │   │   │   ├── push-token.controller.ts # 🆕 Gerenciamento de tokens push (Sprint 13)
 │   │   │   ├── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
+│   │   │   ├── shop.controller.ts       # 🆕 Loja e inventário (7 endpoints - Sprint 16)
 │   │   │   └── user.controller.ts       # 🆕 Perfis públicos (Sprint 12)
 │   │   ├── services/         # 🔧 Lógica de Negócio
 │   │   │   ├── auto-verify.service.ts   # 🆕 Auto-verificação de desafios sociais (354 linhas)
@@ -262,7 +305,8 @@ FiQuestLife/
 │   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (774 linhas - Sprint 11)
 │   │   │   ├── leaderboard.service.ts   # 🆕 Rankings (Sprint 12)
 │   │   │   ├── notification.service.ts  # 🆕 Notificações com proteção duplicatas (Sprint 13)
-│   │   │   └── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
+│   │   │   ├── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
+│   │   │   └── shop.service.ts          # 🆕 Loja/inventário (7 funções, 775 linhas - Sprint 16)
 │   │   ├── routes/           # 🛣️ Definição de rotas
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
@@ -275,6 +319,7 @@ FiQuestLife/
 │   │   │   ├── notification.routes.ts   # 🆕 Rotas de notificações (protegidas - Sprint 13)
 │   │   │   ├── push-token.routes.ts     # 🆕 Rotas de tokens push (protegidas - Sprint 13)
 │   │   │   ├── reward.ts                # 🆕 Rotas de recompensas (protegidas - Sprint 10)
+│   │   │   ├── shop.routes.ts           # 🆕 Rotas de loja (7 rotas protegidas - Sprint 16)
 │   │   │   └── user.ts                  # Rotas de usuário e perfis públicos (protegidas)
 │   │   ├── middlewares/      # 🔒 Middlewares
 │   │   │   ├── auth.middleware.ts       # Validação JWT
@@ -286,12 +331,12 @@ FiQuestLife/
 │   │   │   └── validation.ts            # 🆕 Validação UUID e sanitização (Sprint 12)
 │   │   └── index.ts          # Entry point do servidor (rotas registradas)
 │   ├── prisma/
-│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (12 models)
+│   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (15 models)
 │   │   ├── seed.ts           # 🌱 Seed de badges (29 badges tradicionais)
 │   │   ├── add-badges.ts     # 🆕 Seed de badges progressivos (18 badges sociais)
 │   │   ├── seed-challenges.ts # 🆕 Seed de desafios (43 desafios base)
 │   │   ├── add-challenges.ts # 🆕 Seed de desafios sociais auto-verificáveis (7 desafios)
-│   │   ├── migrations/       # Histórico de mudanças do DB (11 migrations)
+│   │   ├── migrations/       # Histórico de mudanças do DB (12 migrations)
 │   │   │   ├── migration_lock.toml
 │   │   │   ├── 20251016122028_add_username/
 │   │   │   ├── 20251016131113_add_gamification_fields/
@@ -303,7 +348,8 @@ FiQuestLife/
 │   │   │   ├── 20251201_add_challenge_invitations/ # 🆕 Convites de desafios
 │   │   │   ├── 20251201_add_social_features/ # 🆕 Auto-verificação (autoVerifiable, verificationEvent)
 │   │   │   ├── 20251201_make_imageurl_optional/ # 🆕 Badge.imageUrl opcional
-│   │   │   └── 20251201_add_social_badge_enums/ # 🆕 BadgeCategory.SOCIAL + BadgeRequirementType.EVENT_COUNT
+│   │   │   ├── 20251201_add_social_badge_enums/ # 🆕 BadgeCategory.SOCIAL + BadgeRequirementType.EVENT_COUNT
+│   │   │   └── 20251202_add_shop_system/ # 🆕 Sistema de loja (ShopItem, UserInventory, ActiveBoost, Purchase)
 │   │   └── scripts/
 │   │       └── clear-database.sql # Script para limpar DB
 │   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
@@ -414,6 +460,75 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Dezembro de 2025**
+- ✅ **Sprint 16: Sistema de Loja e Inventário** (02/12/2025)
+  - **Economia Virtual Completa:**
+    - 4 tipos de itens: Cosméticos, Consumíveis, Boosts, Pacotes
+    - 4 níveis de raridade: Comum, Raro, Épico, Lendário
+    - Sistema de preços dinâmico com moedas do jogo
+    - Estoque limitado (opcional) e itens em destaque
+  - **Loja Profissional (ShopScreen):**
+    - Filtros por tipo (🎨 Cosmético, 💊 Consumível, ⚡ Boost, 📦 Pacote)
+    - Filtros por raridade com cores distintivas
+    - Busca em tempo real (título, descrição, SKU)
+    - Ordenação automática por preço (mais barato → mais caro)
+    - Cards com imagens, preços, raridade e indicadores visuais
+    - Modal de compra com preview e seleção de quantidade (1-99)
+    - Indicadores: saldo insuficiente, item esgotado
+    - Teclado fecha ao clicar fora (iOS/Android)
+  - **Inventário Gerenciável (InventoryScreen):**
+    - Visualização de todos os itens possuídos
+    - Filtros por tipo e status (equipado/não equipado)
+    - Quantidade exibida em cada card
+    - Ações contextuais: Usar (consumíveis), Equipar/Desequipar (cosméticos)
+    - Sistema de boosts ativos com countdown de tempo restante
+    - Seção dedicada mostrando boosts ativos e multiplicadores
+  - **Interface Unificada (ShopAndInventoryScreen):**
+    - Tabs internas: 🛒 Loja / 🎒 Mochila
+    - Navegação sem reload (telas mantidas montadas com display:none)
+    - Sombras cross-platform (shadowColor iOS / elevation Android)
+    - Saldo de moedas visível em tempo real
+    - Confirmações de compra/uso removidas para UX ágil
+  - **Backend Production-Ready:**
+    - **Transações atômicas** (Prisma $transaction):
+      1. Validar item e estoque
+      2. Validar saldo do usuário (lock pessimista)
+      3. Decrementar moedas
+      4. Atualizar estoque
+      5. Criar/atualizar inventário
+      6. Registrar compra para auditoria
+    - **Rate limiting anti-spam:** 5 segundos entre compras do mesmo item
+    - **Validações robustas:** SKU, quantidade (1-99), preço, saldo, estoque
+    - **7 endpoints RESTful:**
+      - GET /shop/items (com 6 filtros)
+      - GET /shop/items/:sku
+      - POST /shop/purchase (transação atômica)
+      - GET /shop/inventory (com 2 filtros)
+      - POST /shop/inventory/:id/use
+      - GET /shop/boosts (boosts ativos)
+      - GET /shop/stats (estatísticas de vendas)
+    - **Sistema de auditoria:** tabela Purchase registra todas as transações
+    - **Validações de entrada:** sanitização, limites, tipos corretos
+  - **Frontend com Segurança:**
+    - Validação client-side antes de enviar ao backend
+    - Sanitização de busca (limite 100 caracteres)
+    - Retry automático em falhas de rede (2 tentativas)
+    - Validações de resposta (previne crashes)
+    - React.memo em cards (otimização de performance)
+    - Acessibilidade completa (accessibilityLabel, accessibilityRole)
+  - **Schema do banco atualizado:**
+    - **ShopItem:** 14 campos (sku, title, description, type, rarity, price, metadata, stock, isActive, isFeatured, imageUrl, timestamps)
+    - **UserInventory:** 8 campos (userId, itemId, quantity, isEquipped, metadata, purchasedAt, timestamps)
+    - **ActiveBoost:** 8 campos (userId, itemSku, boostType, multiplier, expiresAt, metadata, timestamps)
+    - **Purchase:** 9 campos (userId, itemId, quantity, unitPrice, totalCost, balanceBefore, balanceAfter, metadata, createdAt)
+    - Enums: ShopItemType (4), ShopItemRarity (4), BoostType (3)
+  - **Componentização Profissional:**
+    - ShopItemCard (275 linhas): card reutilizável com React.memo
+    - ShopPurchaseModal (267 linhas): modal de compra com validações
+    - InventoryItemCard (335 linhas): card com ações contextuais
+    - ShopAndInventoryScreen (90 linhas): wrapper com tabs internas
+  - **Testes:** shop.service.test.ts (265 linhas) com 8 cenários de teste
+  - **Código limpo:** JSDoc completo, TypeScript 100% tipado, sem erros de compilação
+
 - ✅ **Sistema de Identificação de Convites no Feed** (02/12/2025)
   - **Badge visual "Desafiado por @usuario"** em posts que vieram de convites:
     - Aparece no feed de amigos (FeedActivityCard)

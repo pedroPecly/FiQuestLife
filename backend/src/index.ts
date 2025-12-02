@@ -28,6 +28,7 @@ import healthRoutes from './routes/health.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
 import pushTokenRoutes from './routes/push-token.routes.js';
 import rewardRoutes from './routes/reward.js';
+import shopRoutes from './routes/shop.routes.js';
 import userProfileRoutes from './routes/user-profile.routes.js';
 import userRoutes from './routes/user.js';
 
@@ -73,6 +74,10 @@ app.get('/', (c) => {
       friendRequests: '/friends/requests - Solicitações recebidas (requer token)',
       friendSearch: '/friends/search?q=query - Buscar usuários (requer token)',
       friendActivity: '/friends/activity - Atividades dos amigos (requer token)',
+      shop: '/shop/items - Loja de itens (requer token)',
+      shopPurchase: '/shop/purchase - Comprar item (requer token)',
+      shopInventory: '/shop/inventory - Inventário (requer token)',
+      shopBoosts: '/shop/boosts - Boosts ativos (requer token)',
     },
     docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
     authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
@@ -115,6 +120,9 @@ app.route('/leaderboard', leaderboardRoutes);
 
 // Registra as rotas de push token (/push-token)
 app.route('/push-token', pushTokenRoutes);
+
+// Registra as rotas da loja (/shop/items, /shop/purchase, /shop/inventory)
+app.route('/shop', shopRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS
