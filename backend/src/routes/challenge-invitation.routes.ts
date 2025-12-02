@@ -39,9 +39,9 @@ app.post('/cleanup', async (c) => {
   try {
     const result = await runInvitationsCleanup();
     return c.json({ 
+      ...result,
       success: true, 
-      message: 'Limpeza executada com sucesso',
-      ...result 
+      message: 'Limpeza executada com sucesso'
     });
   } catch (error: any) {
     console.error('[CLEANUP ROUTE] Erro:', error);
