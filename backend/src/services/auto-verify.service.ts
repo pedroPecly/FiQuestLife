@@ -76,7 +76,7 @@ export const verifyAndCompleteChallenge = async (
       });
 
       if (userChallenge) {
-        // Usa transação para evitar race conditions
+        // FASE 1: Completa desafio e atualiza recompensas (CRÍTICO - transação rápida)
         await prisma.$transaction(async (tx) => {
           // Completa o desafio automaticamente
           await tx.userChallenge.update({
@@ -96,10 +96,15 @@ export const verifyAndCompleteChallenge = async (
               coins: { increment: challenge.coinsReward },
             },
           });
+        });
 
-          // Registra no histórico de recompensas
+        console.log(`[AUTO-VERIFY] ✅ Desafio "${challenge.title}" completado automaticamente!`);
+        console.log(`[AUTO-VERIFY] +${challenge.xpReward} XP, +${challenge.coinsReward} moedas`);
+
+        // FASE 2: Registra histórico de recompensas (AUDITORIA - separado, não-crítico)
+        try {
           if (challenge.xpReward > 0) {
-            await tx.rewardHistory.create({
+            await prisma.rewardHistory.create({
               data: {
                 userId,
                 type: 'XP',
@@ -112,7 +117,7 @@ export const verifyAndCompleteChallenge = async (
           }
 
           if (challenge.coinsReward > 0) {
-            await tx.rewardHistory.create({
+            await prisma.rewardHistory.create({
               data: {
                 userId,
                 type: 'COINS',
@@ -123,10 +128,10 @@ export const verifyAndCompleteChallenge = async (
               },
             });
           }
-        });
-
-        console.log(`[AUTO-VERIFY] ✅ Desafio "${challenge.title}" completado automaticamente!`);
-        console.log(`[AUTO-VERIFY] +${challenge.xpReward} XP, +${challenge.coinsReward} moedas`);
+        } catch (auditError) {
+          // Falha no histórico não afeta conclusão do desafio
+          console.error('[AUTO-VERIFY] ⚠️ Erro ao registrar histórico (desafio já completado):', auditError);
+        }
       }
     }
   } catch (error) {

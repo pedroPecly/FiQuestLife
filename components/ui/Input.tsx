@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TextInputProps,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -23,11 +24,15 @@ export const Input = forwardRef<TextInput, InputProps>(({
   style,
   onFocus,
   onBlur,
+  secureTextEntry,
   ...props
 }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const internalRef = useRef<TextInput>(null);
   const inputRef = (ref as any) || internalRef;
+
+  const isPasswordField = secureTextEntry === true;
 
   const handleContainerPress = () => {
     if (inputRef.current && props.editable !== false) {
@@ -43,6 +48,10 @@ export const Input = forwardRef<TextInput, InputProps>(({
   const handleBlur = (e: any) => {
     setIsFocused(false);
     if (onBlur) onBlur(e);
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
   };
 
   return (
@@ -81,8 +90,24 @@ export const Input = forwardRef<TextInput, InputProps>(({
           importantForAutofill="no"
           textContentType="none"
           blurOnSubmit={true}
+          secureTextEntry={isPasswordField && !isPasswordVisible}
           {...props}
         />
+        {isPasswordField && (
+          <TouchableOpacity
+            onPress={togglePasswordVisibility}
+            style={styles.eyeButton}
+            accessible={true}
+            accessibilityLabel={isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons
+              name={isPasswordVisible ? 'eye-off' : 'eye'}
+              size={24}
+              color="#888"
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -141,5 +166,9 @@ const styles = StyleSheet.create({
   multilineInput: {
     paddingTop: Platform.OS === 'ios' ? 8 : 5,
     height: '100%',
+  },
+  eyeButton: {
+    padding: 8,
+    marginLeft: 4,
   },
 });
