@@ -1,13 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { forwardRef, useRef, useState } from 'react';
 import {
-  Platform,
-  StyleSheet,
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    Platform,
+    StyleSheet,
+    TextInput,
+    TextInputProps,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 
 interface InputProps extends Omit<TextInputProps, 'style'> {

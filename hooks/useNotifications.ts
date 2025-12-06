@@ -21,6 +21,7 @@ import { getLocalNotifications, saveLocalNotification } from '../services/localN
 import {
     addNotificationReceivedListener,
     addNotificationResponseListener,
+    ensureNotificationChannelExists,
     getNotificationsEnabled,
     requestNotificationPermissions,
     scheduleDailyReminder,
@@ -37,6 +38,66 @@ export function useNotifications() {
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
 
+  /**
+   * Configura notificações ao iniciar app
+   * ORDEM CRÍTICA para APK standalone:
+   * 1. Criar canal Android (obrigatório)
+   * 2. Solicitar permissões
+   * 3. Registrar push token
+   * 4. Agendar lembretes
+   */
+  const setupNotifications = async () => {
+    try {
+      console.log('===============================================');
+      console.log('🔔 INICIANDO SETUP DE NOTIFICAÇÕES');
+      console.log('===============================================');
+      
+      // PASSO 1: CRÍTICO - Criar canal Android PRIMEIRO
+      // Em APKs standalone, o canal DEVE existir antes de qualquer notificação
+      console.log('📋 Passo 1/4: Criando canal Android...');
+      await ensureNotificationChannelExists();
+      console.log('✅ Passo 1/4: Canal verificado/criado');
+      
+      // PASSO 2: Solicitar permissões
+      console.log('📋 Passo 2/4: Solicitando permissões...');
+      const granted = await requestNotificationPermissions();
+      setPermissionGranted(granted);
+      
+      if (!granted) {
+        console.log('⚠️ Permissão de notificação não concedida');
+        setIsReady(true);
+        return;
+      }
+      console.log('✅ Passo 2/4: Permissões concedidas');
+
+      // PASSO 3: Registrar push token no backend
+      console.log('📋 Passo 3/4: Registrando push token...');
+      await registerPushToken();
+      console.log('✅ Passo 3/4: Token registrado');
+      
+      // PASSO 4: Verificar preferências e agendar lembretes
+      console.log('📋 Passo 4/4: Verificando preferências...');
+      const enabled = await getNotificationsEnabled();
+      
+      if (enabled) {
+        await scheduleDailyReminder();
+        await scheduleStreakReminder();
+        console.log('✅ Passo 4/4: Lembretes agendados');
+        console.log('✅✅✅ SETUP DE NOTIFICAÇÕES COMPLETO');
+      } else {
+        console.log('ℹ️ Notificações desabilitadas pelo usuário');
+      }
+      console.log('===============================================');
+
+      setIsReady(true);
+    } catch (error) {
+      console.error('===============================================');
+      console.error('❌ ERRO CRÍTICO ao configurar notificações:', error);
+      console.error('===============================================');
+      setIsReady(true);
+    }
+  };
+
   useEffect(() => {
     // Evita setup duplicado usando flag global
     if (globalSetupCompleted) {
@@ -47,6 +108,36 @@ export function useNotifications() {
     
     globalSetupCompleted = true;
     setupNotifications();
+
+    /**
+     * Navega para tela apropriada quando usuário toca na notificação
+     * @param data Dados da notificação
+     */
+    const handleNotificationTap = (data: any) => {
+      if (!data?.type) return;
+
+      switch (data.type) {
+        case 'DAILY_REMINDER':
+        case 'CHALLENGE_ASSIGNED':
+        case 'STREAK_REMINDER':
+          // Navega para tela de desafios
+          router.push('/(tabs)/challenges');
+          break;
+
+        case 'BADGE_EARNED':
+          // Navega para tela de badges
+          router.push('/(tabs)/badges');
+          break;
+
+        case 'LEVEL_UP':
+          // Navega para perfil (home)
+          router.push('/(tabs)' as any);
+          break;
+
+        default:
+          console.log('ℹ️ Tipo de notificação desconhecido:', data.type);
+      }
+    };
 
     // Listener para notificações recebidas (app aberto)
     notificationListener.current = addNotificationReceivedListener(
@@ -162,73 +253,6 @@ export function useNotifications() {
       }
     };
   }, []);
-
-  /**
-   * Configura notificações ao iniciar app
-   * - Solicita permissões
-   * - Agenda lembretes se habilitado
-   */
-  const setupNotifications = async () => {
-    try {
-      // Solicita permissões
-      const granted = await requestNotificationPermissions();
-      setPermissionGranted(granted);
-
-      if (granted) {
-        // Registra o push token no backend
-        await registerPushToken();
-        
-        // Verifica se usuário quer receber notificações
-        const enabled = await getNotificationsEnabled();
-        
-        if (enabled) {
-          // Agenda lembretes diários
-          await scheduleDailyReminder();
-          await scheduleStreakReminder();
-          console.log('✅ Notificações configuradas e agendadas');
-        } else {
-          console.log('ℹ️ Notificações desabilitadas pelo usuário');
-        }
-      } else {
-        console.log('⚠️ Permissão de notificação não concedida');
-      }
-
-      setIsReady(true);
-    } catch (error) {
-      console.error('❌ Erro ao configurar notificações:', error);
-      setIsReady(true);
-    }
-  };
-
-  /**
-   * Navega para tela apropriada quando usuário toca na notificação
-   * @param data Dados da notificação
-   */
-  const handleNotificationTap = (data: any) => {
-    if (!data?.type) return;
-
-    switch (data.type) {
-      case 'DAILY_REMINDER':
-      case 'CHALLENGE_ASSIGNED':
-      case 'STREAK_REMINDER':
-        // Navega para tela de desafios
-        router.push('/(tabs)/challenges');
-        break;
-
-      case 'BADGE_EARNED':
-        // Navega para tela de badges
-        router.push('/(tabs)/badges');
-        break;
-
-      case 'LEVEL_UP':
-        // Navega para perfil (home)
-        router.push('/(tabs)' as any);
-        break;
-
-      default:
-        console.log('ℹ️ Tipo de notificação desconhecido:', data.type);
-    }
-  };
 
   return {
     permissionGranted,

@@ -11,6 +11,7 @@
  * 
  * Tecnologia: Expo Notifications
  * @created 27 de outubro de 2025
+ * @updated 6 de dezembro de 2025 - Correções para APK standalone
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -64,21 +65,76 @@ Notifications.setNotificationHandler({
 const STORAGE_KEY = '@fiquestlife:notifications_enabled';
 
 // ==========================================
-// PERMISSÕES
+// PERMISSÕES E CONFIGURAÇÃO DE CANAL
 // ==========================================
+
+/**
+ * CRÍTICO: Garante que o canal de notificação Android existe
+ * Deve ser chamado ANTES de qualquer outra operação de notificação
+ * 
+ * Em APKs standalone, o canal DEVE existir antes de receber notificações
+ * No Expo Go isso não é necessário (canais pré-configurados)
+ * 
+ * @returns Promise<void>
+ */
+export async function ensureNotificationChannelExists(): Promise<void> {
+  // Canal só é necessário no Android
+  if (Platform.OS !== 'android') {
+    return;
+  }
+  
+  try {
+    // Verifica se canal já existe
+    const existingChannel = await Notifications.getNotificationChannelAsync('default');
+    
+    if (existingChannel) {
+      console.log('[CANAL] ✅ Canal de notificação já existe:', existingChannel.name);
+      return;
+    }
+    
+    // Criar canal se não existir
+    console.log('[CANAL] Criando canal de notificação Android...');
+    
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'FiQuestLife',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#20B2AA',
+      sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
+      enableLights: true,
+    });
+    
+    console.log('[CANAL] ✅ Canal de notificação criado com sucesso');
+    
+    // Verificar se foi realmente criado
+    const verifyChannel = await Notifications.getNotificationChannelAsync('default');
+    if (verifyChannel) {
+      console.log('[CANAL] ✅ Canal verificado:', verifyChannel.name);
+    } else {
+      console.error('[CANAL] ❌ ERRO: Canal não foi criado!');
+    }
+  } catch (error) {
+    console.error('[CANAL] ❌ Erro ao criar canal:', error);
+    throw error;
+  }
+}
 
 /**
  * Solicita permissão para enviar notificações
  * Obrigatório para iOS, recomendado para Android
  * 
+ * IMPORTANTE: Esta função NÃO cria mais o canal Android
+ * O canal deve ser criado ANTES através de ensureNotificationChannelExists()
+ * 
  * @returns true se permissão concedida, false caso contrário
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
   // Emuladores/simuladores podem ter comportamento limitado para push tokens,
-  // mas ainda podemos tentar configurar permissões e canais para testar
-  // notificações locais. Não abortamos aqui para permitir testes locais.
+  // mas ainda podemos tentar configurar permissões para testar notificações locais
   if (!Device.isDevice) {
-    console.warn('⚠️ Você está em um simulador/emulador. Push tokens podem não funcionar, mas permissões locais serão tentadas.');
+    console.warn('⚠️ Você está em um simulador/emulador. Push tokens podem não funcionar.');
   }
 
   // Verifica permissão atual
@@ -97,22 +153,8 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     return false;
   }
 
-  // Configurar canal de notificação (Android obrigatório)
-  if (Platform.OS === 'android') {
-    try {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'FiQuestLife',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#20B2AA',
-        sound: 'default',
-        enableVibrate: true,
-      });
-      console.log('✅ Canal Android de notificações criado/atualizado: default');
-    } catch (err) {
-      console.warn('⚠️ Falha ao criar canal Android de notificação:', err);
-    }
-  }
+  // NOTA: Canal Android é criado em ensureNotificationChannelExists()
+  // Não criamos aqui para evitar problemas de timing
 
   console.log('✅ Permissão de notificação concedida');
   return true;

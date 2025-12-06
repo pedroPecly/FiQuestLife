@@ -234,10 +234,10 @@ export default function ChallengesScreen() {
               <Text style={styles.statValue}>{user?.coins || 0}</Text>
             </View>
 
-            <View style={styles.statItem}>
+            {/*<View style={styles.statItem}>
               <Text style={styles.statIcon}>🔥</Text>
               <Text style={styles.statValue}>{user?.currentStreak || 0}</Text>
-            </View>
+            </View>*/}
           </View>
         </View>
 
