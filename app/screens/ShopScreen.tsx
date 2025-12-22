@@ -276,6 +276,8 @@ export default function ShopScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
+      {/* Card com Header + Busca + Filtros */}
+      <View style={styles.topCard}>
       {/* Header com saldo */}
       <View style={styles.header}>
         <View>
@@ -481,6 +483,7 @@ export default function ShopScreen() {
         </>
       )}
       </View>
+      </View>
 
       {/* Lista de itens */}
       <FlatList
@@ -527,13 +530,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FF',
   },
+  topCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 12,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#FFF',
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 28,
@@ -565,7 +586,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 6,
-    backgroundColor: '#FFF',
   },
   searchInput: {
     backgroundColor: '#F2F2F7',

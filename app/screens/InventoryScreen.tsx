@@ -247,6 +247,8 @@ export default function InventoryScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
+      {/* Card com Header + Boosts + Filtros */}
+      <View style={styles.topCard}>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -411,6 +413,7 @@ export default function InventoryScreen() {
         </>
       )}
       </View>
+      </View>
 
       {/* Lista de itens */}
       <FlatList
@@ -452,13 +455,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FF',
   },
+  topCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 12,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#FFF',
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   headerTitle: {
     fontSize: 28,
@@ -488,8 +509,8 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   boostsContainer: {
-    backgroundColor: '#FFF',
     padding: 12,
+    paddingTop: 0,
   },
   boostsTitle: {
     fontSize: 16,

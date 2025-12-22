@@ -36,9 +36,16 @@ export const styles = StyleSheet.create({
   // ==========================================
   // HEADER
   // ==========================================
-  header: {
+  headerWrapper: {
     paddingHorizontal: 20,
     paddingVertical: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  headerContent: {
+    flex: 1,
     alignItems: 'center',
   },
 
@@ -47,12 +54,20 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 8,
+    textAlign: 'center',
   },
 
   headerSubtitle: {
     fontSize: 16,
     color: '#6B7280',
     fontWeight: '500',
+    textAlign: 'center',
+  },
+
+  notificationContainer: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
   },
 
   // ==========================================

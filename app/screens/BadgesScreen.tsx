@@ -14,7 +14,7 @@
  */
 
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -25,8 +25,10 @@ import {
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCard, BadgeDetailModal } from '../../components/ui';
+import { BadgeCard, BadgeDetailModal, NotificationBell, NotificationsModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
+import { authStorage } from '../../services/auth';
+import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import type { BadgeWithProgress } from '../../services/badge';
 import { getBadgesProgress } from '../../services/badge';
 import { styles } from '../styles/badges.styles';
@@ -53,6 +55,8 @@ export const BadgesScreen = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedBadge, setSelectedBadge] = useState<BadgeWithProgress | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [feedVisible, setFeedVisible] = useState(false);
 
   // Contadores
   const [earnedCount, setEarnedCount] = useState(0);
@@ -60,6 +64,29 @@ export const BadgesScreen = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const { alert } = useAlert();
+
+  // Carrega count de notificações não lidas
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const user = await authStorage.getUser();
+      if (!user) {
+        setUnreadCount(0);
+        return;
+      }
+      const count = await getLocalUnreadCount(user.id);
+      setUnreadCount(count);
+    } catch (error) {
+      setUnreadCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUnreadCount();
+    const interval = setInterval(() => {
+      loadUnreadCount();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [loadUnreadCount]);
 
   // ==========================================
   // LOAD DATA
@@ -153,11 +180,22 @@ export const BadgesScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏆 Conquistas</Text>
-        <Text style={styles.headerSubtitle}>
-          {earnedCount}/{totalCount} conquistas desbloqueadas
-        </Text>
+      <View style={styles.headerWrapper}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>🏆 Conquistas</Text>
+          <Text style={styles.headerSubtitle}>
+            {earnedCount}/{totalCount} conquistas desbloqueadas
+          </Text>
+        </View>
+        
+        <View style={styles.notificationContainer}>
+          <NotificationBell
+            unreadCount={unreadCount}
+            onPress={() => setFeedVisible(true)}
+            size={26}
+            color="#2F4F4F"
+          />
+        </View>
       </View>
 
       {/* Filters */}
@@ -225,6 +263,16 @@ export const BadgesScreen = () => {
             </Text>
           </View>
         }
+      />
+
+      {/* Modal de Notificações */}
+      <NotificationsModal
+        visible={feedVisible}
+        onClose={() => {
+          setFeedVisible(false);
+          loadUnreadCount();
+        }}
+        onUnreadCountChange={setUnreadCount}
       />
 
       {/* Modal de Detalhes */}

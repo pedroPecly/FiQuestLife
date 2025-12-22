@@ -278,21 +278,19 @@ export default function ChallengesScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Seus Desafios</Text>
             
-            {/* Botão para ver convites */}
-            {pendingInvitesCount > 0 && (
-              <TouchableOpacity
-                style={styles.invitesButton}
-                onPress={() => setInvitesVisible(true)}
-              >
-                <Ionicons name="mail" size={20} color="#FFF" />
-                {pendingInvitesCount > 0 && (
-                  <View style={styles.invitesBadge}>
-                    <Text style={styles.invitesBadgeText}>{pendingInvitesCount}</Text>
-                  </View>
-                )}
-                <Text style={styles.invitesButtonText}>Convites</Text>
-              </TouchableOpacity>
-            )}
+            {/* Botão para ver convites - sempre visível */}
+            <TouchableOpacity
+              style={styles.invitesButton}
+              onPress={() => setInvitesVisible(true)}
+            >
+              <Ionicons name="mail" size={20} color="#FFF" />
+              {pendingInvitesCount > 0 && (
+                <View style={styles.invitesBadge}>
+                  <Text style={styles.invitesBadgeText}>{pendingInvitesCount}</Text>
+                </View>
+              )}
+              <Text style={styles.invitesButtonText}>Convites</Text>
+            </TouchableOpacity>
           </View>
 
           {challenges.length === 0 ? (

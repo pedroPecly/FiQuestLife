@@ -18,12 +18,14 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     acceptChallengeInvite,
     ChallengeInvitation,
     getPendingInvites,
     rejectChallengeInvite,
 } from '../../services/challengeInvitation';
+import { getTimeUntilExpiration, isInvitationExpired } from '../../utils/invitationUtils';
 import { Avatar } from './Avatar';
 
 interface ChallengeInvitesModalProps {
@@ -37,6 +39,7 @@ export function ChallengeInvitesModal({
   onClose,
   onInviteProcessed,
 }: ChallengeInvitesModalProps) {
+  const insets = useSafeAreaInsets();
   const [invites, setInvites] = useState<ChallengeInvitation[]>([]);
   const [loading, setLoading] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -118,9 +121,11 @@ export function ChallengeInvitesModal({
 
   const renderInviteItem = ({ item }: { item: ChallengeInvitation }) => {
     const isProcessing = processingId === item.id;
+    const timeLeft = getTimeUntilExpiration(item);
+    const isExpired = isInvitationExpired(item);
 
     return (
-      <View style={styles.inviteCard}>
+      <View style={[styles.inviteCard, isExpired && styles.inviteCardExpired]}>
         {/* Quem desafiou */}
         <View style={styles.inviteHeader}>
           <Avatar
@@ -131,6 +136,18 @@ export function ChallengeInvitesModal({
           <View style={styles.inviteHeaderText}>
             <Text style={styles.challengerName}>{item.fromUser?.name}</Text>
             <Text style={styles.challengerAction}>te desafiou em</Text>
+          </View>
+          
+          {/* Indicador de tempo de expiração */}
+          <View style={[styles.expirationBadge, isExpired && styles.expirationBadgeExpired]}>
+            <Ionicons 
+              name={isExpired ? "close-circle" : "time-outline"} 
+              size={14} 
+              color={isExpired ? "#F44336" : "#FF9800"} 
+            />
+            <Text style={[styles.expirationText, isExpired && styles.expirationTextExpired]}>
+              {timeLeft}
+            </Text>
           </View>
         </View>
 
@@ -217,9 +234,9 @@ export function ChallengeInvitesModal({
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
             <Text style={styles.title}>Convites de Desafios</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={28} color="#666" />
@@ -281,17 +298,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   loadingContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
+    minHeight: 300,
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 80,
     paddingHorizontal: 32,
+    minHeight: 300,
   },
   emptyText: {
     fontSize: 18,
@@ -317,10 +334,35 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#20B2AA',
   },
+  inviteCardExpired: {
+    opacity: 0.6,
+    borderColor: '#CCC',
+  },
   inviteHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  expirationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#FFF3E0',
+    marginLeft: 'auto',
+  },
+  expirationBadgeExpired: {
+    backgroundColor: '#FFEBEE',
+  },
+  expirationText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FF9800',
+  },
+  expirationTextExpired: {
+    color: '#F44336',
   },
   inviteHeaderText: {
     marginLeft: 12,

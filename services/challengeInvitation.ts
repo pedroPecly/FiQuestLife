@@ -17,6 +17,7 @@ export interface ChallengeInvitation {
   date: string;
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
   message?: string;
+  expiresAt: string; // Data e hora de expiração do convite (24h ou fim do dia do desafio)
   createdAt: string;
   updatedAt: string;
   fromUser?: {
@@ -194,7 +195,7 @@ export const getFriendsAlreadyChallengedToday = async () => {
 
 /**
  * Verifica quais desafios já foram usados para desafiar alguém hoje
- * OU foram recebidos de outros usuários (não podem ser usados para desafiar)
+ * OU foram recebidos de outros usuários HOJE (não podem ser usados para desafiar)
  */
 export const getChallengesAlreadyUsedToday = async () => {
   try {
@@ -209,15 +210,22 @@ export const getChallengesAlreadyUsedToday = async () => {
       return inviteDate.getTime() === today.getTime();
     });
 
-    // Pega IDs dos desafios já enviados
+    // Pega IDs dos desafios já enviados HOJE
     const sentChallengeIds = todayInvites.map((invite) => invite.challengeId);
 
-    // Pega IDs dos desafios recebidos (aceitos ou pendentes)
-    // Estes também não podem ser usados para desafiar
+    // Pega IDs dos desafios recebidos HOJE (aceitos ou pendentes)
+    // Apenas os recebidos HOJE não podem ser usados para desafiar
     const receivedChallengeIds = invites.received
-      .filter((invite) => 
-        invite.status === 'PENDING' || invite.status === 'ACCEPTED'
-      )
+      .filter((invite) => {
+        if (invite.status !== 'PENDING' && invite.status !== 'ACCEPTED') {
+          return false;
+        }
+        
+        // Verifica se foi recebido hoje
+        const inviteDate = new Date(invite.createdAt);
+        inviteDate.setHours(0, 0, 0, 0);
+        return inviteDate.getTime() === today.getTime();
+      })
       .map((invite) => invite.challengeId);
 
     // Retorna array único com todos os IDs
