@@ -30,16 +30,16 @@ export const runInvitationsCleanup = async () => {
     const completedCount = await cleanupCompletedInvitations();
     
     // Limpar convites pendentes expirados (mais de 7 dias sem resposta)
-    const expiredCount = await cleanupExpiredInvitations();
+    const expiredResult = await cleanupExpiredInvitations();
 
-    const totalDeleted = completedCount + expiredCount;
+    const totalDeleted = completedCount + expiredResult.deleted;
     const duration = Date.now() - startTime;
 
     console.log(`[CLEANUP JOB] ✅ Limpeza concluída em ${duration}ms`);
     console.log(`[CLEANUP JOB] 📊 Total deletado: ${totalDeleted} registros`);
-    console.log(`[CLEANUP JOB] 📈 Completados: ${completedCount} | Expirados: ${expiredCount}`);
+    console.log(`[CLEANUP JOB] 📈 Completados: ${completedCount} | Expirados: ${expiredResult.deleted} | Marcados: ${expiredResult.marked}`);
 
-    return { success: true, totalDeleted, completedCount, expiredCount, duration };
+    return { success: true, totalDeleted, completedCount, expiredResult, duration };
   } catch (error) {
     console.error('[CLEANUP JOB] ❌ Erro na limpeza:', error);
     throw error;
