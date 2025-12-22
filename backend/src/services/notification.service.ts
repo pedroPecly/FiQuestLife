@@ -74,8 +74,19 @@ export async function createNotification(notificationData: CreateNotificationDat
       createdAt: new Date().toISOString(),
     };
   } catch (error) {
+    // Log do erro mas não propaga - notificação é nice-to-have, não deve quebrar o fluxo
     console.error('[NOTIFICATION SERVICE] Erro ao criar notificação:', error);
-    throw error;
+    // Retorna objeto básico mesmo com erro
+    return {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: notificationData.userId,
+      type: notificationData.type,
+      title: notificationData.title,
+      message: notificationData.message,
+      data: notificationData.data,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
   }
 }
 

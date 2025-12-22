@@ -273,6 +273,7 @@ model ChallengeInvitation {
   date            DateTime                  @default(now())
   status          ChallengeInvitationStatus @default(PENDING)
   message         String?
+  expiresAt       DateTime                  @map("expires_at") // Convite expira em 24h ou quando o desafio do remetente expirar
   createdAt       DateTime                  @default(now()) @map("created_at")
   updatedAt       DateTime                  @updatedAt @map("updated_at")
   fromUser        User                      @relation("SentInvites", fields: [fromUserId], references: [id], onDelete: Cascade)

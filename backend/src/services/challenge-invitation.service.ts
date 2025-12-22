@@ -75,19 +75,35 @@ export const createChallengeInvitation = async (params: CreateInvitationParams) 
     throw new Error('Você só pode desafiar amigos em desafios que você tem hoje');
   }
 
-  // Verifica se este desafio veio de um convite (não pode ser usado para desafiar)
+  // Calcula quando o convite expira:
+  // - O convite expira em 24h OU quando o desafio do remetente expirar (o que ocorrer primeiro)
+  // - Desafios diários expiram às 23:59:59 do dia atual
+  const now = new Date();
+  const endOfDay = new Date(today);
+  endOfDay.setHours(23, 59, 59, 999);
+  const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  
+  // Usa o menor tempo entre 24h e o fim do dia
+  const expiresAt = twentyFourHoursFromNow < endOfDay ? twentyFourHoursFromNow : endOfDay;
+
+  // Verifica se este desafio veio de um convite HOJE (não pode ser usado para desafiar no mesmo dia)
+  // Convites de dias anteriores não bloqueiam mais
   const receivedInvitation = await prisma.challengeInvitation.findFirst({
     where: {
       toUserId: fromUserId,
-      userChallengeId: senderHasChallenge.id,
+      challengeId, // Verifica pelo challengeId ao invés do userChallengeId
       status: {
         in: [ChallengeInvitationStatus.PENDING, ChallengeInvitationStatus.ACCEPTED],
+      },
+      createdAt: {
+        gte: today,
+        lt: tomorrow,
       },
     },
   });
 
   if (receivedInvitation) {
-    throw new Error('Você não pode desafiar alguém com um desafio que recebeu de outro usuário');
+    throw new Error('Você não pode desafiar alguém com um desafio que recebeu hoje de outro usuário');
   }
 
   // Verifica limite: 1 convite total por amigo por dia (independente do desafio)
@@ -143,6 +159,7 @@ export const createChallengeInvitation = async (params: CreateInvitationParams) 
       message,
       userChallengeId: friendChallenge?.id, // Vincula se já existe
       status: ChallengeInvitationStatus.PENDING,
+      expiresAt, // Define a data de expiração
     },
     include: {
       fromUser: {
@@ -214,6 +231,17 @@ export const acceptChallengeInvitation = async (invitationId: string, userId: st
 
   if (invitation.status !== ChallengeInvitationStatus.PENDING) {
     throw new Error('Este convite já foi processado');
+  }
+
+  // Verifica se o convite expirou
+  const now = new Date();
+  if (invitation.expiresAt && now > invitation.expiresAt) {
+    // Marca como expirado
+    await prisma.challengeInvitation.update({
+      where: { id: invitationId },
+      data: { status: ChallengeInvitationStatus.EXPIRED },
+    });
+    throw new Error('Este convite expirou. O desafio não está mais disponível.');
   }
 
   try {
@@ -338,12 +366,33 @@ export const rejectChallengeInvitation = async (invitationId: string, userId: st
 
 /**
  * Lista convites recebidos pendentes
+ * Marca automaticamente convites expirados e retorna apenas os válidos
  */
 export const getPendingInvitations = async (userId: string) => {
+  const now = new Date();
+
+  // Marca convites expirados automaticamente
+  await prisma.challengeInvitation.updateMany({
+    where: {
+      toUserId: userId,
+      status: ChallengeInvitationStatus.PENDING,
+      expiresAt: {
+        lt: now,
+      },
+    },
+    data: {
+      status: ChallengeInvitationStatus.EXPIRED,
+    },
+  });
+
+  // Retorna apenas convites pendentes e não expirados
   return prisma.challengeInvitation.findMany({
     where: {
       toUserId: userId,
       status: ChallengeInvitationStatus.PENDING,
+      expiresAt: {
+        gte: now,
+      },
     },
     include: {
       challenge: true,
@@ -465,22 +514,39 @@ export const cleanupCompletedInvitations = async () => {
 };
 
 /**
- * Limpa convites pendentes expirados (mais de 7 dias)
- * Convites não respondidos após 7 dias podem ser deletados
+ * Marca convites pendentes expirados e limpa convites expirados antigos
+ * Convites expirados há mais de 7 dias podem ser deletados
  */
 export const cleanupExpiredInvitations = async () => {
+  const now = new Date();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const deletedCount = await prisma.challengeInvitation.deleteMany({
+  // Marca convites pendentes que expiraram como EXPIRED
+  const markedCount = await prisma.challengeInvitation.updateMany({
     where: {
       status: ChallengeInvitationStatus.PENDING,
-      createdAt: {
+      expiresAt: {
+        lt: now,
+      },
+    },
+    data: {
+      status: ChallengeInvitationStatus.EXPIRED,
+    },
+  });
+
+  console.log(`[CLEANUP] ⏰ Marcados ${markedCount.count} convites como expirados`);
+
+  // Deleta convites expirados há mais de 7 dias
+  const deletedCount = await prisma.challengeInvitation.deleteMany({
+    where: {
+      status: ChallengeInvitationStatus.EXPIRED,
+      expiresAt: {
         lt: sevenDaysAgo,
       },
     },
   });
 
-  console.log(`[CLEANUP] 🧹 Deletados ${deletedCount.count} convites pendentes expirados`);
-  return deletedCount.count;
+  console.log(`[CLEANUP] 🧹 Deletados ${deletedCount.count} convites expirados antigos`);
+  return { marked: markedCount.count, deleted: deletedCount.count };
 };

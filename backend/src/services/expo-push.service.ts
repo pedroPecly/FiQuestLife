@@ -64,6 +64,14 @@ export async function sendPushNotification(message: PushMessage): Promise<boolea
       body: JSON.stringify(payload),
     });
 
+    // Verifica se a resposta é JSON válida
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[PUSH] ❌ Resposta não é JSON:', text.substring(0, 200));
+      return false;
+    }
+
     const data: any = await response.json();
 
     console.log('[PUSH] 📥 Resposta do Expo:', JSON.stringify(data));
