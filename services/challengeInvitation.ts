@@ -69,6 +69,18 @@ export const createChallengeInvite = async (params: CreateInviteParams) => {
       throw new Error(response.data.message || 'Erro ao criar convite');
     }
 
+    console.log('[CHALLENGE INVITATION] ✅ Convite criado:', response.data.data);
+    
+    // Se a resposta incluir notificação, processar
+    if (response.data.data?.notification) {
+      const notification = response.data.data.notification;
+      console.log('[CHALLENGE INVITATION] 📬 Notificação recebida do backend:', notification);
+      
+      // Importar dinamicamente para evitar circular dependency
+      const { processNotificationFromResponse } = await import('./notifications');
+      await processNotificationFromResponse(notification);
+    }
+
     return response.data.data as ChallengeInvitation;
   } catch (error: any) {
     console.error('[CHALLENGE INVITATION] Erro ao criar convite:', error);
@@ -85,6 +97,18 @@ export const acceptChallengeInvite = async (invitationId: string) => {
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Erro ao aceitar convite');
+    }
+
+    console.log('[CHALLENGE INVITATION] ✅ Convite aceito:', response.data.data);
+    
+    // Se a resposta incluir notificação, processar
+    if (response.data.data?.notification) {
+      const notification = response.data.data.notification;
+      console.log('[CHALLENGE INVITATION] 📬 Notificação recebida do backend:', notification);
+      
+      // Importar dinamicamente para evitar circular dependency
+      const { processNotificationFromResponse } = await import('./notifications');
+      await processNotificationFromResponse(notification);
     }
 
     return response.data.data as ChallengeInvitation;

@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Alert, Platform } from 'react-native';
+import { saveLocalNotification } from './localNotificationStorage';
 
 // ==========================================
 // TIPOS
@@ -670,5 +671,42 @@ export async function getNotificationSystemStatus() {
   } catch (error) {
     console.error('❌ [DEBUG] Erro ao obter status:', error);
     return null;
+  }
+}
+
+// ==========================================
+// PROCESSAR NOTIFICAÇÃO DE RESPOSTA DO BACKEND
+// ==========================================
+
+/**
+ * Processa uma notificação que veio na resposta do backend
+ * Salva localmente para aparecer no sininho (bell)
+ * 
+ * Usado quando backend retorna notificação junto com a resposta
+ * (ex: criar convite de desafio, aceitar convite, etc)
+ * 
+ * @param notification - Dados da notificação retornados pelo backend
+ */
+export async function processNotificationFromResponse(notification: any): Promise<void> {
+  try {
+    if (!notification) {
+      console.log('[NOTIFICATION] ⚠️ Notificação vazia, ignorando');
+      return;
+    }
+
+    console.log('[NOTIFICATION] 📬 Processando notificação do backend:', notification);
+
+    // Salva localmente (para aparecer no sininho)
+    await saveLocalNotification({
+      userId: notification.userId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      data: notification.data,
+    });
+
+    console.log('[NOTIFICATION] ✅ Notificação salva localmente (sininho)');
+  } catch (error) {
+    console.error('[NOTIFICATION] ❌ Erro ao processar notificação:', error);
   }
 }

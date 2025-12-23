@@ -30,6 +30,7 @@ export async function toggleLike(c: Context) {
     return c.json({
       message: result.liked ? 'Atividade curtida!' : 'Curtida removida',
       liked: result.liked,
+      notification: result.notification || null, // Inclui notificação
     });
   } catch (error: any) {
     console.error('[FEED CONTROLLER] Erro ao curtir/descurtir:', error);
@@ -90,6 +91,7 @@ export async function addComment(c: Context) {
         updatedAt: comment.updatedAt,
         user: comment.user,
       },
+      notification: comment.notification || null, // Inclui notificação
     });
   } catch (error: any) {
     console.error('[FEED CONTROLLER] Erro ao adicionar comentário:', error);

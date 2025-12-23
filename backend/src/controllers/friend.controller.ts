@@ -31,6 +31,7 @@ export const friendController = {
         success: true,
         message: 'Solicitação de amizade enviada com sucesso',
         data: request,
+        notification: request.notification || null, // Inclui notificação
       });
     } catch (error: any) {
       console.error('Erro ao enviar solicitação de amizade:', error);
@@ -53,6 +54,7 @@ export const friendController = {
         success: true,
         message: 'Solicitação aceita com sucesso',
         data: result,
+        notification: result.notification || null, // Inclui notificação
       });
     } catch (error: any) {
       console.error('Erro ao aceitar solicitação:', error);

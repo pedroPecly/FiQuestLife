@@ -183,14 +183,17 @@ export const createChallengeInvitation = async (params: CreateInvitationParams) 
   });
 
   // Envia notificação para o amigo
-  await notifyChallengeInvite(invitation);
+  const notification = await notifyChallengeInvite(invitation);
 
   // Verifica e completa desafios auto-verificáveis (ex: "Desafie um Amigo")
   handleSocialEvent(fromUserId, 'CHALLENGE_INVITE_SENT').catch((error) => {
     console.error('[CHALLENGE INVITATION] Erro ao verificar desafios automáticos:', error);
   });
 
-  return invitation;
+  return {
+    ...invitation,
+    notification, // Inclui notificação na resposta
+  };
 };
 
 /**
@@ -301,8 +304,9 @@ export const acceptChallengeInvitation = async (invitationId: string, userId: st
 
     // Notifica o remetente que o desafio foi aceito
     // Notificação não deve bloquear o fluxo principal
-    notifyChallengeAccepted(invitation).catch((error) => {
+    const notification = await notifyChallengeAccepted(invitation).catch((error) => {
       console.error('[CHALLENGE INVITATION] Erro ao enviar notificação:', error);
+      return null;
     });
 
     // Verifica e completa desafios auto-verificáveis (ex: "Aceite um Desafio")
@@ -327,7 +331,10 @@ export const acceptChallengeInvitation = async (invitationId: string, userId: st
       },
     });
 
-    return updatedInvitation;
+    return {
+      ...updatedInvitation,
+      notification, // Inclui notificação na resposta
+    };
   } catch (error) {
     console.error('[CHALLENGE INVITATION SERVICE] Erro ao aceitar convite:', error);
     throw error;

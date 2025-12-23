@@ -18,7 +18,6 @@ import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import { getUserBadges } from '../../services/badge';
-import { sendTestNotification, getNotificationSystemStatus } from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/profile.styles';
 
@@ -336,114 +335,6 @@ const ProfileScreen = () => {
           </View>
           <Text style={styles.historyButtonArrow}>›</Text>
         </TouchableOpacity>
-
-        {/* 🧪 BOTÕES DE TESTE - DEBUG */}
-        <Card style={{ marginBottom: 16, backgroundColor: '#FFF9E6', borderColor: '#FFD700', borderWidth: 2 }}>
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FF8C00', marginBottom: 8 }}>
-              🧪 Ferramentas de Debug
-            </Text>
-            <Text style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>
-              Use esses botões para testar o sistema de notificações
-            </Text>
-            
-            {/* Botão: Testar Notificação */}
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#20B2AA',
-                padding: 16,
-                borderRadius: 12,
-                marginBottom: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onPress={async () => {
-                console.log('🧪 [DEBUG] Testando notificação...');
-                const result = await sendTestNotification();
-                if (result) {
-                  Alert.alert(
-                    '✅ Sucesso',
-                    'Notificação de teste enviada! Se você viu a notificação, o canal Android está funcionando.',
-                    [{ text: 'OK' }]
-                  );
-                } else {
-                  Alert.alert(
-                    '❌ Falha',
-                    'Não foi possível enviar notificação de teste. Verifique os logs.',
-                    [{ text: 'OK' }]
-                  );
-                }
-              }}
-            >
-              <Text style={{ fontSize: 24, marginRight: 8 }}>🧪</Text>
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
-                Testar Notificação Local
-              </Text>
-            </TouchableOpacity>
-
-            {/* Botão: Ver Status */}
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#FF6347',
-                padding: 16,
-                borderRadius: 12,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onPress={async () => {
-                console.log('🔍 [DEBUG] Verificando status do sistema...');
-                const status = await getNotificationSystemStatus();
-                
-                if (status) {
-                  const statusText = `
-🔍 Status do Sistema de Notificações:
-
-📱 Dispositivo:
-- Físico: ${status.device.isPhysicalDevice ? 'Sim' : 'Não (Emulador)'}
-- Plataforma: ${status.device.platform}
-- Versão: ${status.device.platformVersion}
-
-🔔 Permissões:
-- Status: ${status.permissions.status}
-- Concedida: ${status.permissions.granted ? 'Sim ✅' : 'Não ❌'}
-
-📺 Canal Android:
-- Existe: ${status.channel ? 'Sim ✅' : 'Não ❌'}
-${status.channel ? `- Nome: ${status.channel.name}
-- Importância: ${status.channel.importance}` : ''}
-
-📋 Notificações Agendadas: ${status.scheduledNotifications}
-
-🔑 Token: ${status.token ? status.token.substring(0, 30) + '...' : 'Não obtido'}
-                  `.trim();
-
-                  Alert.alert('🔍 Status do Sistema', statusText, [
-                    { text: 'Copiar Token', onPress: () => {
-                      if (status.token) {
-                        console.log('🔑 TOKEN COMPLETO:', status.token);
-                        console.log('🔗 Teste manualmente em: https://expo.dev/notifications');
-                      }
-                    }},
-                    { text: 'OK' }
-                  ]);
-                } else {
-                  Alert.alert('❌ Erro', 'Não foi possível obter status. Verifique os logs.', [{ text: 'OK' }]);
-                }
-              }}
-            >
-              <Text style={{ fontSize: 24, marginRight: 8 }}>🔍</Text>
-              <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
-                Ver Status do Sistema
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={{ fontSize: 10, color: '#999', marginTop: 12, textAlign: 'center' }}>
-              ⚠️ Esses botões são apenas para desenvolvimento/testes
-            </Text>
-          </View>
-        </Card>
 
       </ScrollView>
     </View>

@@ -117,8 +117,9 @@ export async function sendFriendRequest(userId: string, targetUserId: string) {
   });
 
   // Criar notificação para o receptor
+  let notification = null;
   try {
-    await notifyFriendRequest(
+    notification = await notifyFriendRequest(
       targetUserId,
       friendRequest.sender.name || friendRequest.sender.username
     );
@@ -126,7 +127,10 @@ export async function sendFriendRequest(userId: string, targetUserId: string) {
     console.error('[FRIEND SERVICE] Erro ao criar notificação de friend request:', error);
   }
 
-  return friendRequest;
+  return {
+    ...friendRequest,
+    notification, // Inclui notificação na resposta
+  };
 }
 
 /**
@@ -211,9 +215,10 @@ export async function acceptFriendRequest(userId: string, requestId: string) {
   });
 
   // Criar notificação para quem enviou a solicitação
+  let notification = null;
   if (result) {
     try {
-      await notifyFriendAccepted(
+      notification = await notifyFriendAccepted(
         request.senderId,
         result.receiver.name || result.receiver.username
       );
@@ -231,7 +236,10 @@ export async function acceptFriendRequest(userId: string, requestId: string) {
     });
   }
 
-  return result;
+  return {
+    ...result,
+    notification, // Inclui notificação na resposta
+  };
 }
 
 /**

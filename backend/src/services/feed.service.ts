@@ -63,9 +63,10 @@ export async function toggleLike(userId: string, activityId: string) {
       });
 
       // Notificar dono da atividade (se não for ele mesmo curtindo e atividade existir)
+      let notification = null;
       if (activity && activity.userId !== userId) {
         try {
-          await notifyActivityLike(
+          notification = await notifyActivityLike(
             activity.userId,
             activityId, // ID da atividade
             like.user.name || like.user.username,
@@ -82,7 +83,7 @@ export async function toggleLike(userId: string, activityId: string) {
         console.error('[FEED SERVICE] Erro ao verificar desafios automáticos:', error);
       });
 
-      return { liked: true };
+      return { liked: true, notification };
     }
   } catch (error) {
     console.error('[FEED SERVICE] Erro ao curtir/descurtir:', error);
@@ -190,9 +191,10 @@ export async function addComment(userId: string, activityId: string, content: st
     });
 
     // Notificar dono da atividade (se não for ele mesmo comentando e atividade existir)
+    let notification = null;
     if (activity && activity.userId !== userId) {
       try {
-        await notifyActivityComment(
+        notification = await notifyActivityComment(
           activity.userId,
           activityId,
           comment.user.name || comment.user.username,
@@ -216,6 +218,7 @@ export async function addComment(userId: string, activityId: string, content: st
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
       user: comment.user,
+      notification, // Inclui notificação na resposta
     };
   } catch (error) {
     console.error('[FEED SERVICE] Erro ao adicionar comentário:', error);

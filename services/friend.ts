@@ -90,6 +90,13 @@ class FriendService {
    */
   async sendFriendRequest(targetUserId: string): Promise<FriendRequest> {
     const response = await api.post('/friends/request', { targetUserId });
+    
+    // Processar notificação se vier na resposta
+    if (response.data.notification) {
+      const { processNotificationFromResponse } = await import('./notifications');
+      await processNotificationFromResponse(response.data.notification);
+    }
+    
     return response.data.data;
   }
 
@@ -98,6 +105,13 @@ class FriendService {
    */
   async acceptFriendRequest(requestId: string): Promise<FriendRequest> {
     const response = await api.post(`/friends/accept/${requestId}`);
+    
+    // Processar notificação se vier na resposta
+    if (response.data.notification) {
+      const { processNotificationFromResponse } = await import('./notifications');
+      await processNotificationFromResponse(response.data.notification);
+    }
+    
     return response.data.data;
   }
 
