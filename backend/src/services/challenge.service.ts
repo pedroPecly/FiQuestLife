@@ -149,7 +149,7 @@ export const completeChallenge = async (
   });
 
   // Atualiza stats do usuário (XP e coins)
-  const { leveledUp, newLevel } = await updateUserStats(
+  const { leveledUp, newLevel, notification } = await updateUserStats(
     userId,
     userChallenge.challenge.xpReward,
     userChallenge.challenge.coinsReward
@@ -205,6 +205,7 @@ export const completeChallenge = async (
     leveledUp,
     newLevel,
     newBadges,
+    notification, // Retorna notificação de level up (se houver)
   };
 };
 
