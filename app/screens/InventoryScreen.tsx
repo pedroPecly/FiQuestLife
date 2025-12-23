@@ -16,29 +16,29 @@
 import InventoryItemCard from '@/components/ui/InventoryItemCard';
 import { authService } from '@/services/api';
 import shopService, {
-  ActiveBoost,
-  ShopItemType,
-  UserInventoryItem,
+    ActiveBoost,
+    ShopItemType,
+    UserInventoryItem,
 } from '@/services/shop';
 import type { User } from '@/types/user';
 import { Feather } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  Animated,
-  Easing,
-  FlatList,
-  Keyboard,
-  LayoutAnimation,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  UIManager,
-  View,
+    Alert,
+    Animated,
+    Easing,
+    FlatList,
+    Keyboard,
+    LayoutAnimation,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    UIManager,
+    View,
 } from 'react-native';
 
 // Arrays explícitos para garantir que os filtros funcionem

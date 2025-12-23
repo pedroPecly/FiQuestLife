@@ -241,6 +241,9 @@ export const updateUserStats = async (userId: string, xp: number, coins: number)
     },
   });
 
+  // Preparar dados de notificação (para retornar ao frontend)
+  let notification = null;
+
   // Se subiu de nível, registra no histórico
   if (leveledUp) {
     await prisma.rewardHistory.create({
@@ -253,15 +256,15 @@ export const updateUserStats = async (userId: string, xp: number, coins: number)
       },
     });
 
-    // Criar notificação
+    // Criar notificação (push + dados para retornar)
     try {
-      await notifyLevelUp(userId, newLevel);
+      notification = await notifyLevelUp(userId, newLevel);
     } catch (error) {
       console.error('[CHALLENGE SERVICE] Erro ao criar notificação de level up:', error);
     }
   }
 
-  return { leveledUp, newLevel };
+  return { leveledUp, newLevel, notification };
 };
 
 /**

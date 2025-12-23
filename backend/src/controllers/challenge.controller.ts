@@ -151,6 +151,8 @@ export const completeChallengeById = async (c: Context) => {
       success: true,
       data: result,
       message: 'Desafio completado com sucesso!',
+      // Retorna notificação para o frontend salvar localmente
+      notification: result.notification || null,
     });
   } catch (error) {
     console.error('Error in completeChallengeById:', error);

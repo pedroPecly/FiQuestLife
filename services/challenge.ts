@@ -1,4 +1,5 @@
 import api from './api';
+import { processBackendNotification } from '../utils/notificationHelper';
 
 // ==========================================
 // INTERFACES
@@ -155,6 +156,8 @@ class ChallengeService {
     caption?: string
   ): Promise<CompleteChallengeResponse> {
     try {
+      let response;
+      
       // Se houver foto, enviar como multipart/form-data
       if (photo) {
         const formData = new FormData();
@@ -171,17 +174,23 @@ class ChallengeService {
           formData.append('caption', caption);
         }
 
-        const response = await api.post(`/challenges/${userChallengeId}/complete`, formData, {
+        response = await api.post(`/challenges/${userChallengeId}/complete`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        return response.data.data;
+      } else {
+        // Se não houver foto, enviar como JSON vazio
+        response = await api.post(`/challenges/${userChallengeId}/complete`);
       }
-
-      // Se não houver foto, enviar como JSON vazio
-      const response = await api.post(`/challenges/${userChallengeId}/complete`);
-      return response.data.data; // Backend retorna { success, data, message }
+      
+      // Processar e salvar notificação retornada pelo backend
+      if (response.data.notification) {
+        await processBackendNotification(response.data.notification);
+        console.log('[CHALLENGE SERVICE] ✅ Notificação processada e salva localmente');
+      }
+      
+      return response.data.data; // Backend retorna { success, data, message, notification }
     } catch (error) {
       console.error('Erro ao completar desafio:', error);
       throw error;

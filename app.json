@@ -29,8 +29,10 @@
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
-        "POST_NOTIFICATIONS"
-      ]
+        "POST_NOTIFICATIONS",
+        "WAKE_LOCK"
+      ],
+      "useNextNotificationsApi": true
     },
     "web": {
       "output": "static",

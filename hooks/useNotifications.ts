@@ -43,13 +43,14 @@ export function useNotifications() {
    * ORDEM CRÍTICA para APK standalone:
    * 1. Criar canal Android (obrigatório)
    * 2. Solicitar permissões
-   * 3. Registrar push token
+   * 3. Registrar push token (SEMPRE, não usar cache)
    * 4. Agendar lembretes
    */
   const setupNotifications = async () => {
     try {
       console.log('===============================================');
       console.log('🔔 INICIANDO SETUP DE NOTIFICAÇÕES');
+      console.log('📅 Timestamp:', new Date().toISOString());
       console.log('===============================================');
       
       // PASSO 1: CRÍTICO - Criar canal Android PRIMEIRO
@@ -64,16 +65,23 @@ export function useNotifications() {
       setPermissionGranted(granted);
       
       if (!granted) {
-        console.log('⚠️ Permissão de notificação não concedida');
+        console.log('⚠️ Permissão de notificação não concedida - continuando sem push');
         setIsReady(true);
         return;
       }
       console.log('✅ Passo 2/4: Permissões concedidas');
 
-      // PASSO 3: Registrar push token no backend
-      console.log('📋 Passo 3/4: Registrando push token...');
-      await registerPushToken();
-      console.log('✅ Passo 3/4: Token registrado');
+      // PASSO 3: Registrar push token no backend (SEMPRE, não confiar em cache)
+      // Token pode mudar entre builds, reinstalações, etc.
+      console.log('📋 Passo 3/4: Registrando push token no backend...');
+      const tokenRegistered = await registerPushToken();
+      
+      if (tokenRegistered) {
+        console.log('✅ Passo 3/4: Token registrado com sucesso');
+      } else {
+        console.warn('⚠️ Passo 3/4: Falha ao registrar token - push pode não funcionar');
+        console.warn('⚠️ Isso é normal em ambiente de dev ou se backend estiver offline');
+      }
       
       // PASSO 4: Verificar preferências e agendar lembretes
       console.log('📋 Passo 4/4: Verificando preferências...');
@@ -143,14 +151,17 @@ export function useNotifications() {
     notificationListener.current = addNotificationReceivedListener(
       async (notification) => {
         const content = notification.request.content;
+        const timestamp = new Date().toISOString();
+        
         console.log('===============================================');
-        console.log('📦 NOTIFICAÇÃO RECEBIDA (APP ABERTO)');
-        console.log('===============================================');
+        console.log('📦 [PUSH RECEBIDO] APP ABERTO');
+        console.log('🕒 Timestamp:', timestamp);
         console.log('📝 Título:', content.title);
         console.log('📝 Corpo:', content.body);
-        console.log('📝 Dados completos:', JSON.stringify(content.data, null, 2));
         console.log('📝 Channel ID:', content.channelId);
         console.log('📝 Som:', content.sound);
+        console.log('📝 Badge:', content.badge);
+        console.log('📝 Dados completos:', JSON.stringify(content.data, null, 2));
         console.log('===============================================');
         
         // Pega userId do usuário logado

@@ -28,9 +28,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCard, BadgeDetailModal, NotificationBell, NotificationsModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authStorage } from '../../services/auth';
-import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import type { BadgeWithProgress } from '../../services/badge';
 import { getBadgesProgress } from '../../services/badge';
+import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import { styles } from '../styles/badges.styles';
 
 // ==========================================

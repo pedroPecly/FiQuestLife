@@ -17,7 +17,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 // ==========================================
 // TIPOS
@@ -124,6 +124,7 @@ export async function ensureNotificationChannelExists(): Promise<void> {
 /**
  * Solicita permissão para enviar notificações
  * Obrigatório para iOS, recomendado para Android
+ * Android 13+ requer permissão runtime explícita
  * 
  * IMPORTANTE: Esta função NÃO cria mais o canal Android
  * O canal deve ser criado ANTES através de ensureNotificationChannelExists()
@@ -131,33 +132,57 @@ export async function ensureNotificationChannelExists(): Promise<void> {
  * @returns true se permissão concedida, false caso contrário
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
-  // Emuladores/simuladores podem ter comportamento limitado para push tokens,
-  // mas ainda podemos tentar configurar permissões para testar notificações locais
+  // Emuladores/simuladores têm comportamento limitado
   if (!Device.isDevice) {
-    console.warn('⚠️ Você está em um simulador/emulador. Push tokens podem não funcionar.');
-  }
-
-  // Verifica permissão atual
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  // Se não tem permissão, solicita
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  // Se permissão negada
-  if (finalStatus !== 'granted') {
-    console.warn('❌ Permissão de notificação negada');
+    console.warn('[PERMISSIONS] ⚠️ Simulador detectado - Push tokens podem não funcionar');
     return false;
   }
 
-  // NOTA: Canal Android é criado em ensureNotificationChannelExists()
-  // Não criamos aqui para evitar problemas de timing
+  console.log('[PERMISSIONS] 📱 Plataforma:', Platform.OS);
+  console.log('[PERMISSIONS] 📱 Versão:', Platform.Version);
 
-  console.log('✅ Permissão de notificação concedida');
-  return true;
+  try {
+    // Verifica permissão atual
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    console.log('[PERMISSIONS] 🔍 Status atual:', existingStatus);
+    
+    let finalStatus = existingStatus;
+
+    // Se não tem permissão, solicita
+    if (existingStatus !== 'granted') {
+      console.log('[PERMISSIONS] 📋 Solicitando permissões...');
+      
+      // Android 13+ (API 33+) requer tratamento especial
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        console.log('[PERMISSIONS] 📱 Android 13+ detectado - Solicitando POST_NOTIFICATIONS');
+      }
+      
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+      
+      console.log('[PERMISSIONS] 📋 Novo status:', finalStatus);
+    }
+
+    // Se permissão negada
+    if (finalStatus !== 'granted') {
+      console.warn('[PERMISSIONS] ❌ Permissão de notificação negada');
+      
+      // Alerta educativo apenas em produção (APK)
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        // Não mostra Alert se usuário explicitamente negou
+        // Apenas loga para não ser intrusivo
+        console.warn('[PERMISSIONS] ℹ️ Para receber notificações, ative nas configurações do app');
+      }
+      
+      return false;
+    }
+
+    console.log('[PERMISSIONS] ✅ Permissão de notificação concedida');
+    return true;
+  } catch (error) {
+    console.error('[PERMISSIONS] ❌ Erro ao solicitar permissões:', error);
+    return false;
+  }
 }
 
 /**
@@ -563,4 +588,87 @@ export async function getScheduledNotifications() {
     console.log(`  - ${notif.content.title} (${notif.content.data?.type})`);
   });
   return scheduled;
+}
+
+/**
+ * 🧪 FUNÇÃO DE TESTE: Envia notificação local imediata
+ * Útil para testar se canal Android está funcionando
+ * Use em um botão de debug no app
+ * 
+ * @returns true se enviou com sucesso
+ */
+export async function sendTestNotification(): Promise<boolean> {
+  try {
+    console.log('🧪 [TESTE] Enviando notificação de teste...');
+    
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '🧪 Teste de Notificação',
+        body: 'Se você vê isso, o sistema de notificações está funcionando!',
+        data: { 
+          type: 'TEST',
+          timestamp: new Date().toISOString(),
+        },
+        channelId: 'default',
+        sound: true,
+        badge: 1,
+      },
+      trigger: null, // Imediato
+    });
+    
+    console.log('✅ [TESTE] Notificação de teste enviada com ID:', notificationId);
+    return true;
+  } catch (error) {
+    console.error('❌ [TESTE] Erro ao enviar notificação de teste:', error);
+    return false;
+  }
+}
+
+/**
+ * 🔍 FUNÇÃO DE DEBUG: Verifica status completo do sistema de notificações
+ * Retorna informações detalhadas para troubleshooting
+ * 
+ * @returns Objeto com status completo
+ */
+export async function getNotificationSystemStatus() {
+  try {
+    const status = {
+      device: {
+        isPhysicalDevice: Device.isDevice,
+        platform: Platform.OS,
+        platformVersion: Platform.Version,
+      },
+      permissions: await Notifications.getPermissionsAsync(),
+      channel: null as any,
+      scheduledNotifications: 0,
+      token: null as string | null,
+    };
+
+    // Verifica canal Android
+    if (Platform.OS === 'android') {
+      status.channel = await Notifications.getNotificationChannelAsync('default');
+    }
+
+    // Conta notificações agendadas
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    status.scheduledNotifications = scheduled.length;
+
+    // Tenta obter token (pode falhar se não tiver permissão)
+    try {
+      const tokenData = await Notifications.getExpoPushTokenAsync({
+        projectId: '3d9c9e4f-42ba-4ac8-b313-1fef0567b711',
+      });
+      status.token = tokenData.data;
+    } catch (error) {
+      console.warn('[DEBUG] Não foi possível obter token:', error);
+    }
+
+    console.log('🔍 [DEBUG] Status do Sistema de Notificações:');
+    console.log(JSON.stringify(status, null, 2));
+
+    return status;
+  } catch (error) {
+    console.error('❌ [DEBUG] Erro ao obter status:', error);
+    return null;
+  }
 }

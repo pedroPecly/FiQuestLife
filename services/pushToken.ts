@@ -14,6 +14,8 @@ import api from './api';
  */
 export async function registerPushToken(): Promise<boolean> {
   try {
+    console.log('[PUSH TOKEN] 📋 Obtendo token do Expo...');
+    
     // Obtém o token do Expo
     const tokenData = await Notifications.getExpoPushTokenAsync({
       projectId: '3d9c9e4f-42ba-4ac8-b313-1fef0567b711',
@@ -22,21 +24,22 @@ export async function registerPushToken(): Promise<boolean> {
     const expoPushToken = tokenData.data;
     
     if (!expoPushToken) {
-      console.log('[PUSH TOKEN] Não foi possível obter token');
+      console.log('[PUSH TOKEN] ❌ Não foi possível obter token');
       return false;
     }
 
-    console.log('[PUSH TOKEN] Token obtido:', expoPushToken);
+    console.log('[PUSH TOKEN] ✅ Token obtido:', expoPushToken);
+    console.log('[PUSH TOKEN] 📤 Enviando token para backend...');
 
     // Envia para o backend
     await api.post('/push-token', { expoPushToken });
     
-    console.log('[PUSH TOKEN] ✅ Token registrado no backend');
+    console.log('[PUSH TOKEN] ✅ Token registrado no backend com sucesso');
     return true;
   } catch (error: any) {
     // Se for erro 401, não mostra erro (usuário não está autenticado)
     if (error.response?.status === 401) {
-      console.log('[PUSH TOKEN] Usuário não autenticado - token não registrado');
+      console.log('[PUSH TOKEN] ℹ️ Usuário não autenticado - token não registrado');
       return false;
     }
     
@@ -46,7 +49,13 @@ export async function registerPushToken(): Promise<boolean> {
       return false;
     }
     
-    console.error('[PUSH TOKEN] Erro ao registrar token:', error);
+    // Outros erros de rede do backend
+    if (error.message?.includes('Network Error') || error.code === 'ECONNREFUSED') {
+      console.log('[PUSH TOKEN] ⚠️ Backend offline ou sem conexão - token não registrado');
+      return false;
+    }
+    
+    console.error('[PUSH TOKEN] ❌ Erro ao registrar token:', error);
     return false;
   }
 }
