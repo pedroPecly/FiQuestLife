@@ -57,6 +57,8 @@ export const verifyAndCompleteChallenge = async (
 
     // Para cada desafio, verifica se o usuário tem ele pendente hoje
     for (const challenge of autoVerifiableChallenges) {
+      console.log(`[AUTO-VERIFY] Verificando desafio: "${challenge.title}"`);
+      
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
@@ -75,7 +77,12 @@ export const verifyAndCompleteChallenge = async (
         },
       });
 
-      if (userChallenge) {
+      if (!userChallenge) {
+        console.log(`[AUTO-VERIFY] Desafio "${challenge.title}" não está pendente para o usuário hoje`);
+        continue;
+      }
+
+      console.log(`[AUTO-VERIFY] Desafio "${challenge.title}" encontrado como PENDENTE, tentando completar...`);
         // FASE 1: Completa desafio e atualiza recompensas (CRÍTICO - transação rápida)
         await prisma.$transaction(async (tx) => {
           // Completa o desafio automaticamente
@@ -243,7 +250,11 @@ export const checkAndAwardBadges = async (
           },
         });
 
-        eventCount = completedToday >= 3 ? completedToday : 0;
+        console.log(`[AUTO-VERIFY] Desafios completados hoje: ${completedToday}`);
+        
+        // Retorna 1 se completou >= 3, senão 0
+        // Isso garante que o desafio seja completado apenas uma vez por dia
+        eventCount = completedToday >= 3 ? 1 : 0;
         break;
 
       default:

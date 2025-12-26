@@ -187,6 +187,18 @@ export const completeChallenge = async (
   // REMOVIDO: Notificação de desafio completado (usuário não quer receber)
   // As notificações para desafios completados foram desativadas a pedido do usuário
 
+  // ✅ VERIFICA DESAFIOS AUTO-COMPLETÁVEIS (ex: "Complete 3 desafios hoje")
+  // Importar dinamicamente para evitar dependência circular
+  try {
+    const { verifyAndCompleteChallenge } = await import('./auto-verify.service.js');
+    // Fire-and-forget: não aguarda para não aumentar latência
+    verifyAndCompleteChallenge(userId, 'DAILY_CHALLENGES_COMPLETED').catch((err) =>
+      console.error('[CHALLENGE] Erro ao verificar desafios auto-completáveis:', err)
+    );
+  } catch (error) {
+    console.error('[CHALLENGE] Erro ao importar auto-verify.service:', error);
+  }
+
   // Busca stats atualizadas
   const updatedUser = await prisma.user.findUnique({
     where: { id: userId },
