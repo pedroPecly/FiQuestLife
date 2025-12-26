@@ -234,7 +234,7 @@ const ProfileScreen = () => {
 
             <StatBox
               icon="star"
-              value={user.xp || 0}
+              value={`${(user.xp || 0) % 1000}/1000`}
               label="XP"
               iconColor="#20B2AA"
             />

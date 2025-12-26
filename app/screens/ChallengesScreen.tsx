@@ -1,3 +1,4 @@
+import { Header } from '@/components/layout';
 import { ChallengeCard, LoadingScreen, NotificationBell, NotificationsModal } from '@/components/ui';
 import { ChallengeInvitesModal } from '@/components/ui/ChallengeInvitesModal';
 import { useAlert } from '@/hooks/useAlert';
@@ -18,12 +19,13 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authStorage } from '../../services/auth';
 import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import { styles } from '../styles/challenges.styles';
 
 export default function ChallengesScreen() {
+  const insets = useSafeAreaInsets();
   const { alert } = useAlert();
   const [user, setUser] = useState<User | null>(null);
   const [challenges, setChallenges] = useState<UserChallenge[]>([]);
@@ -199,45 +201,32 @@ export default function ChallengesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Header 
+        title="Desafios"
+        subtitle="Complete suas missões diárias! 🎯"
+        showNotifications={true}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Header com saudação e stats */}
-        <View style={styles.header}>
-          <Text style={styles.greeting}>Olá, {user?.name || 'Usuário'}! 👋</Text>
-
-          <View style={styles.notificationContainer}>
-            <NotificationBell
-              unreadCount={unreadCount}
-              onPress={() => setFeedVisible(true)}
-              size={26}
-              color="#2F4F4F"
-            />
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statIcon}>🏆</Text>
+            <Text style={styles.statValue}>Nível {user?.level || 1}</Text>
           </View>
 
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statIcon}>🏆</Text>
-              <Text style={styles.statValue}>Nível {user?.level || 1}</Text>
-            </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statIcon}>⭐</Text>
+            <Text style={styles.statValue}>{(user?.xp || 0) % 1000}/1000</Text>
+          </View>
 
-            <View style={styles.statItem}>
-              <Text style={styles.statIcon}>⭐</Text>
-              <Text style={styles.statValue}>{user?.xp || 0}</Text>
-            </View>
-
-            <View style={styles.statItem}>
-              <Text style={styles.statIcon}>💰</Text>
-              <Text style={styles.statValue}>{user?.coins || 0}</Text>
-            </View>
-
-            {/*<View style={styles.statItem}>
-              <Text style={styles.statIcon}>🔥</Text>
-              <Text style={styles.statValue}>{user?.currentStreak || 0}</Text>
-            </View>*/}
+          <View style={styles.statItem}>
+            <Text style={styles.statIcon}>💰</Text>
+            <Text style={styles.statValue}>{user?.coins || 0}</Text>
           </View>
         </View>
 
@@ -323,6 +312,6 @@ export default function ChallengesScreen() {
           loadPendingInvitesCount();
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }

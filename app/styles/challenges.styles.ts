@@ -32,26 +32,17 @@ export const styles = StyleSheet.create({
   },
 
   // ==========================================
-  // HEADER (SAUDAÇÃO E STATS)
+  // STATS ROW
   // ==========================================
-  header: {
-    width: '100%',
-    maxWidth: 500, // Padrão do projeto
-    marginBottom: 24,
-  },
-
-  greeting: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#2F4F4F', // Cor padrão de títulos do projeto
-    marginBottom: 16,
-  },
-
   statsRow: {
+    width: '100%',
+    maxWidth: 500,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    flexWrap: 'wrap', // Permite quebra controlada
+    flexWrap: 'wrap',
+    marginBottom: 20,
   },
 
   levelBadge: {

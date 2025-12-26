@@ -289,7 +289,7 @@ export default function UserProfileScreen() {
 
             <StatBox icon="trophy" value={profile.user.level || 1} label="Level" iconColor="#FFD700" />
 
-            <StatBox icon="star" value={profile.user.xp || 0} label="XP" iconColor="#20B2AA" />
+            <StatBox icon="star" value={`${(profile.user.xp || 0) % 1000}/1000`} label="XP" iconColor="#20B2AA" />
           </View>
 
           <View style={styles.statsContainer}>
