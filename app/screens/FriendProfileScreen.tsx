@@ -264,14 +264,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap', // Mantém stats na mesma linha
     paddingHorizontal: 20,
-    gap: 8,
     marginBottom: 16,
     justifyContent: 'space-between',
+    overflow: 'hidden', // Garante que nada saia
   },
   stat: {
     flex: 1,
-    minWidth: 80,
+    maxWidth: 120,
     flexShrink: 1,
+    flexBasis: 0,
   },
   section: {
     backgroundColor: '#FFFFFF',

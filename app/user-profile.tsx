@@ -17,12 +17,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View
+    ActivityIndicator,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     marginTop: 10,
     marginBottom: 20,
-    gap: 4,
+    overflow: 'hidden', // Garante que nada saia
   },
   actionButtonContainer: {
     width: '100%',

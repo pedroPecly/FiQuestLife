@@ -222,7 +222,7 @@ export const styles = StyleSheet.create({
     alignItems: 'stretch',
     marginTop: 10,
     marginBottom: 20,
-    gap: 4,
+    overflow: 'hidden', // Garante que nada saia do container
   },
 
   /**
@@ -235,11 +235,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F0F8FF', // Azul muito claro
     borderRadius: 10,
-    padding: 12,
+    padding: 10,
     flex: 1,
-    minWidth: 90,
+    maxWidth: 120,
     flexShrink: 1,
-    marginHorizontal: 4,
+    flexBasis: 0,
+    marginHorizontal: 3,
     marginVertical: 4,
   },
 

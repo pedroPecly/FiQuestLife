@@ -83,62 +83,62 @@ export const verifyAndCompleteChallenge = async (
       }
 
       console.log(`[AUTO-VERIFY] Desafio "${challenge.title}" encontrado como PENDENTE, tentando completar...`);
-        // FASE 1: Completa desafio e atualiza recompensas (CRÍTICO - transação rápida)
-        await prisma.$transaction(async (tx) => {
-          // Completa o desafio automaticamente
-          await tx.userChallenge.update({
-            where: { id: userChallenge.id },
-            data: {
-              status: 'COMPLETED',
-              completedAt: new Date(),
-              progress: 100,
-            },
-          });
-
-          // Atualiza XP e moedas do usuário
-          await tx.user.update({
-            where: { id: userId },
-            data: {
-              xp: { increment: challenge.xpReward },
-              coins: { increment: challenge.coinsReward },
-            },
-          });
+      
+      // FASE 1: Completa desafio e atualiza recompensas (CRÍTICO - transação rápida)
+      await prisma.$transaction(async (tx) => {
+        // Completa o desafio automaticamente
+        await tx.userChallenge.update({
+          where: { id: userChallenge.id },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+            progress: 100,
+          },
         });
 
-        console.log(`[AUTO-VERIFY] ✅ Desafio "${challenge.title}" completado automaticamente!`);
-        console.log(`[AUTO-VERIFY] +${challenge.xpReward} XP, +${challenge.coinsReward} moedas`);
+        // Atualiza XP e moedas do usuário
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            xp: { increment: challenge.xpReward },
+            coins: { increment: challenge.coinsReward },
+          },
+        });
+      });
 
-        // FASE 2: Registra histórico de recompensas (AUDITORIA - separado, não-crítico)
-        try {
-          if (challenge.xpReward > 0) {
-            await prisma.rewardHistory.create({
-              data: {
-                userId,
-                type: 'XP',
-                amount: challenge.xpReward,
-                source: 'CHALLENGE_COMPLETION',
-                sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
-                description: `Desafio "${challenge.title}" completado automaticamente`,
-              },
-            });
-          }
+      console.log(`[AUTO-VERIFY] ✅ Desafio "${challenge.title}" completado automaticamente!`);
+      console.log(`[AUTO-VERIFY] +${challenge.xpReward} XP, +${challenge.coinsReward} moedas`);
 
-          if (challenge.coinsReward > 0) {
-            await prisma.rewardHistory.create({
-              data: {
-                userId,
-                type: 'COINS',
-                amount: challenge.coinsReward,
-                source: 'CHALLENGE_COMPLETION',
-                sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
-                description: `Desafio "${challenge.title}" completado automaticamente`,
-              },
-            });
-          }
-        } catch (auditError) {
-          // Falha no histórico não afeta conclusão do desafio
-          console.error('[AUTO-VERIFY] ⚠️ Erro ao registrar histórico (desafio já completado):', auditError);
+      // FASE 2: Registra histórico de recompensas (AUDITORIA - separado, não-crítico)
+      try {
+        if (challenge.xpReward > 0) {
+          await prisma.rewardHistory.create({
+            data: {
+              userId,
+              type: 'XP',
+              amount: challenge.xpReward,
+              source: 'CHALLENGE_COMPLETION',
+              sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
+              description: `Desafio "${challenge.title}" completado automaticamente`,
+            },
+          });
         }
+
+        if (challenge.coinsReward > 0) {
+          await prisma.rewardHistory.create({
+            data: {
+              userId,
+              type: 'COINS',
+              amount: challenge.coinsReward,
+              source: 'CHALLENGE_COMPLETION',
+              sourceId: userChallenge.id, // ID do UserChallenge, não do Challenge
+              description: `Desafio "${challenge.title}" completado automaticamente`,
+            },
+          });
+        }
+      } catch (auditError) {
+        // Falha no histórico não afeta conclusão do desafio
+        console.error('[AUTO-VERIFY] ⚠️ Erro ao registrar histórico (desafio já completado):', auditError);
       }
     }
   } catch (error) {

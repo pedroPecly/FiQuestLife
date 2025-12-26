@@ -17,9 +17,9 @@ export const StatBox: React.FC<StatBoxProps> = ({
 }) => {
   return (
     <View style={styles.box}>
-      <MaterialCommunityIcons name={icon as any} size={28} color={iconColor} />
+      <MaterialCommunityIcons name={icon as any} size={24} color={iconColor} />
       <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
-      <Text style={styles.label} numberOfLines={1}>{label}</Text>
+      <Text style={styles.label} numberOfLines={1} ellipsizeMode="tail">{label}</Text>
     </View>
   );
 };
@@ -29,25 +29,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F0F8FF',
     borderRadius: 10,
-    padding: 12,
+    padding: 10,
     flex: 1,
-    minWidth: 90, // Largura mínima para evitar quebras
-    flexShrink: 1, // Permite encolher se necessário
-    marginHorizontal: 4,
+    maxWidth: 120, // Largura máxima, mas pode encolher
+    flexShrink: 1, // Permite encolher proporcionalmente
+    flexBasis: 0, // Distribui espaço igualmente
+    marginHorizontal: 3,
     marginVertical: 4,
   },
   value: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#007BFF',
-    marginTop: 4,
+    marginTop: 3,
     textAlign: 'center',
     width: '100%',
+    flexShrink: 1,
   },
   label: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#666',
-    marginTop: 4,
+    marginTop: 3,
     textAlign: 'center',
     width: '100%',
     flexShrink: 1,

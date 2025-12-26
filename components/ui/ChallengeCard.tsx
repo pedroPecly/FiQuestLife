@@ -1,11 +1,11 @@
 import { useAlert } from '@/hooks/useAlert';
 import {
-  CATEGORY_COLORS,
-  CATEGORY_ICONS,
-  CATEGORY_LABELS,
-  DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
-  UserChallenge,
+    CATEGORY_COLORS,
+    CATEGORY_ICONS,
+    CATEGORY_LABELS,
+    DIFFICULTY_COLORS,
+    DIFFICULTY_LABELS,
+    UserChallenge,
 } from '@/services/challenge';
 import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/challengeInvitation';
 import { Ionicons } from '@expo/vector-icons';
