@@ -16,9 +16,9 @@
 import type { ChallengeCategory } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import {
-  notifyBadgeEarned,
-  notifyLevelUp,
-  notifyStreakMilestone,
+    notifyBadgeEarned,
+    notifyLevelUp,
+    notifyStreakMilestone,
 } from './notification.service.js';
 
 /**

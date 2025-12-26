@@ -421,10 +421,12 @@ const styles = StyleSheet.create({
   statsContainer: {
     width: '100%',
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    flexWrap: 'nowrap', // Mantém stats na mesma linha
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
     marginTop: 10,
     marginBottom: 20,
+    gap: 4,
   },
   actionButtonContainer: {
     width: '100%',

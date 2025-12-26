@@ -211,33 +211,36 @@ export const styles = StyleSheet.create({
   
   /**
    * Container das estatísticas (XP, Level, Moedas, etc)
-   * - flexWrap: 'wrap' permite quebra de linha em telas pequenas
-   * - Responsivo: 3 colunas em telas grandes, 2 colunas em mobile
+   * - flexWrap: 'nowrap' mantém todos na mesma linha
+   * - Responsivo: 3 colunas fixas, redimensiona proporcionalmente
    */
   statsContainer: {
     width: '100%',
     flexDirection: 'row',
-    flexWrap: 'wrap', // Permite quebra de linha em telas pequenas
-    justifyContent: 'space-around',
+    flexWrap: 'nowrap', // Mantém todos na mesma linha
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
     marginTop: 10,
     marginBottom: 20,
+    gap: 4,
   },
 
   /**
    * Caixa individual de estatística
-   * - minWidth: 100px garante tamanho mínimo mesmo em telas pequenas
    * - flex: 1 distribui espaço igualmente
-   * - marginVertical: 5 adiciona espaço quando há quebra de linha
+   * - flexShrink: 1 permite encolher se necessário
+   * - minWidth garante legibilidade mínima
    */
   statBox: {
     alignItems: 'center',
     backgroundColor: '#F0F8FF', // Azul muito claro
     borderRadius: 10,
-    padding: 15,
+    padding: 12,
     flex: 1,
-    minWidth: 100, // Largura mínima para cada stat (responsividade)
-    marginHorizontal: 5,
-    marginVertical: 5, // Espaço vertical quando quebra linha
+    minWidth: 90,
+    flexShrink: 1,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
 
   /**

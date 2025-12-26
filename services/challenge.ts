@@ -1,5 +1,5 @@
-import api from './api';
 import { processBackendNotification } from '../utils/notificationHelper';
+import api from './api';
 
 // ==========================================
 // INTERFACES

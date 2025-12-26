@@ -10,10 +10,10 @@
  */
 
 import { authStorage } from '../services/auth';
-import { 
-  saveLocalNotification, 
-  LocalNotificationType,
-  getLocalNotifications,
+import {
+    LocalNotificationType,
+    getLocalNotifications,
+    saveLocalNotification,
 } from '../services/localNotificationStorage';
 
 // ==========================================

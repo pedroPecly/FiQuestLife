@@ -50,8 +50,8 @@ export const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    flexWrap: 'wrap', // Permite quebra de linha em telas pequenas
+    gap: 8,
+    flexWrap: 'wrap', // Permite quebra controlada
   },
 
   levelBadge: {
@@ -59,6 +59,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    flexShrink: 0, // Não encolhe
   },
 
   levelText: {
@@ -75,6 +76,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     gap: 4,
+    flexShrink: 0, // Não encolhe, quebra linha se necessário
     // Sombra leve
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -91,6 +93,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#2F4F4F', // Cor padrão do projeto
+    flexShrink: 0,
   },
 
   // ==========================================

@@ -24,8 +24,8 @@ export const InfoRow: React.FC<InfoRowProps> = ({
         style={styles.icon}
       />
       <View style={styles.content}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+        <Text style={styles.label} numberOfLines={1}>{label}</Text>
+        <Text style={styles.value} numberOfLines={1}>{value}</Text>
       </View>
     </View>
   );

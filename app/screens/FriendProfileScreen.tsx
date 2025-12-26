@@ -262,14 +262,16 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexWrap: 'nowrap', // Mantém stats na mesma linha
     paddingHorizontal: 20,
-    gap: 12,
+    gap: 8,
     marginBottom: 16,
+    justifyContent: 'space-between',
   },
   stat: {
     flex: 1,
-    minWidth: '45%',
+    minWidth: 80,
+    flexShrink: 1,
   },
   section: {
     backgroundColor: '#FFFFFF',

@@ -119,8 +119,8 @@ export default function ChallengeCard({
         </View>
 
         {/* Título e descrição */}
-        <Text style={styles.title}>{challenge.title}</Text>
-        <Text style={styles.description}>{challenge.description}</Text>
+        <Text style={styles.title} numberOfLines={2}>{challenge.title}</Text>
+        <Text style={styles.description} numberOfLines={3}>{challenge.description}</Text>
 
         {/* Badge de foto obrigatória */}
         {challenge.requiresPhoto && (
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    flexWrap: 'wrap',
+    flexWrap: 'wrap', // Permite quebra se necessário
     gap: 8,
   },
   categoryBadge: {
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     gap: 6,
+    flexShrink: 0, // Não encolhe
   },
   categoryIcon: {
     fontSize: 14,
@@ -291,6 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    flexShrink: 0, // Não encolhe
   },
   difficultyText: {
     color: '#FFFFFF',
@@ -302,12 +304,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#2F4F4F', // Cor padrão do projeto
     marginBottom: 8,
+    flexShrink: 1, // Permite encolher
   },
   description: {
     fontSize: 14,
     color: '#666', // Cor padrão do projeto
     lineHeight: 20,
     marginBottom: 16,
+    flexShrink: 1, // Permite encolher
   },
   photoBadge: {
     backgroundColor: '#EFF6FF',
