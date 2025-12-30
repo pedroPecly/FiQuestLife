@@ -78,7 +78,6 @@ activity.post('/batch-sync', async (c) => {
         },
         data: {
           progress: result.currentValue,
-          updatedAt: new Date(timestamp),
         },
       })
     );
