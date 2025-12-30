@@ -18,7 +18,8 @@ import {
     getHistory,
 } from '../controllers/challenge.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { prisma } from '../config/database.js';
+import { prisma } from '../lib/prisma.js';
+import { getUserId } from '../utils/context.helpers.js';
 
 const challengeRoutes = new Hono();
 
@@ -38,7 +39,7 @@ challengeRoutes.get('/daily', getDailyChallenges);
  */
 challengeRoutes.get('/active-with-tracking', async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = getUserId(c);
 
     const userChallenges = await prisma.userChallenge.findMany({
       where: {

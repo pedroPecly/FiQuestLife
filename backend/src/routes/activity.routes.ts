@@ -11,7 +11,8 @@
 import { Hono } from 'hono';
 import * as activityController from '../controllers/activity.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { prisma } from '../config/database.js';
+import { prisma } from '../lib/prisma.js';
+import { getUserId } from '../utils/context.helpers.js';
 
 const activity = new Hono();
 
@@ -58,7 +59,7 @@ activity.get('/history', activityController.getActivityHistory);
  */
 activity.post('/batch-sync', async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = getUserId(c);
     const { results, timestamp } = await c.req.json();
 
     if (!Array.isArray(results) || results.length === 0) {
