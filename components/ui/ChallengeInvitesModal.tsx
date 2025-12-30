@@ -9,24 +9,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-    acceptChallengeInvite,
-    ChallengeInvitation,
-    getPendingInvites,
-    rejectChallengeInvite,
+  acceptChallengeInvite,
+  ChallengeInvitation,
+  getPendingInvites,
+  rejectChallengeInvite,
 } from '../../services/challengeInvitation';
 import { getTimeUntilExpiration, isInvitationExpired } from '../../utils/invitationUtils';
 import { Avatar } from './Avatar';
+import { BottomSheetModal } from './BottomSheetModal';
 
 interface ChallengeInvitesModalProps {
   visible: boolean;
@@ -39,7 +38,6 @@ export function ChallengeInvitesModal({
   onClose,
   onInviteProcessed,
 }: ChallengeInvitesModalProps) {
-  const insets = useSafeAreaInsets();
   const [invites, setInvites] = useState<ChallengeInvitation[]>([]);
   const [loading, setLoading] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -232,71 +230,37 @@ export function ChallengeInvitesModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-          {/* Header */}
-          <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
-            <Text style={styles.title}>Convites de Desafios</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={28} color="#666" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Content */}
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#20B2AA" />
-            </View>
-          ) : invites.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="mail-open-outline" size={64} color="#CCC" />
-              <Text style={styles.emptyText}>Nenhum convite pendente</Text>
-              <Text style={styles.emptySubtext}>
-                Quando seus amigos te desafiarem, os convites aparecerão aqui!
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={invites}
-              renderItem={renderInviteItem}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContent}
-              showsVerticalScrollIndicator={false}
-            />
-          )}
+    <BottomSheetModal
+      visible={visible}
+      onClose={onClose}
+      title="Convites de Desafios"
+    >
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
         </View>
-      </View>
-    </Modal>
+      ) : invites.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="mail-open-outline" size={64} color="#CCC" />
+          <Text style={styles.emptyText}>Nenhum convite pendente</Text>
+          <Text style={styles.emptySubtext}>
+            Quando seus amigos te desafiarem, os convites aparecerão aqui!
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={invites}
+          renderItem={renderInviteItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '85%',
-    paddingBottom: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',

@@ -160,7 +160,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="badges"
         options={{
-          title: 'Conquistas',
+          title: 'Troféus',
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
               name={focused ? 'shield-star' : 'shield-star-outline'}

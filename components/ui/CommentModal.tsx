@@ -109,13 +109,18 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.flex}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.flex}
+        keyboardVerticalOffset={0}
+      >
         <View style={styles.modalOverlay}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-            style={styles.modalContainer}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-          >
+          <View style={styles.modalContainer}>
+            {/* Barra de arrasto */}
+            <View style={styles.dragIndicatorContainer}>
+              <View style={styles.dragIndicator} />
+            </View>
+
             {/* Header */}
             <View style={styles.header}>
               <Text style={styles.title}>Comentários</Text>
@@ -133,10 +138,11 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={true}
+              keyboardDismissMode="on-drag"
             >
               {loading ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#20B2AA" />
+                  <ActivityIndicator size="large" color="#007AFF" />
                 </View>
               ) : comments.length === 0 ? (
                 <View style={styles.emptyContainer}>
@@ -167,7 +173,7 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
             </ScrollView>
 
             {/* Input de comentário - fixo no bottom */}
-            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom - 8, 8) }]}>
+            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
               <TextInput
                 ref={inputRef}
                 style={styles.input}
@@ -193,9 +199,9 @@ export function CommentModal({ visible, activityId, onClose, onCommentAdded, onC
                 )}
               </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -213,15 +219,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
-    minHeight: 400,
+    height: '80%',
+  },
+  dragIndicatorContainer: {
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  dragIndicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#DDD',
+    borderRadius: 2,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
     backgroundColor: '#FFF',
@@ -292,7 +308,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#EEE',
     backgroundColor: '#FFF',

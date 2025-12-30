@@ -182,9 +182,9 @@ export const BadgesScreen = () => {
       {/* Header */}
       <View style={styles.headerWrapper}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>🏆 Conquistas</Text>
+          <Text style={styles.headerTitle}>🏆 Troféus</Text>
           <Text style={styles.headerSubtitle}>
-            {earnedCount}/{totalCount} conquistas desbloqueadas
+            {earnedCount}/{totalCount} troféus desbloqueados
           </Text>
         </View>
         
