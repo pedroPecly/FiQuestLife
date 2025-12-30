@@ -1,5 +1,6 @@
 export { ActivityFeedItem } from './ActivityFeedItem';
 export { ActivityRewardBadges } from './ActivityRewardBadges';
+export { ActivityTrackerModal } from './ActivityTrackerModal';
 export { AlertModal } from './AlertModal';
 export { Avatar } from './Avatar';
 export { BadgeCard } from './BadgeCard';
@@ -33,6 +34,7 @@ export { SearchBar } from './SearchBar';
 export type { SearchBarProps } from './SearchBar';
 export { SettingsMenuItem } from './SettingsMenuItem';
 export { StatBox } from './StatBox';
+export { StepCounterWidget } from './StepCounterWidget';
 export { Tab, TabBar } from './TabBar';
 export type { TabBarProps } from './TabBar';
 export { Tag } from './Tag';

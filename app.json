@@ -13,7 +13,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.fiquestlife.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSMotionUsageDescription": "FiQuestLife precisa acessar o sensor de movimento para contar seus passos e rastrear suas atividades físicas.",
+        "NSLocationWhenInUseUsageDescription": "FiQuestLife precisa da sua localização para rastrear a distância percorrida durante atividades físicas como corrida e caminhada.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "FiQuestLife precisa da sua localização para rastrear atividades físicas mesmo em segundo plano, permitindo que você complete desafios automaticamente."
       }
     },
     "android": {
@@ -30,7 +33,11 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "POST_NOTIFICATIONS",
-        "WAKE_LOCK"
+        "WAKE_LOCK",
+        "ACTIVITY_RECOGNITION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE"
       ],
       "useNextNotificationsApi": true
     },
@@ -40,6 +47,16 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "FiQuestLife precisa da sua localização para rastrear atividades físicas como corrida e caminhada.",
+          "locationWhenInUsePermission": "FiQuestLife precisa da sua localização para rastrear a distância percorrida durante atividades físicas.",
+          "locationAlwaysPermission": "FiQuestLife precisa da sua localização para rastrear atividades físicas mesmo em segundo plano, permitindo que você complete desafios automaticamente.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
       [
         "expo-splash-screen",
         {

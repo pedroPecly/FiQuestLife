@@ -42,6 +42,7 @@ model User {
   inventory              UserInventory[]
   purchases              Purchase[]
   activeBoosts           ActiveBoost[]
+  activityTracking       ActivityTracking[]
 
   @@map("users")
 }
@@ -65,6 +66,9 @@ model Challenge {
   requiresPhoto  Boolean             @default(false) @map("requires_photo")
   autoVerifiable Boolean             @default(false) @map("auto_verifiable")
   verificationEvent String?          @map("verification_event")
+  trackingType   TrackingType?       @map("tracking_type")
+  targetValue    Int?                @map("target_value")
+  targetUnit     String?             @map("target_unit")
   createdAt      DateTime            @default(now()) @map("created_at")
   updatedAt      DateTime            @updatedAt @map("updated_at")
   userChallenges UserChallenge[]
@@ -94,6 +98,10 @@ model UserChallenge {
   notes       String?
   photoUrl    String?         @map("photo_url")
   caption     String?
+  steps       Int?
+  distance    Float?
+  duration    Int?
+  activityData Json?          @map("activity_data")
   challenge   Challenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   challengeInvitation ChallengeInvitation?
@@ -525,4 +533,44 @@ model ActiveBoost {
 
   @@index([userId, isActive, expiresAt])
   @@map("active_boosts")
+}
+
+/// *
+/// * Rastreamento de Atividades Físicas
+/// * 
+/// * Registra atividades físicas do usuário para rastreamento de passos,
+/// * distância, duração e rotas GPS.
+/// * Usado para auto-verificação de desafios que requerem sensores.
+/// * Exemplos:
+/// * - Caminhada de 30 minutos
+/// * - Corrida de 5km
+/// * - 10.000 passos
+model ActivityTracking {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  challengeId  String?  @map("challenge_id")
+  activityType String   @map("activity_type")
+  steps        Int?
+  distance     Float?
+  duration     Int
+  startTime    DateTime @map("start_time")
+  endTime      DateTime @map("end_time")
+  routeData    Json?    @map("route_data")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startTime])
+  @@map("activity_tracking")
+}
+
+/// *
+/// * Tipos de Rastreamento de Atividades
+/// * 
+/// * Define como o progresso de um desafio é medido
+enum TrackingType {
+  STEPS
+  DISTANCE
+  DURATION
+  ALTITUDE
+  MANUAL
 }

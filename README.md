@@ -197,6 +197,7 @@ FiQuestLife/
 │   │   ├── AlertModal.tsx    # Modal profissional de alertas (4 tipos)
 │   │   ├── Avatar.tsx        # Avatar circular com iniciais
 │   │   ├── BadgeCard.tsx     # 🆕 Card de badge/conquista com progresso (Sprint 7)
+│   │   ├── ActivityTrackerModal.tsx # 🆕 Modal de rastreamento de atividades (Sprint 17)
 │   │   ├── BadgeDetailModal.tsx # 🆕 Modal de detalhes do badge
 │   │   ├── BadgeItem.tsx     # 🆕 Item de badge reutilizável (2 variantes: full/mini)
 │   │   ├── BottomSheetModal.tsx # 🆕 Modal bottom sheet genérico (Sprint 13)
@@ -229,6 +230,7 @@ FiQuestLife/
 │   │   ├── ShopItemCard.tsx  # 🆕 Card de item da loja (Sprint 16)
 │   │   ├── ShopPurchaseModal.tsx # 🆕 Modal de compra da loja (Sprint 16)
 │   │   ├── StatBox.tsx       # Caixa de estatística gamificada
+│   │   ├── StepCounterWidget.tsx # 🆕 Widget de progresso de atividades (Sprint 17)
 │   │   ├── TabBar.tsx        # 🆕 Sistema de abas horizontal reutilizável (Sprint 13)
 │   │   ├── Tag.tsx           # Badge/Tag com ícone
 │   │   ├── UserSearchCard.tsx # 🆕 Card de resultado de busca de usuário (Sprint 11)
@@ -256,6 +258,7 @@ FiQuestLife/
 │
 ├── services/                  # 🌐 Comunicação com API
 │   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
+│   ├── activity.ts           # 🆕 Serviço de rastreamento de atividades (Sprint 17)
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
@@ -264,9 +267,11 @@ FiQuestLife/
 │   ├── feedInteractions.ts   # 🆕 Serviço de curtidas/comentários (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
 │   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
+│   ├── location.ts           # 🆕 Serviço de GPS e distância (Sprint 17)
 │   ├── localNotificationStorage.ts # 🆕 Armazenamento local de notificações
 │   ├── notificationNavigation.ts # 🆕 Navegação de notificações (Sprint 14)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
+│   ├── pedometer.ts          # 🆕 Serviço de contagem de passos (Sprint 17)
 │   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
 │   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
 │   ├── shop.ts               # 🆕 Serviço de loja e inventário (Sprint 16)
@@ -282,6 +287,7 @@ FiQuestLife/
 ├── backend/                   # 🔧 Backend (Node.js + Hono)
 │   ├── src/
 │   │   ├── controllers/      # 🎯 Controladores da API
+│   │   │   ├── activity.controller.ts   # 🆕 Rastreamento de atividades (5 endpoints - Sprint 17)
 │   │   │   ├── auth.controller.ts       # Login, Register, Profile
 │   │   │   ├── badge.controller.ts      # 🆕 Gerenciamento de badges (3 endpoints)
 │   │   │   ├── challenge.controller.ts  # 🆕 Gerenciamento de desafios (4 endpoints)
@@ -296,6 +302,7 @@ FiQuestLife/
 │   │   │   ├── shop.controller.ts       # 🆕 Loja e inventário (7 endpoints - Sprint 16)
 │   │   │   └── user.controller.ts       # 🆕 Perfis públicos (Sprint 12)
 │   │   ├── services/         # 🔧 Lógica de Negócio
+│   │   │   ├── activity.service.ts      # 🆕 7 funções de rastreamento (Sprint 17)
 │   │   │   ├── auto-verify.service.ts   # 🆕 Auto-verificação de desafios sociais (354 linhas)
 │   │   │   ├── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
 │   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
@@ -308,6 +315,7 @@ FiQuestLife/
 │   │   │   ├── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
 │   │   │   └── shop.service.ts          # 🆕 Loja/inventário (7 funções, 775 linhas - Sprint 16)
 │   │   ├── routes/           # 🛣️ Definição de rotas
+│   │   │   ├── activity.routes.ts       # 🆕 Rotas de rastreamento (protegidas - Sprint 17)
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
 │   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
@@ -334,7 +342,7 @@ FiQuestLife/
 │   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (15 models)
 │   │   ├── seed.ts           # 🌱 Seed de badges (29 badges tradicionais)
 │   │   ├── add-badges.ts     # 🆕 Seed de badges progressivos (18 badges sociais)
-│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (43 desafios base)
+│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (52 desafios: 42 base + 10 com rastreamento)
 │   │   ├── add-challenges.ts # 🆕 Seed de desafios sociais auto-verificáveis (7 desafios)
 │   │   ├── migrations/       # Histórico de mudanças do DB (12 migrations)
 │   │   │   ├── migration_lock.toml
@@ -349,7 +357,8 @@ FiQuestLife/
 │   │   │   ├── 20251201_add_social_features/ # 🆕 Auto-verificação (autoVerifiable, verificationEvent)
 │   │   │   ├── 20251201_make_imageurl_optional/ # 🆕 Badge.imageUrl opcional
 │   │   │   ├── 20251201_add_social_badge_enums/ # 🆕 BadgeCategory.SOCIAL + BadgeRequirementType.EVENT_COUNT
-│   │   │   └── 20251202_add_shop_system/ # 🆕 Sistema de loja (ShopItem, UserInventory, ActiveBoost, Purchase)
+│   │   │   ├── 20251202_add_shop_system/ # 🆕 Sistema de loja (ShopItem, UserInventory, ActiveBoost, Purchase)
+│   │   │   └── 20251230174817_add_activity_tracking_system/ # 🆕 Sistema de rastreamento (Sprint 17)
 │   │   └── scripts/
 │   │       └── clear-database.sql # Script para limpar DB
 │   ├── .env                  # 🔐 Variáveis de ambiente (não versionado)
@@ -460,6 +469,68 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Dezembro de 2025**
+- ✅ **Sprint 17: Sistema de Rastreamento de Atividades** (30/12/2025)
+  - **Rastreamento Automático de Atividades Físicas:**
+    - 3 tipos de rastreamento: STEPS (passos), DISTANCE (distância), DURATION (duração)
+    - Contagem de passos via Expo Pedometer (sensor de movimento)
+    - Rastreamento GPS de distância via Expo Location (fórmula Haversine)
+    - Timer de duração para exercícios
+    - Completamento automático ao atingir meta
+  - **10 Desafios com Rastreamento Automático:**
+    - STEPS: Caminhar 5.000 passos (60 XP), 10.000 passos (100 XP), 15.000 passos (150 XP)
+    - DISTANCE: Caminhar 2km (50 XP), Correr 3km (100 XP), Correr 5km (150 XP), Ciclismo 30min (100 XP)
+    - DURATION: Exercício 15min (40 XP), Caminhada 30min (50 XP), Treino 45min (140 XP)
+  - **ActivityTrackerModal Profissional:**
+    - Interface completa com cronômetro e progresso em tempo real
+    - Botões Pausar/Retomar/Finalizar
+    - Círculo de progresso com percentual visual
+    - Integração simultânea pedômetro + GPS + timer
+    - Sincronização automática com backend ao finalizar
+    - Validação de permissões (iOS/Android)
+  - **StepCounterWidget:**
+    - Widget compacto de progresso para ChallengeCard
+    - Barra de progresso com cores dinâmicas
+    - Ícones contextuais (👣 passos, 📍 km, ⏱️ minutos)
+    - Formatação profissional de valores
+    - Atualização em tempo real
+  - **Backend Activity System:**
+    - activity.service.ts: 7 funções (trackActivity, updateChallengeProgress, getDailyActivity, getDailyStats, getActivityHistory, checkAndCompleteActivityChallenges, ...)
+    - activity.controller.ts: 5 endpoints REST (/track, /challenges/:id/progress, /daily, /stats, /history)
+    - activity.routes.ts: Rotas protegidas com authMiddleware
+    - ActivityTracking model: Auditoria completa com steps, distance, duration, startTime, endTime, routeData
+  - **Schema do Banco Atualizado:**
+    - TrackingType enum: STEPS, DISTANCE, DURATION, ALTITUDE, MANUAL
+    - Challenge: +trackingType?, +targetValue?, +targetUnit?
+    - UserChallenge: +steps?, +distance?, +duration?, +activityData?
+    - ActivityTracking model: 13 campos (userId, challengeId, activityType, steps, distance, duration, startTime, endTime, routeData, metadata, timestamps)
+  - **Sensores e Permissões:**
+    - Expo Sensors ~15.0.7 (Pedometer)
+    - Expo Location ~18.0.11 (GPS com Haversine)
+    - Expo Task Manager ~12.0.4 (background tasks - produção)
+    - Permissões iOS/Android configuradas em app.json
+    - Tratamento de compatibilidade com Expo Go
+  - **Frontend Services:**
+    - services/pedometer.ts: Rastreamento de sessão com baseline
+    - services/location.ts: GPS com múltiplos métodos (haversine, isTracking, getDistance)
+    - services/activity.ts: Wrapper de API com TypeScript
+  - **Integração com ChallengeCard:**
+    - Botão "Iniciar Rastreamento" para desafios com trackingType
+    - StepCounterWidget mostra progresso atual
+    - Badge "Completa automaticamente" escondido para desafios rastreáveis
+    - Modal aparece automaticamente ao clicar
+  - **Testado em Dispositivo Real:**
+    - iPhone com Expo Go
+    - Pedômetro: 16 passos contados com precisão
+    - GPS: Coordenadas e altitude obtidas
+    - Todos os 5 endpoints da API testados com sucesso
+  - **Código Production-Ready:**
+    - TypeScript 100% tipado
+    - Tratamento completo de erros
+    - Validações de permissões
+    - JSDoc em todos os serviços
+    - Migration aplicada: 20251230174817_add_activity_tracking_system
+    - 52 desafios no seed (10 com rastreamento automático)
+
 - ✅ **Sprint 16: Sistema de Loja e Inventário** (02/12/2025)
   - **Economia Virtual Completa:**
     - 4 tipos de itens: Cosméticos, Consumíveis, Boosts, Pacotes
@@ -645,8 +716,9 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 - ✅ **Sistema de Notificações** - Push notifications com 5 tipos e lembretes agendados
 - ✅ **Sistema de Badges** - 29 conquistas em 5 categorias com 4 raridades
 - ✅ **Edição de Perfil** - Upload de foto, validações, campos completos
-- ✅ **Desafios Diários** - 43 desafios em 8 categorias com atribuição automática
+- ✅ **Desafios Diários** - 52 desafios em 8 categorias com atribuição automática (10 com rastreamento)
 - ✅ **Gamificação Base** - XP, níveis, moedas, streaks completos
+- ✅ **Sistema de Rastreamento de Atividades** - Contagem automática de passos, distância e duração
 
 ---
 

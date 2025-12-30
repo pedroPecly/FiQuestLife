@@ -18,6 +18,7 @@ import { logger } from 'hono/logger'; // Mostra logs no terminal de cada requisi
 
 // Importa nossas coisas personalizadas
 import { errorMiddleware } from './middlewares/error.middleware.js';
+import activityRoutes from './routes/activity.routes.js';
 import authRoutes from './routes/auth.js';
 import badgeRoutes from './routes/badge.routes.js';
 import challengeInvitationRoutes from './routes/challenge-invitation.routes.js';
@@ -123,6 +124,9 @@ app.route('/push-token', pushTokenRoutes);
 
 // Registra as rotas da loja (/shop/items, /shop/purchase, /shop/inventory)
 app.route('/shop', shopRoutes);
+
+// Registra as rotas de atividades físicas (/activity/track, /activity/stats)
+app.route('/activity', activityRoutes);
 
 // ============================================
 // TRATAMENTO DE ERROS

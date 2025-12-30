@@ -1,5 +1,5 @@
 import { Header } from '@/components/layout';
-import { ChallengeCard, LoadingScreen, NotificationBell, NotificationsModal } from '@/components/ui';
+import { ChallengeCard, LoadingScreen, NotificationsModal } from '@/components/ui';
 import { ChallengeInvitesModal } from '@/components/ui/ChallengeInvitesModal';
 import { useAlert } from '@/hooks/useAlert';
 import { authService } from '@/services/api';

@@ -23,6 +23,7 @@ import type {
   ChallengeCategory,
   ChallengeDifficulty,
   ChallengeFrequency,
+  TrackingType,
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
@@ -45,6 +46,10 @@ async function seedChallenges() {
     coinsReward: number;
     frequency: ChallengeFrequency;
     requiresPhoto: boolean;
+    autoVerifiable?: boolean;
+    trackingType?: TrackingType;
+    targetValue?: number;
+    targetUnit?: string;
   }> = [
     // ============================================
     // 💪 PHYSICAL_ACTIVITY (11 desafios)
@@ -57,7 +62,11 @@ async function seedChallenges() {
       xpReward: 50,
       coinsReward: 10,
       frequency: 'DAILY',
-      requiresPhoto: false, // Não requer foto
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DURATION',
+      targetValue: 1800, // 30 minutos em segundos
+      targetUnit: 'segundos',
     },
     {
       title: '10.000 passos',
@@ -67,7 +76,11 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
-      requiresPhoto: false, // Não requer foto
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'STEPS',
+      targetValue: 10000,
+      targetUnit: 'passos',
     },
     {
       title: 'Treino de força',
@@ -87,7 +100,11 @@ async function seedChallenges() {
       xpReward: 150,
       coinsReward: 30,
       frequency: 'DAILY',
-      requiresPhoto: false, // Não requer foto
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DISTANCE',
+      targetValue: 5000, // 5km em metros
+      targetUnit: 'metros',
     },
     {
       title: 'Alongamento matinal',
@@ -137,7 +154,11 @@ async function seedChallenges() {
       xpReward: 100,
       coinsReward: 20,
       frequency: 'DAILY',
-      requiresPhoto: false, // Não requer foto
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DURATION',
+      targetValue: 1800, // 30 minutos em segundos
+      targetUnit: 'segundos',
     },
     {
       title: 'Natação',
@@ -158,6 +179,91 @@ async function seedChallenges() {
       coinsReward: 26,
       frequency: 'DAILY',
       requiresPhoto: true, // ✅ REQUER FOTO
+    },
+    // NOVOS DESAFIOS COM RASTREAMENTO
+    {
+      title: '5.000 passos',
+      description: 'Complete 5.000 passos no dia - meta iniciante',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'EASY',
+      xpReward: 60,
+      coinsReward: 12,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'STEPS',
+      targetValue: 5000,
+      targetUnit: 'passos',
+    },
+    {
+      title: '15.000 passos',
+      description: 'Complete 15.000 passos no dia - desafio avançado',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'HARD',
+      xpReward: 150,
+      coinsReward: 30,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'STEPS',
+      targetValue: 15000,
+      targetUnit: 'passos',
+    },
+    {
+      title: 'Corrida de 3km',
+      description: 'Complete uma corrida de 3 quilômetros',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'MEDIUM',
+      xpReward: 100,
+      coinsReward: 20,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DISTANCE',
+      targetValue: 3000,
+      targetUnit: 'metros',
+    },
+    {
+      title: 'Caminhada de 2km',
+      description: 'Caminhe por 2 quilômetros',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'EASY',
+      xpReward: 50,
+      coinsReward: 10,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DISTANCE',
+      targetValue: 2000,
+      targetUnit: 'metros',
+    },
+    {
+      title: 'Exercício de 15 minutos',
+      description: 'Faça qualquer atividade física por 15 minutos',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'EASY',
+      xpReward: 40,
+      coinsReward: 8,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DURATION',
+      targetValue: 900, // 15 minutos
+      targetUnit: 'segundos',
+    },
+    {
+      title: 'Treino de 45 minutos',
+      description: 'Complete 45 minutos de atividade física intensa',
+      category: 'PHYSICAL_ACTIVITY',
+      difficulty: 'HARD',
+      xpReward: 140,
+      coinsReward: 28,
+      frequency: 'DAILY',
+      requiresPhoto: false,
+      autoVerifiable: true,
+      trackingType: 'DURATION',
+      targetValue: 2700, // 45 minutos
+      targetUnit: 'segundos',
     },
 
     // ============================================

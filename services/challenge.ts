@@ -17,9 +17,14 @@ export interface Challenge {
   isActive: boolean;
   requiresPhoto: boolean;
   autoVerifiable?: boolean;
+  trackingType?: TrackingType;
+  targetValue?: number;
+  targetUnit?: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export type TrackingType = 'STEPS' | 'DISTANCE' | 'DURATION' | 'ALTITUDE' | 'MANUAL';
 
 export interface UserChallenge {
   id: string;
@@ -31,6 +36,10 @@ export interface UserChallenge {
   progress: number;
   photoUrl: string | null;
   caption: string | null;
+  steps?: number;
+  distance?: number;
+  duration?: number;
+  activityData?: any;
   challenge: Challenge;
 }
 
