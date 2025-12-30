@@ -20,6 +20,26 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 
 ### **🏆 Desafios e Conquistas**
 - 50 desafios em 8 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade, Meditação)
+- **Sistema Dual de Tracking:**
+  - **Manual:** Modal com GPS e cronômetro para sessões intencionais (corrida, ciclismo)
+  - **Automático:** Sincronização em background de passos e distância (app pode ficar fechado)
+- **Tracking Automático de Atividades Físicas:**
+  - 📱 **Fase 1 (Expo Go):** Pedômetro nativo + auto-sync ao abrir app
+    - Conta passos mesmo com app fechado
+    - Estimativa de distância (passos × 0.78m)
+    - Completa desafios automaticamente
+  - 🏥 **Fase 2 (Development Build):** Apple Health + Google Fit
+    - Distância REAL via GPS (não estimativa)
+    - Integração com Apple Watch e smartwatches Android
+    - Dados de calorias ativas queimadas
+    - Histórico completo de atividades
+    - Onboarding intuitivo para conectar Health APIs
+    - Fallback automático para Fase 1 se Health não disponível
+  - 🔧 **Otimizações:**
+    - Cache de desafios (5min TTL) para reduzir chamadas API
+    - Memoização com useCallback para evitar re-renders
+    - Memory leak fix com cleanup de timeouts
+    - Graceful degradation com fallback para cache expirado
 - **7 desafios sociais auto-verificáveis** que completam automaticamente ao realizar ações no app:
   - 🎯 Desafiar um Amigo (convite enviado)
   - 🤝 Aceitar um Desafio (convite aceito)
@@ -259,6 +279,7 @@ FiQuestLife/
 ├── services/                  # 🌐 Comunicação com API
 │   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
 │   ├── activity.ts           # 🆕 Serviço de rastreamento de atividades (Sprint 17)
+│   ├── activitySync.ts       # 🆕 Sincronização automática de atividades (Fase 1+2)
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
@@ -266,6 +287,8 @@ FiQuestLife/
 │   ├── feed.ts               # 🆕 Serviço de feed social (Sprint 12)
 │   ├── feedInteractions.ts   # 🆕 Serviço de curtidas/comentários (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
+│   ├── googleFit.ts          # 🆕 Integração Google Fit para Android (Fase 2)
+│   ├── healthKit.ts          # 🆕 Integração Apple Health para iOS (Fase 2)
 │   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
 │   ├── location.ts           # 🆕 Serviço de GPS e distância (Sprint 17)
 │   ├── localNotificationStorage.ts # 🆕 Armazenamento local de notificações
@@ -469,9 +492,36 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Dezembro de 2025**
-- ✅ **Sprint 17: Sistema de Rastreamento de Atividades** (30/12/2025)
-  - **Rastreamento Automático de Atividades Físicas:**
+- ✅ **Sprint 17: Sistema de Rastreamento de Atividades + Health Integration** (30/12/2025)
+  - **Sistema Dual de Tracking (Manual + Automático):**
+    - Modal interativo para tracking manual com GPS e cronômetro
+    - Sistema de auto-sync em background (app pode ficar fechado)
     - 3 tipos de rastreamento: STEPS (passos), DISTANCE (distância), DURATION (duração)
+  - **Fase 1: Auto-Sync com Sensores Nativos (Expo Go):**
+    - Sincronização automática ao abrir app
+    - Pedômetro nativo conta passos 24/7 (mesmo app fechado)
+    - Estimativa de distância (passos × 0.78m)
+    - Auto-completa desafios quando meta atingida
+    - Cache inteligente (5min TTL) para reduzir chamadas API
+  - **Fase 2: Integração com Health APIs (Development Build):**
+    - Apple Health (iOS): passos, distância GPS real, calorias, workouts
+    - Google Fit (Android): mesmas funcionalidades para Android
+    - Dados de wearables (Apple Watch, smartwatches Android)
+    - Histórico completo de atividades dos últimos N dias
+    - Onboarding intuitivo (first-time modal + configurações)
+    - Fallback automático para Fase 1 se Health não disponível
+    - Detecção de Expo Go (desabilita Health APIs automaticamente)
+  - **Serviços Criados:**
+    - `activitySync.ts`: Core do sistema de sincronização (375 linhas)
+    - `healthKit.ts`: Integração Apple Health (280 linhas)
+    - `googleFit.ts`: Integração Google Fit (250 linhas)
+    - `HealthOnboardingScreen.tsx`: UI de onboarding (220 linhas)
+  - **Otimizações de Performance:**
+    - Memory leak fix: cleanup de timeouts com useRef
+    - Memoização: useCallback para evitar re-renders
+    - Cache de desafios com TTL e fallback para cache expirado
+    - Graceful degradation em caso de erro (404, 500)
+  - **Rastreamento Manual (Modal GPS):**
     - Contagem de passos via Expo Pedometer (sensor de movimento)
     - Rastreamento GPS de distância via Expo Location (fórmula Haversine)
     - Timer de duração para exercícios
@@ -497,7 +547,15 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
     - activity.service.ts: 7 funções (trackActivity, updateChallengeProgress, getDailyActivity, getDailyStats, getActivityHistory, checkAndCompleteActivityChallenges, ...)
     - activity.controller.ts: 5 endpoints REST (/track, /challenges/:id/progress, /daily, /stats, /history)
     - activity.routes.ts: Rotas protegidas com authMiddleware
+    - challenge.routes.ts: Novo endpoint GET /challenges/active-with-tracking para auto-sync
     - ActivityTracking model: Auditoria completa com steps, distance, duration, startTime, endTime, routeData
+  - **Documentação Completa:**
+    - AUTOMATIC_ACTIVITY_TRACKING_IMPLEMENTATION.md: 1753 linhas com arquitetura completa
+    - FASE2_HEALTH_INTEGRATION_COMPLETE.md: Guia de implementação Health APIs
+    - HEALTH_ONBOARDING_INTEGRATION.tsx: 4 opções de integração do onboarding
+    - OTIMIZACOES_PERFORMANCE.md: Análise detalhada de otimizações
+  - **Dependências Adicionadas:**
+    - react-native-health: Integração com Apple Health e Google Fit
   - **Schema do Banco Atualizado:**
     - TrackingType enum: STEPS, DISTANCE, DURATION, ALTITUDE, MANUAL
     - Challenge: +trackingType?, +targetValue?, +targetUnit?

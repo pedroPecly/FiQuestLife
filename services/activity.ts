@@ -121,10 +121,25 @@ export const getActivityHistory = async (
   }
 };
 
+/**
+ * Obtém desafios ativos com tracking automático
+ * Usado pelo sistema de sincronização automática
+ */
+export const getChallengesWithTracking = async () => {
+  try {
+    const response = await api.get('/challenges/active-with-tracking');
+    return response.data.data;
+  } catch (error: any) {
+    console.error('[ACTIVITY API] Erro ao buscar desafios com tracking:', error);
+    throw error;
+  }
+};
+
 export default {
   trackActivity,
   updateChallengeProgress,
   getDailyActivity,
   getDailyStats,
   getActivityHistory,
+  getChallengesWithTracking,
 };

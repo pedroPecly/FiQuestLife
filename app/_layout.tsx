@@ -1,11 +1,126 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Modal, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { useAppState } from '../hooks/useAppState';
 import { useNotifications } from '../hooks/useNotifications';
+import ActivitySyncService from '../services/activitySync';
+import { HealthOnboardingScreen } from './screens';
+
+const HEALTH_ONBOARDING_KEY = '@FiQuestLife:healthOnboardingShown';
+
+// Verifica se é Expo Go (não suporta react-native-health)
+const isExpoGo = Constants.appOwnership === 'expo';
 
 export default function RootLayout() {
   // Inicializa sistema de notificações globalmente
   useNotifications();
+  
+  const router = useRouter();
+  const appState = useAppState();
+  const lastSyncRef = useRef<number>(0);
+  const alertTimeoutRef = useRef<NodeJS.Timeout>();
+  const [showHealthOnboarding, setShowHealthOnboarding] = useState(false);
+  const checkHealthOnboardingRef = useRef(false);
+
+  // Cleanup do timeout quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (alertTimeoutRef.current) {
+        clearTimeout(alertTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Verificar se deve mostrar Health onboarding (apenas iOS/Android + não Expo Go)
+  useEffect(() => {
+    const checkHealthOnboarding = async () => {
+      // Evitar múltiplas verificações
+      if (checkHealthOnboardingRef.current) return;
+      checkHealthOnboardingRef.current = true;
+
+      // Não mostrar no Expo Go (não funciona)
+      if (isExpoGo) {
+        console.log('[HEALTH ONBOARDING] ⚠️ Pulado: Expo Go não suporta react-native-health');
+        return;
+      }
+
+      // Apenas em plataformas nativas
+      if (Platform.OS !== 'ios' && Platform.OS !== 'android') return;
+
+      // Aguardar 3 segundos após app abrir (UX melhor)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      const shown = await AsyncStorage.getItem(HEALTH_ONBOARDING_KEY);
+      if (!shown) {
+        setShowHealthOnboarding(true);
+      }
+    };
+
+    checkHealthOnboarding();
+  }, []);
+
+  // Callback para quando onboarding for completo
+  const handleHealthOnboardingComplete = useCallback(async () => {
+    await AsyncStorage.setItem(HEALTH_ONBOARDING_KEY, 'true');
+    setShowHealthOnboarding(false);
+  }, []);
+
+  // Função memoizada para evitar re-criação a cada render
+  const syncActivities = useCallback(async () => {
+    try {
+      lastSyncRef.current = Date.now();
+      const results = await ActivitySyncService.syncActivityOnAppOpen();
+      
+      // Filtrar desafios completados
+      const completed = results.filter(r => r.completed);
+      
+      if (completed.length > 0) {
+        // Limpar timeout anterior se existir
+        if (alertTimeoutRef.current) {
+          clearTimeout(alertTimeoutRef.current);
+        }
+        
+        // Exibir alerta de conquista com cleanup
+        alertTimeoutRef.current = setTimeout(() => {
+          Alert.alert(
+            '🎉 Parabéns!',
+            completed.length === 1
+              ? `Você completou o desafio "${completed[0].title}" automaticamente!`
+              : `Você completou ${completed.length} desafios automaticamente!`,
+            [
+              { 
+                text: 'Ver Badges', 
+                onPress: () => router.push('/(tabs)/badges')
+              },
+              { text: 'OK', style: 'cancel' },
+            ]
+          );
+        }, 1000); // Delay de 1s para garantir que UI está pronta
+      }
+    } catch (error) {
+      console.error('[ROOT LAYOUT] Erro ao sincronizar atividades:', error);
+      // Falha silenciosa - não incomodar o usuário
+    }
+  }, [router]);
+
+  // Sync ao montar o componente (primeira vez que abre o app)
+  useEffect(() => {
+    syncActivities();
+  }, [syncActivities]);
+
+  // Sync quando app volta ao foreground
+  useEffect(() => {
+    if (appState === 'active') {
+      // Evitar sync múltiplo (mínimo 10 segundos entre syncs)
+      const now = Date.now();
+      if (now - lastSyncRef.current > 10000) {
+        syncActivities();
+      }
+    }
+  }, [appState, syncActivities]);
   
   return (
     <>
@@ -48,6 +163,18 @@ export default function RootLayout() {
       
       {/* O StatusBar pode ficar aqui para controlar a cor dos ícones do celular */}
       <StatusBar style="auto" />
+
+      {/* Modal de Health Onboarding (primeira vez) */}
+      <Modal
+        visible={showHealthOnboarding}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <HealthOnboardingScreen
+          onComplete={handleHealthOnboardingComplete}
+          onSkip={handleHealthOnboardingComplete}
+        />
+      </Modal>
     </>
   );
 }

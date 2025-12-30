@@ -83,10 +83,20 @@ export const completeChallengeById = async (c: Context) => {
     // Tentar parsear como form-data (se houver foto) ou JSON
     let photoUrl: string | undefined;
     let caption: string | undefined;
+    let autoCompleted = false;
+    let trackingData: any;
 
     const contentType = c.req.header('content-type');
     
-    if (contentType?.includes('multipart/form-data')) {
+    // Se for JSON, pode ser auto-complete do tracking automático
+    if (contentType?.includes('application/json')) {
+      const body = await c.req.json();
+      autoCompleted = body.autoCompleted || false;
+      trackingData = body.trackingData;
+      caption = body.caption;
+    }
+    // Se for form-data, tem foto
+    else if (contentType?.includes('multipart/form-data')) {
       const body = await c.req.parseBody();
       const photo = body.photo as File | undefined;
       caption = body.caption as string | undefined;

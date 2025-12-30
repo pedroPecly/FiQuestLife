@@ -50,4 +50,55 @@ activity.get('/stats', activityController.getDailyStats);
  */
 activity.get('/history', activityController.getActivityHistory);
 
+/**
+ * POST /api/activity/batch-sync
+ * Sincroniza progresso de múltiplos desafios em batch
+ * Usado pelo sistema de sincronização automática
+ */
+activity.post('/batch-sync', async (c) => {
+  try {
+    const userId = c.get('userId');
+    const { prisma } = c.get('services');
+    const { results, timestamp } = await c.req.json();
+
+    if (!Array.isArray(results) || results.length === 0) {
+      return c.json({
+        success: true,
+        message: 'Nenhum resultado para sincronizar',
+      });
+    }
+
+    // Atualizar todos os progressos em batch usando transaction
+    const updates = results.map((result: any) =>
+      prisma.userChallenge.updateMany({
+        where: {
+          userId,
+          challengeId: result.challengeId,
+        },
+        data: {
+          progress: result.currentValue,
+          updatedAt: new Date(timestamp),
+        },
+      })
+    );
+
+    await prisma.$transaction(updates);
+
+    return c.json({
+      success: true,
+      message: `${results.length} desafios sincronizados`,
+    });
+  } catch (error: any) {
+    console.error('[ACTIVITY] Erro no batch sync:', error);
+    return c.json(
+      {
+        success: false,
+        message: 'Erro ao sincronizar desafios',
+        error: error.message,
+      },
+      500
+    );
+  }
+});
+
 export default activity;

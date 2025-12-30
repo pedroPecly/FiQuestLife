@@ -402,6 +402,14 @@ export default function SettingsScreen() {
             iconColor="#FF5722"
             label="Lembrete Diário"
             onPress={handleSetReminder}
+          />
+
+          <SettingsMenuItem
+            type="clickable"
+            icon="heart"
+            iconColor="#20B2AA"
+            label={Platform.OS === 'ios' ? 'Conectar Apple Health' : 'Conectar Google Fit'}
+            onPress={() => router.push('/health-onboarding' as any)}
             isLast
           />
         </View>

@@ -2,7 +2,10 @@
   "expo": {
     "name": "FiQuestLife",
     "slug": "FiQuestLife",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "0.11.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -16,7 +19,9 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSMotionUsageDescription": "FiQuestLife precisa acessar o sensor de movimento para contar seus passos e rastrear suas atividades físicas.",
         "NSLocationWhenInUseUsageDescription": "FiQuestLife precisa da sua localização para rastrear a distância percorrida durante atividades físicas como corrida e caminhada.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "FiQuestLife precisa da sua localização para rastrear atividades físicas mesmo em segundo plano, permitindo que você complete desafios automaticamente."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "FiQuestLife precisa da sua localização para rastrear atividades físicas mesmo em segundo plano, permitindo que você complete desafios automaticamente.",
+        "NSHealthShareUsageDescription": "FiQuestLife precisa ler seus dados de saúde (passos, distância, calorias) para atualizar seus desafios automaticamente.",
+        "NSHealthUpdateUsageDescription": "FiQuestLife pode salvar suas atividades completadas no Apple Health."
       }
     },
     "android": {
@@ -80,11 +85,23 @@
             "color": "#20B2AA",
             "sound": "default",
             "priority": "max",
-            "vibrationPattern": [0, 250, 250, 250]
+            "vibrationPattern": [
+              0,
+              250,
+              250,
+              250
+            ]
           },
           "ios": {
             "sound": true
           }
+        }
+      ],
+      [
+        "react-native-health",
+        {
+          "healthSharePermission": "FiQuestLife precisa ler seus dados de saúde para atualizar desafios automaticamente.",
+          "healthUpdatePermission": "FiQuestLife pode salvar suas atividades completadas no Apple Health."
         }
       ]
     ],
