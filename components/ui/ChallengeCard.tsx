@@ -11,9 +11,9 @@ import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityTrackerModal } from './ActivityTrackerModal';
 import PhotoCaptureModal from './PhotoCaptureModal';
 import { SelectFriendModal } from './SelectFriendModal';
-import { ActivityTrackerModal } from './ActivityTrackerModal';
 import { StepCounterWidget } from './StepCounterWidget';
 
 interface ChallengeCardProps {
@@ -377,6 +377,7 @@ const styles = StyleSheet.create({
   rewardsRow: {
     flexDirection: 'row',
     gap: 16,
+    marginTop: 12,
     marginBottom: 16,
   },
   rewardItem: {

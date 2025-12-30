@@ -20,10 +20,10 @@
  */
 
 import type {
-  ChallengeCategory,
-  ChallengeDifficulty,
-  ChallengeFrequency,
-  TrackingType,
+    ChallengeCategory,
+    ChallengeDifficulty,
+    ChallengeFrequency,
+    TrackingType,
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 

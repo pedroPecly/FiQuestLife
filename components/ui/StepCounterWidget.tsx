@@ -13,12 +13,19 @@
  * - Animação suave
  * 
  * @created 30/12/2025
+ * @updated 30/12/2025 - Refatorado para usar activityFormatters
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import type { TrackingType } from '@/services/challenge';
+import {
+    calculateProgress,
+    formatActivityValue,
+    getActivityIcon,
+    getProgressColor,
+} from '@/utils/activityFormatters';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface StepCounterWidgetProps {
   trackingType: TrackingType;
@@ -34,54 +41,11 @@ export function StepCounterWidget({
   targetUnit,
 }: StepCounterWidgetProps) {
   // ==========================================
-  // HELPERS
+  // COMPUTED VALUES
   // ==========================================
-  const getProgressPercentage = (): number => {
-    return Math.min((currentValue / targetValue) * 100, 100);
-  };
-
-  const formatValue = (value: number): string => {
-    switch (trackingType) {
-      case 'STEPS':
-        return `${value.toLocaleString()}`;
-      case 'DISTANCE':
-        if (value >= 1000) {
-          return `${(value / 1000).toFixed(1)} km`;
-        }
-        return `${Math.round(value)} m`;
-      case 'DURATION':
-        const hours = Math.floor(value / 3600);
-        const minutes = Math.floor((value % 3600) / 60);
-        if (hours > 0) {
-          return `${hours}h ${minutes}m`;
-        }
-        return `${minutes}m`;
-      default:
-        return `${value}`;
-    }
-  };
-
-  const getIcon = (): keyof typeof Ionicons.glyphMap => {
-    switch (trackingType) {
-      case 'STEPS':
-        return 'footsteps';
-      case 'DISTANCE':
-        return 'navigate';
-      case 'DURATION':
-        return 'timer';
-      case 'ALTITUDE':
-        return 'trending-up';
-      default:
-        return 'fitness';
-    }
-  };
-
-  const getColor = (): string => {
-    const percentage = getProgressPercentage();
-    if (percentage >= 100) return '#4CAF50';
-    if (percentage >= 50) return '#FF9800';
-    return '#007AFF';
-  };
+  const progress = calculateProgress(currentValue, targetValue);
+  const color = getProgressColor(progress);
+  const icon = getActivityIcon(trackingType);
 
   // ==========================================
   // RENDER
@@ -89,7 +53,7 @@ export function StepCounterWidget({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name={getIcon()} size={20} color={getColor()} />
+        <Ionicons name={icon} size={20} color={color} />
         <Text style={styles.label}>Progresso</Text>
       </View>
 
@@ -99,21 +63,25 @@ export function StepCounterWidget({
             style={[
               styles.progressBar,
               {
-                width: `${getProgressPercentage()}%`,
-                backgroundColor: getColor(),
+                width: `${progress}%`,
+                backgroundColor: color,
               },
             ]}
           />
         </View>
-        <Text style={[styles.progressText, { color: getColor() }]}>
-          {Math.round(getProgressPercentage())}%
+        <Text style={[styles.progressText, { color }]}>
+          {Math.round(progress)}%
         </Text>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.currentValue}>{formatValue(currentValue)}</Text>
+        <Text style={styles.currentValue}>
+          {formatActivityValue(currentValue, trackingType)}
+        </Text>
         <Text style={styles.separator}>/</Text>
-        <Text style={styles.targetValue}>{formatValue(targetValue)}</Text>
+        <Text style={styles.targetValue}>
+          {formatActivityValue(targetValue, trackingType)}
+        </Text>
       </View>
     </View>
   );
@@ -126,14 +94,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F0F8FF',
     borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
+    padding: 10,
+    marginTop: 4,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   label: {
     fontSize: 13,
@@ -144,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   progressBarBg: {
     flex: 1,
