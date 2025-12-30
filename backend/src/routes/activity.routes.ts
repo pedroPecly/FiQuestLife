@@ -60,7 +60,7 @@ activity.get('/history', activityController.getActivityHistory);
 activity.post('/batch-sync', async (c) => {
   try {
     const userId = getUserId(c);
-    const { results, timestamp } = await c.req.json();
+    const { results } = await c.req.json();
 
     if (!Array.isArray(results) || results.length === 0) {
       return c.json({
