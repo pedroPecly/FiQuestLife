@@ -96,13 +96,6 @@
             "sound": true
           }
         }
-      ],
-      [
-        "react-native-health",
-        {
-          "healthSharePermission": "FiQuestLife precisa ler seus dados de saúde para atualizar desafios automaticamente.",
-          "healthUpdatePermission": "FiQuestLife pode salvar suas atividades completadas no Apple Health."
-        }
       ]
     ],
     "experiments": {

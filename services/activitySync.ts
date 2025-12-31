@@ -1,28 +1,28 @@
 /**
  * ============================================
- * ACTIVITY SYNC SERVICE
+ * ACTIVITY SYNC SERVICE (Native Only)
  * ============================================
  * 
  * Serviço para sincronização automática de atividades físicas.
- * Atualiza progresso de desafios baseado em dados dos sensores nativos
- * (pedômetro, GPS) mesmo quando o app está fechado.
+ * Usa APENAS sensores nativos do Expo (pedômetro + GPS).
  * 
  * Features:
  * - Auto-sync ao abrir app
- * - Leitura de passos desde meia-noite
- * - Auto-completar desafios quando meta é atingida
- * - Persistência local com AsyncStorage
+ * - Rastreamento de passos 24/7 (Pedometer)
+ * - GPS real via Location Service
+ * - Auto-completar desafios quando meta atingida
+ * - Cache otimizado com TTL
  * 
  * @created 30/12/2025
- * @phase Implementação Fase 1 - Auto-Sync
+ * @updated 31/12/2025 - Removido HealthKit/GoogleFit (desnecessário)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from './api';
 import PedometerService from './pedometer';
-import HealthKitService from './healthKit';
-import GoogleFitService from './googleFit';
-import { Platform } from 'react-native';
+
+const DAILY_PROGRESS_KEY = '@FiQuestLife:dailyProgress';
+const AVERAGE_STEP_LENGTH_METERS = 0.78; // Comprimento médio do passo adulto
 
 const DAILY_PROGRESS_KEY = '@FiQuestLife:dailyProgress';
 
@@ -140,52 +140,28 @@ class ActivitySyncService {
 
   /**
    * Obtém dados de atividade do dia atual
-   * Prioridade: HealthKit/GoogleFit > Pedômetro nativo
+   * Usa pedômetro nativo + estimativa de distância
    * 
-   * FASE 2: Integração com Health APIs para dados mais precisos
+   * NOTA: Para GPS real, usar LocationService durante rastreamento manual
    */
   private async getTodayActivityData(): Promise<DailyProgress> {
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      // FASE 2: Tentar HealthKit (iOS) ou Google Fit (Android) primeiro
-      if (Platform.OS === 'ios' && HealthKitService.isAvailable()) {
-        try {
-          const healthData = await HealthKitService.getTodayData();
-          console.log('[ACTIVITY SYNC] ✅ Usando dados do Apple Health');
-          
-          return {
-            steps: healthData.steps,
-            distance: healthData.distance, // Distância REAL do HealthKit!
-            date: today,
-            lastSync: Date.now(),
-          };
-        } catch (error) {
-          console.warn('[ACTIVITY SYNC] ⚠️ Falha no HealthKit, usando fallback:', error);
-        }
-      } else if (Platform.OS === 'android' && GoogleFitService.isAvailable()) {
-        try {
-          const fitData = await GoogleFitService.getTodayData();
-          console.log('[ACTIVITY SYNC] ✅ Usando dados do Google Fit');
-          
-          return {
-            steps: fitData.steps,
-            distance: fitData.distance, // Distância REAL do Google Fit!
-            date: today,
-            lastSync: Date.now(),
-          };
-        } catch (error) {
-          console.warn('[ACTIVITY SYNC] ⚠️ Falha no Google Fit, usando fallback:', error);
-        }
-      }
-
-      // Fallback: Pedômetro nativo com estimativa
-      console.log('[ACTIVITY SYNC] 📱 Usando pedômetro nativo (estimativa)');
+      console.log('[ACTIVITY SYNC] 📱 Obtendo dados do pedômetro nativo...');
+      
+      // Obter passos do pedômetro nativo (Expo Sensors)
       const steps = await PedometerService.getDailySteps();
 
-      // Distância estimada: 0.78m por passo (média adulto caminhando)
-      // Fase 2 irá usar HealthKit para distância real
-      const estimatedDistance = Math.round(steps * 0.78);
+      // Estimar distância baseado em passos
+      // Precisão: ~5-10% erro (aceitável para maioria dos casos)
+      // Para GPS real: usar LocationService durante rastreamento manual
+      const estimatedDistance = Math.round(steps * AVERAGE_STEP_LENGTH_METERS);
+
+      console.log('[ACTIVITY SYNC] ✅ Dados obtidos:', {
+        steps,
+        estimatedDistance: `${(estimatedDistance / 1000).toFixed(2)}km`,
+      });
 
       return {
         steps,
