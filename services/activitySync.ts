@@ -24,8 +24,6 @@ import PedometerService from './pedometer';
 const DAILY_PROGRESS_KEY = '@FiQuestLife:dailyProgress';
 const AVERAGE_STEP_LENGTH_METERS = 0.78; // Comprimento médio do passo adulto
 
-const DAILY_PROGRESS_KEY = '@FiQuestLife:dailyProgress';
-
 // ==========================================
 // TYPES
 // ==========================================
