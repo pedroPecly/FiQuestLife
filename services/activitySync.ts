@@ -204,6 +204,12 @@ class ActivitySyncService {
       
       return data;
     } catch (error: any) {
+      // Se não autenticado (401), retornar array vazio silenciosamente
+      if (error.response?.status === 401) {
+        console.log('[ACTIVITY SYNC] ⚠️ Não autenticado, pulando busca de desafios');
+        return [];
+      }
+
       // Se endpoint não existe ainda (404), retornar array vazio
       if (error.response?.status === 404) {
         console.warn('[ACTIVITY SYNC] Endpoint /challenges/active-with-tracking não encontrado (esperado durante desenvolvimento)');
@@ -386,6 +392,16 @@ class ActivitySyncService {
   invalidateChallengesCache(): void {
     this.challengesCache = null;
     console.log('[ACTIVITY SYNC] 🗑️ Cache de desafios invalidado');
+  }
+
+  /**
+   * Limpa todos os caches e estados
+   * Deve ser chamado no logout para evitar dados residuais
+   */
+  clearCache(): void {
+    this.challengesCache = null;
+    this.syncing = false;
+    console.log('[ACTIVITY SYNC] 🧹 Cache limpo (logout)');
   }
 }
 

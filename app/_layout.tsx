@@ -1,12 +1,13 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Modal, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 import { useAppState } from '../hooks/useAppState';
 import { useNotifications } from '../hooks/useNotifications';
 import ActivitySyncService from '../services/activitySync';
+import { authStorage } from '../services/auth';
 import { HealthOnboardingScreen } from './screens';
 
 const HEALTH_ONBOARDING_KEY = '@FiQuestLife:healthOnboardingShown';
@@ -71,6 +72,13 @@ export default function RootLayout() {
   // Função memoizada para evitar re-criação a cada render
   const syncActivities = useCallback(async () => {
     try {
+      // ✅ VERIFICAR SE ESTÁ AUTENTICADO ANTES DE SINCRONIZAR
+      const isAuthenticated = await authStorage.isLoggedIn();
+      if (!isAuthenticated) {
+        console.log('[ROOT LAYOUT] ⚠️ Usuário não autenticado, pulando sync');
+        return;
+      }
+
       lastSyncRef.current = Date.now();
       const results = await ActivitySyncService.syncActivityOnAppOpen();
       

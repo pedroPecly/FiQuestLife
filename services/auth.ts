@@ -12,6 +12,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '../types/user';
+import ActivitySyncService from './activitySync';
 import { unregisterPushToken } from './pushToken';
 
 // Chave para armazenar o token
@@ -88,6 +89,9 @@ export const authStorage = {
       // Remover dados de autenticação do AsyncStorage
       await AsyncStorage.removeItem(TOKEN_KEY);
       await AsyncStorage.removeItem(USER_KEY);
+      
+      // Limpar cache de sincronização de atividades
+      ActivitySyncService.clearCache();
       
       console.log('[AUTH] Logout concluído com sucesso');
       console.log('[AUTH] ℹ️ Notificações locais mantidas para próximo login');
