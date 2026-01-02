@@ -8,10 +8,10 @@ import {
     UserChallenge,
 } from '@/services/challenge';
 import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/challengeInvitation';
+import MultiTrackerService from '@/services/multiTracker';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ActivityTrackerModal } from './ActivityTrackerModal';
 import PhotoCaptureModal from './PhotoCaptureModal';
 import { SelectFriendModal } from './SelectFriendModal';
 import { StepCounterWidget } from './StepCounterWidget';
@@ -35,9 +35,10 @@ export default function ChallengeCard({
   const isCompleted = status === 'COMPLETED';
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showFriendModal, setShowFriendModal] = useState(false);
-  const [showTrackerModal, setShowTrackerModal] = useState(false);
   const [invitation, setInvitation] = useState<any>(null);
   const [sendingInvite, setSendingInvite] = useState(false);
+  const [isTracking, setIsTracking] = useState(false);
+  const [trackingProgress, setTrackingProgress] = useState(0);
   const { alert } = useAlert();
 
   // Para desafios com rastreamento
@@ -45,7 +46,30 @@ export default function ChallengeCard({
 
   // Carrega informação de convite se existir
   useEffect(() => {
-    loadInvitation();
+    const checkTrackingStatus = () => {
+      const session = MultiTrackerService.getSession(id);
+      if (session) {
+        setIsTracking(true);
+        setTrackingProgress(session.currentValue);
+        
+        // Se completou, auto-finalizar
+        if (session.completed && !isCompleted) {
+          onComplete(id);
+        }
+      } else {
+        setIsTracking(false);
+        setTrackingProgress(0);
+      }
+    };
+
+    checkTrackingStatus();
+
+    // Subscribe para updates do MultiTracker
+    const unsubscribe = MultiTrackerService.addListener(() => {
+      checkTrackingStatus();
+    });
+
+    return unsubscribe;
   }, [id]);
 
   const loadInvitation = async () => {
@@ -79,6 +103,29 @@ export default function ChallengeCard({
     onComplete(id, photo, caption);
   };
 
+
+  const handleToggleTracking = async () => {
+    if (isTracking) {
+      // Parar tracking
+      await MultiTrackerService.stopTracking(id, false);
+      alert.info('Rastreamento pausado', 'Você pode retomar a qualquer momento');
+    } else {
+      // Iniciar tracking
+      try {
+        await MultiTrackerService.startTracking({
+          challengeId: challenge.id,
+          userChallengeId: id,
+          trackingType: challenge.trackingType!,
+          targetValue: challenge.targetValue!,
+          targetUnit: challenge.targetUnit!,
+        });
+        alert.success('Rastreamento iniciado!', 'Continue com suas atividades normalmente');
+      } catch (error: any) {
+        alert.error('Erro', error.message || 'Não foi possível iniciar o rastreamento');
+      }
+    }
+  };
+
   const handleChallengeFriend = async (friendId: string, friendName: string) => {
     setSendingInvite(true);
     try {
@@ -99,12 +146,6 @@ export default function ChallengeCard({
     }
   };
 
-  const handleTrackerComplete = () => {
-    setShowTrackerModal(false);
-    // Recarregar dados do desafio para refletir progresso
-    loadInvitation();
-  };
-
   return (
     <>
       <View style={[styles.container, isCompleted && styles.completedContainer]}>
@@ -122,10 +163,8 @@ export default function ChallengeCard({
           {/* Badge de desafio recebido de amigo - ao lado da dificuldade */}
           {invitation && (
             <View style={styles.inviteBadge}>
-              <Ionicons name="trophy" size={12} color="#FF6B35" />
-              <Text style={styles.inviteBadgeText}>
-                desafiado por @{invitation.fromUser?.username}
-              </Text>
+              <Ionicons name="people" size={14} color="#20B2AA" />
+              <Text style={styles.inviteBadgeText}>Desafio de {invitation.senderName}</Text>
             </View>
           )}
         </View>
@@ -145,7 +184,7 @@ export default function ChallengeCard({
         {hasTracking && !isCompleted && (
           <StepCounterWidget
             trackingType={challenge.trackingType!}
-            currentValue={userChallenge.steps || userChallenge.distance || userChallenge.duration || 0}
+            currentValue={isTracking ? trackingProgress : (userChallenge.steps || userChallenge.distance || userChallenge.duration || 0)}
             targetValue={challenge.targetValue!}
             targetUnit={challenge.targetUnit!}
           />
@@ -169,11 +208,20 @@ export default function ChallengeCard({
           {/* Botão de rastreamento para desafios com tracking */}
           {hasTracking && !isCompleted && (
             <TouchableOpacity
-              style={[styles.button, styles.trackingButton]}
-              onPress={() => setShowTrackerModal(true)}
+              style={[
+                styles.button,
+                isTracking ? styles.trackingActiveButton : styles.trackingButton
+              ]}
+              onPress={handleToggleTracking}
             >
-              <Ionicons name="play-circle" size={20} color="#FFF" />
-              <Text style={styles.buttonText}>Iniciar Rastreamento</Text>
+              <Ionicons 
+                name={isTracking ? "pause-circle" : "play-circle"} 
+                size={20} 
+                color="#FFF" 
+              />
+              <Text style={styles.buttonText}>
+                {isTracking ? 'Pausar' : 'Iniciar'}
+              </Text>
             </TouchableOpacity>
           )}
 
@@ -193,20 +241,15 @@ export default function ChallengeCard({
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.buttonText}>
-                  {isCompleted
-                    ? '✓ Concluído'
-                    : challenge.requiresPhoto
-                      ? '📸 Adicionar Foto'
-                      : 'Concluir Desafio'}
+                  {isCompleted ? '✓ Concluído' : 'Completar Desafio'}
                 </Text>
               )}
             </TouchableOpacity>
           )}
 
-          {/* Mostra badge "Auto" para desafios auto-verificáveis SEM rastreamento */}
-          {challenge.autoVerifiable && !isCompleted && !hasTracking && (
+          {/* Badge para desafios auto-verificáveis (exceto os com tracking) */}
+          {challenge.autoVerifiable && !hasTracking && (
             <View style={styles.autoVerifyBadge}>
-              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
               <Text style={styles.autoVerifyText}>Completa automaticamente</Text>
             </View>
           )}
@@ -250,19 +293,6 @@ export default function ChallengeCard({
         onClose={() => setShowFriendModal(false)}
         onSelectFriend={handleChallengeFriend}
       />
-
-      {/* Modal de rastreamento de atividade */}
-      {hasTracking && (
-        <ActivityTrackerModal
-          visible={showTrackerModal}
-          onClose={() => setShowTrackerModal(false)}
-          challengeId={id}
-          trackingType={challenge.trackingType!}
-          targetValue={challenge.targetValue!}
-          targetUnit={challenge.targetUnit!}
-          onComplete={handleTrackerComplete}
-        />
-      )}
     </>
   );
 }
@@ -427,6 +457,11 @@ const styles = StyleSheet.create({
   },
   trackingButton: {
     backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  trackingActiveButton: {
+    backgroundColor: '#FF9500',
     flexDirection: 'row',
     gap: 8,
   },

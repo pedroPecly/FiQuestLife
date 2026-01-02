@@ -47,6 +47,14 @@ export function StepCounterWidget({
   const color = getProgressColor(progress);
   const icon = getActivityIcon(trackingType);
 
+  // Para DURATION, formatar com minutos:segundos em tempo real
+  const formatValue = (value: number) => {
+    if (trackingType === 'DURATION') {
+      return formatActivityValue(value, trackingType, { durationFormat: 'short' });
+    }
+    return formatActivityValue(value, trackingType);
+  };
+
   // ==========================================
   // RENDER
   // ==========================================
@@ -76,11 +84,11 @@ export function StepCounterWidget({
 
       <View style={styles.footer}>
         <Text style={styles.currentValue}>
-          {formatActivityValue(currentValue, trackingType)}
+          {formatValue(currentValue)}
         </Text>
         <Text style={styles.separator}>/</Text>
         <Text style={styles.targetValue}>
-          {formatActivityValue(targetValue, trackingType)}
+          {formatValue(targetValue)}
         </Text>
       </View>
     </View>

@@ -8,6 +8,7 @@ import { useAppState } from '../hooks/useAppState';
 import { useNotifications } from '../hooks/useNotifications';
 import ActivitySyncService from '../services/activitySync';
 import { authStorage } from '../services/auth';
+import MultiTrackerService from '../services/multiTracker';
 import { HealthOnboardingScreen } from './screens';
 
 const HEALTH_ONBOARDING_KEY = '@FiQuestLife:healthOnboardingShown';
@@ -117,6 +118,18 @@ export default function RootLayout() {
   // Sync ao montar o componente (primeira vez que abre o app)
   useEffect(() => {
     syncActivities();
+    
+    // Inicializar MultiTrackerService (restaurar sessões salvas)
+    const initMultiTracker = async () => {
+      try {
+        await MultiTrackerService.loadSessionsFromStorage();
+        console.log('[ROOT LAYOUT] ✅ MultiTrackerService inicializado');
+      } catch (error) {
+        console.error('[ROOT LAYOUT] ⚠️ Erro ao inicializar MultiTrackerService:', error);
+      }
+    };
+    
+    initMultiTracker();
   }, [syncActivities]);
 
   // Sync quando app volta ao foreground

@@ -43,8 +43,7 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "FOREGROUND_SERVICE"
-      ],
-      "useNextNotificationsApi": true
+      ]
     },
     "web": {
       "output": "static",
@@ -52,6 +51,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "FiQuestLife precisa acessar o sensor de movimento para contar seus passos durante atividades físicas."
+        }
+      ],
       [
         "expo-location",
         {

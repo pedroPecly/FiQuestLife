@@ -37,6 +37,8 @@ class PedometerService {
   private sessionSteps: number = 0;
   private sessionStartSteps: number = 0;
   private sessionStartTime: Date | null = null;
+  private pollingInterval: ReturnType<typeof setInterval> | null = null;
+  private onUpdateCallback: ((steps: number) => void) | null = null;
 
   // Daily tracking (Android)
   private dailyStepSubscription: any = null;
@@ -46,7 +48,7 @@ class PedometerService {
   // Cache optimization
   private lastCacheTime: number = 0;
   private lastCachedSteps: number = 0;
-  private cacheTimer: NodeJS.Timeout | null = null;
+  private cacheTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Verifica se o pedômetro está disponível no dispositivo
@@ -61,52 +63,116 @@ class PedometerService {
   }
 
   /**
+   * Verifica se o tracking está ativo
+   */
+  isTracking(): boolean {
+    return this.pollingInterval !== null;
+  }
+
+  /**
    * Inicia rastreamento de sessão (para modal de tracking)
    * @param onUpdate Callback chamado quando passos são atualizados
    */
   async startTracking(onUpdate: (steps: number) => void): Promise<void> {
-    const available = await this.isAvailable();
-    if (!available) {
-      throw new Error('Pedômetro não disponível neste dispositivo');
+    try {
+      // Verificar se já está rastreando
+      if (this.isTracking()) {
+        console.log('[PEDOMETER] ⚠️ Já está rastreando! Ignorando nova chamada.');
+        return;
+      }
+      
+      // Web não suporta pedômetro
+      if (Platform.OS === 'web') {
+        console.warn('[PEDOMETER] ⚠️ Pedômetro não disponível na Web');
+        return;
+      }
+
+      const available = await this.isAvailable();
+      if (!available) {
+        throw new Error('Pedômetro não disponível neste dispositivo');
+      }
+
+      console.log('[PEDOMETER] 🚀 Iniciando rastreamento...');
+
+      // Garantir que qualquer rastreamento anterior foi limpo
+      if (this.subscription) {
+        console.warn('[PEDOMETER] ⚠️ Limpando subscrição anterior');
+        this.subscription.remove();
+        this.subscription = null;
+      }
+      
+      if (this.pollingInterval) {
+        console.warn('[PEDOMETER] ⚠️ Limpando polling anterior');
+        clearInterval(this.pollingInterval);
+        this.pollingInterval = null;
+      }
+
+      // Resetar contadores
+      this.sessionStartTime = new Date();
+      this.sessionSteps = 0;
+      this.sessionStartSteps = 0;
+      this.onUpdateCallback = onUpdate;
+
+      console.log('[PEDOMETER] ✅ Iniciando rastreamento');
+
+      // watchStepCount - o result.steps JÁ É o total desde que iniciou
+      // Não somar, apenas usar o valor direto
+      this.subscription = Pedometer.watchStepCount(result => {
+        this.sessionSteps = result.steps;
+        
+        console.log(`[PEDOMETER] 📊 ${this.sessionSteps} passos`);
+        
+        if (this.onUpdateCallback) {
+          this.onUpdateCallback(this.sessionSteps);
+        }
+      });
+    } catch (error) {
+      console.error('[PEDOMETER] ⚠️ Erro ao iniciar rastreamento:', error);
+      throw error; // Re-throw para o caller saber que falhou
     }
-
-    // Inicializar rastreamento diário se necessário (sem recursão)
-    if (Platform.OS === 'android' && !this.dailyTrackingInitialized) {
-      await this.initializeDailyTracking();
-    }
-
-    // Obter baseline (iOS: API, Android: cache)
-    this.sessionStartTime = new Date();
-    this.sessionStartSteps = Platform.OS === 'ios' 
-      ? await this.getDailyStepsIOS()
-      : this.dailyStepCount;
-    this.sessionSteps = 0;
-
-    console.log('[PEDOMETER] Rastreamento de sessão iniciado. Baseline:', this.sessionStartSteps);
-
-    // Monitorar incrementos
-    this.subscription = Pedometer.watchStepCount((result) => {
-      this.sessionSteps += result.steps;
-      onUpdate(this.sessionSteps);
-    });
   }
 
   /**
    * Para o rastreamento de passos
    */
   stopTracking(): number {
+    console.log('[PEDOMETER] 🛑 Parando rastreamento...');
+    
+    // Parar polling
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+      console.log('[PEDOMETER] ✅ Polling parado');
+    }
+
+    // Parar subscription (se houver)
     if (this.subscription) {
       this.subscription.remove();
       this.subscription = null;
-      console.log('[PEDOMETER] Rastreamento parado. Passos da sessão:', this.sessionSteps);
+      console.log('[PEDOMETER] ✅ Subscription removida');
     }
-    return this.sessionSteps;
+
+    this.onUpdateCallback = null;
+    const finalSteps = this.sessionSteps;
+    
+    // Resetar valores da sessão
+    this.sessionSteps = 0;
+    this.sessionStartSteps = 0;
+    this.sessionStartTime = null;
+    
+    console.log('[PEDOMETER] Rastreamento parado. Passos finais:', finalSteps);
+    return finalSteps;
   }
 
   /**
    * Obtém passos diários (plataforma-agnóstico)
    */
   async getDailySteps(): Promise<number> {
+    // Web não suporta pedômetro
+    if (Platform.OS === 'web') {
+      return 0;
+    }
+
     if (Platform.OS === 'ios') {
       return this.getDailyStepsIOS();
     }
@@ -149,7 +215,9 @@ class PedometerService {
     
     // Monitorar incrementos
     this.dailyStepSubscription = Pedometer.watchStepCount((result) => {
+      const before = this.dailyStepCount;
       this.dailyStepCount += result.steps;
+      console.log(`[PEDOMETER DAILY] +${result.steps} | Total diário: ${this.dailyStepCount}`);
       
       // Salvar com debouncing (tempo OU threshold)
       this.debouncedCacheSave();

@@ -207,6 +207,7 @@ export default function ChallengesScreen() {
         subtitle="Complete suas missões diárias! 🎯"
         showNotifications={true}
       />
+      
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
