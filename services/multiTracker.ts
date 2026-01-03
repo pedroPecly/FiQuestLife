@@ -16,9 +16,9 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PedometerService from './pedometer';
-import LocationService from './location';
 import api from './api';
+import LocationService from './location';
+import PedometerService from './pedometer';
 
 const ACTIVE_SESSIONS_KEY = '@FiQuestLife:activeSessions';
 
@@ -316,6 +316,7 @@ class MultiTrackerService {
    */
   async loadSessionsFromStorage(): Promise<void> {
     try {
+      console.log('[MULTI TRACKER] Carregando sessões...');
       const stored = await AsyncStorage.getItem(ACTIVE_SESSIONS_KEY);
       if (!stored) {
         console.log('[MULTI TRACKER] Nenhuma sessão salva');
@@ -324,7 +325,7 @@ class MultiTrackerService {
       
       const data: ActiveSession[] = JSON.parse(stored);
       
-      if (data.length === 0) {
+      if (!Array.isArray(data) || data.length === 0) {
         console.log('[MULTI TRACKER] Nenhuma sessão ativa');
         return;
       }
@@ -333,23 +334,32 @@ class MultiTrackerService {
         this.activeSessions.set(session.userChallengeId, session);
       });
 
-      // Aguardar 1 segundo para sensores estarem prontos
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log(`[MULTI TRACKER] ${this.activeSessions.size} sessões carregadas, aguardando sensores...`);
+      
+      // Aguardar 2 segundos para sensores estarem prontos
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Reiniciar tracking se houver sessões
       if (this.activeSessions.size > 0) {
         try {
           await this.startGlobalTracking();
-          console.log(`[MULTI TRACKER] ✅ ${this.activeSessions.size} sessões restauradas`);
+          console.log(`[MULTI TRACKER] ✅ ${this.activeSessions.size} sessões restauradas com sucesso`);
         } catch (trackingError) {
           console.error('[MULTI TRACKER] ⚠️ Erro ao reiniciar tracking:', trackingError);
-          // Falha silenciosa - não deve crashar o app
+          // Limpar sessões se falhar (evita loop infinito de crashes)
+          this.activeSessions.clear();
+          await AsyncStorage.removeItem(ACTIVE_SESSIONS_KEY);
         }
       }
     } catch (error) {
       console.error('[MULTI TRACKER] ⚠️ Erro ao carregar sessões:', error);
-      // Limpar sessões corrompidas
-      await AsyncStorage.removeItem(ACTIVE_SESSIONS_KEY);
+      // Limpar dados corrompidos
+      try {
+        await AsyncStorage.removeItem(ACTIVE_SESSIONS_KEY);
+        console.log('[MULTI TRACKER] Sessões corrompidas removidas');
+      } catch {
+        // Ignore
+      }
     }
   }
 }

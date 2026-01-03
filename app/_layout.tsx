@@ -119,9 +119,10 @@ export default function RootLayout() {
   useEffect(() => {
     syncActivities();
     
-    // Inicializar MultiTrackerService (restaurar sessões salvas)
+    // Inicializar MultiTrackerService
     const initMultiTracker = async () => {
       try {
+        await new Promise(resolve => setTimeout(resolve, 3000));
         await MultiTrackerService.loadSessionsFromStorage();
         console.log('[ROOT LAYOUT] ✅ MultiTrackerService inicializado');
       } catch (error) {
