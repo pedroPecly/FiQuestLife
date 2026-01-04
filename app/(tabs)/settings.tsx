@@ -20,15 +20,15 @@ import { CommonActions } from '@react-navigation/native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Platform,
-    // Remover SafeAreaView do react-native
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  // Remover SafeAreaView do react-native
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
@@ -36,8 +36,8 @@ import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import {
-    getNotificationsEnabled,
-    setNotificationsEnabled as saveNotificationsPreference,
+  getNotificationsEnabled,
+  setNotificationsEnabled as saveNotificationsPreference,
 } from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/settings.styles';
@@ -402,14 +402,6 @@ export default function SettingsScreen() {
             iconColor="#FF5722"
             label="Lembrete Diário"
             onPress={handleSetReminder}
-          />
-
-          <SettingsMenuItem
-            type="clickable"
-            icon="heart"
-            iconColor="#20B2AA"
-            label={Platform.OS === 'ios' ? 'Conectar Apple Health' : 'Conectar Google Fit'}
-            onPress={() => router.push('/health-onboarding' as any)}
             isLast
           />
         </View>

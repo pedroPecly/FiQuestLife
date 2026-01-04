@@ -47,7 +47,7 @@ interface LeaderboardCardProps {
     level: number;
   };
   stat: number;
-  statType: 'xp' | 'coins' | 'streak';
+  statType: 'xp' | 'coins' | 'streak' | 'challenges' | 'distance';
   isCurrentUser?: boolean;
 }
 
@@ -72,6 +72,18 @@ export function LeaderboardCard({ position, user, stat, statType, isCurrentUser 
           icon: 'flame' as const,
           color: COLORS.error,
           label: 'Dias',
+        };
+      case 'challenges':
+        return {
+          icon: 'trophy' as const,
+          color: '#9333ea',
+          label: 'Desafios',
+        };
+      case 'distance':
+        return {
+          icon: 'footsteps' as const,
+          color: '#10b981',
+          label: 'KM',
         };
     }
   };
@@ -119,7 +131,7 @@ export function LeaderboardCard({ position, user, stat, statType, isCurrentUser 
         <View style={styles.statRow}>
           <Ionicons name={config.icon} size={20} color={config.color} />
           <Text style={[styles.statValue, { color: config.color }]}>
-            {stat.toLocaleString('pt-BR')}
+            {(stat || 0).toLocaleString('pt-BR')}
           </Text>
         </View>
         <Text style={styles.statLabel}>{config.label}</Text>

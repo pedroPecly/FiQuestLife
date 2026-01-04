@@ -90,6 +90,18 @@ export const getUserDailyChallenges = async (userId: string) => {
     },
     include: {
       challenge: true,
+      challengeInvitation: {
+        include: {
+          fromUser: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
     },
     orderBy: [
       { status: 'asc' }, // PENDING primeiro

@@ -14,7 +14,7 @@ import api from './api';
 // INTERFACES
 // ============================================
 
-export type LeaderboardType = 'xp' | 'streak' | 'challenges';
+export type LeaderboardType = 'xp' | 'streak' | 'challenges' | 'distance';
 export type LeaderboardScope = 'friends' | 'global';
 
 export interface LeaderboardEntry {
@@ -28,6 +28,7 @@ export interface LeaderboardEntry {
   currentStreak: number;
   longestStreak: number;
   challengesCompleted: number;
+  totalDistance?: number; // em km
   isCurrentUser: boolean;
 }
 

@@ -41,6 +41,19 @@ export interface UserChallenge {
   duration?: number;
   activityData?: any;
   challenge: Challenge;
+  challengeInvitation?: {
+    id: string;
+    fromUserId: string;
+    toUserId: string;
+    status: string;
+    message?: string;
+    fromUser: {
+      id: string;
+      username: string;
+      name: string;
+      avatarUrl: string | null;
+    };
+  } | null;
 }
 
 export type ChallengeCategory =

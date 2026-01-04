@@ -69,7 +69,6 @@ export default function ExploreScreen() {
    * Previne bug de loading congelado após navegação
    */
   useEffect(() => {
-    console.log('[EXPLORE] Componente montado - resetando estados de loading');
     setFeedLoading(false);
     setFeedRefreshing(false);
     setMyPostsLoading(false);
@@ -82,15 +81,6 @@ export default function ExploreScreen() {
    */
   useFocusEffect(
     useCallback(() => {
-      console.log('[EXPLORE] useFocusEffect - Tab ativa:', activeTab);
-      console.log('[EXPLORE] Estados de loading:', {
-        feedLoading,
-        feedRefreshing,
-        myPostsLoading,
-        myPostsRefreshing,
-        initialLoad,
-      });
-      
       // Resetar estados de loading que podem ter ficado travados após navegação
       setFeedLoading(false);
       setFeedRefreshing(false);
@@ -109,24 +99,10 @@ export default function ExploreScreen() {
 
   // Processa parâmetros de navegação (highlight de atividades)
   useEffect(() => {
-    console.log('[EXPLORE] ========================================');
-    console.log('[EXPLORE] useEffect disparado');
-    console.log('[EXPLORE] Todos os params:', JSON.stringify(params));
-    console.log('[EXPLORE] params.highlightActivityId:', params.highlightActivityId);
-    console.log('[EXPLORE] params.tab:', params.tab);
-    console.log('[EXPLORE] params.openComments:', params.openComments);
-    console.log('[EXPLORE] params.timestamp:', params.timestamp);
-    console.log('[EXPLORE] ========================================');
-
     if (params.highlightActivityId && params.tab) {
       const targetTab = params.tab as 'feed' | 'myPosts';
       const activityId = params.highlightActivityId as string;
       const shouldOpenComments = params.openComments === 'true';
-
-      console.log('[EXPLORE] ✅ Processando navegação:');
-      console.log('[EXPLORE] - Tab:', targetTab);
-      console.log('[EXPLORE] - ActivityId:', activityId);
-      console.log('[EXPLORE] - OpenComments:', shouldOpenComments);
 
       // Define o ID para highlight ANTES de mudar de tab
       setHighlightedActivityId(activityId);
@@ -157,32 +133,23 @@ export default function ExploreScreen() {
     const isLoading = activeTab === 'feed' ? feedLoading : myPostsLoading;
     const listRef = activeTab === 'feed' ? feedListRef : myPostsListRef;
 
-    console.log('[EXPLORE] Verificando scroll - Tab:', activeTab, 'Loading:', isLoading, 'Items:', targetList.length, 'Ref:', !!listRef.current);
-
     // Aguarda os dados serem carregados
     if (isLoading || targetList.length === 0) {
-      console.log('[EXPLORE] Aguardando dados serem carregados...');
       return;
     }
 
     // Encontra o índice da atividade
     const index = targetList.findIndex(a => a.id === highlightedActivityId);
-    
-    console.log('[EXPLORE] Tentando scroll - Index:', index, 'Total items:', targetList.length);
 
     if (index === -1) {
-      console.warn('[EXPLORE] ⚠️ Atividade não encontrada na lista:', highlightedActivityId);
       return;
     }
 
     // Aguarda todas as interações e animações terminarem antes de tentar scroll
     const handle = InteractionManager.runAfterInteractions(() => {
-      console.log('[EXPLORE] ✅ Interações completas, verificando ref...');
-      
       const currentListRef = activeTab === 'feed' ? feedListRef : myPostsListRef;
       
       if (currentListRef.current) {
-        console.log('[EXPLORE] ✅ Ref disponível! Fazendo scroll');
         if (activeTab === 'feed' || activeTab === 'myPosts') {
           // Delay adicional para garantir layout
           setTimeout(() => {
@@ -228,15 +195,11 @@ export default function ExploreScreen() {
     const listRef = tab === 'feed' ? feedListRef : myPostsListRef;
     const index = list.findIndex(a => a.id === activityId);
     
-    console.log('[EXPLORE] Fazendo scroll - Index:', index, 'Total items:', list.length, 'Ref disponível:', !!listRef.current);
-    
     if (index === -1) {
-      console.warn('[EXPLORE] ⚠️ Atividade não encontrada na lista');
       return;
     }
 
     if (!listRef.current) {
-      console.warn('[EXPLORE] ⚠️ Ref não disponível ainda, FlatList não renderizado');
       return;
     }
     
@@ -247,18 +210,15 @@ export default function ExploreScreen() {
         animated: true,
         viewPosition: 0.3, // Posiciona um pouco acima do centro para melhor visibilidade
       });
-      console.log('[EXPLORE] ✅ Scroll executado com sucesso para index:', index);
     } catch (error) {
-      console.error('[EXPLORE] ❌ Erro ao fazer scrollToIndex:', error);
       // Fallback: tenta scroll manual por offset
       try {
         listRef.current.scrollToOffset({
           offset: index * 250, // Altura aproximada de um card
           animated: true,
         });
-        console.log('[EXPLORE] ✅ Scroll por offset executado para index:', index);
       } catch (fallbackError) {
-        console.error('[EXPLORE] ❌ Erro no fallback de scroll:', fallbackError);
+        // Silently fail
       }
     }
   };
@@ -303,8 +263,6 @@ export default function ExploreScreen() {
 
       setHasMore(data.length === 20);
     } catch (error: any) {
-      console.error('❌ Erro ao carregar feed:', error);
-      console.error('❌ Error response:', error.response);
       if (error.response?.status === 500) {
         setHasMore(false);
       }
@@ -318,8 +276,6 @@ export default function ExploreScreen() {
   // Load my posts
   const loadMyPosts = async (isRefresh = false) => {
     try {
-      console.log('[MY POSTS] 🔄 Iniciando loadMyPosts - isRefresh:', isRefresh, 'offset:', myPostsOffset);
-      
       if (isRefresh) {
         setMyPostsRefreshing(true);
       } else if (!myPostsInitialLoad) {
@@ -327,23 +283,7 @@ export default function ExploreScreen() {
       }
 
       const newOffset = isRefresh ? 0 : myPostsOffset;
-      console.log('[MY POSTS] 📡 Chamando getMyActivity com offset:', newOffset);
-      
       const data = await feedService.getMyActivity(20, newOffset);
-      
-      console.log('[MY POSTS] ✅ Dados recebidos:', data.length, 'atividades');
-      console.log('[MY POSTS] 📸 Atividades com foto:', data.filter(a => a.photoUrl).length);
-      
-      // Log da primeira atividade para debug
-      if (data.length > 0) {
-        console.log('[MY POSTS] 📝 Primeira atividade:', {
-          id: data[0].id,
-          type: data[0].type,
-          hasPhoto: !!data[0].photoUrl,
-          photoUrl: data[0].photoUrl?.substring(0, 50),
-          caption: data[0].caption,
-        });
-      }
       
       if (isRefresh) {
         setMyPosts(data);
@@ -355,8 +295,6 @@ export default function ExploreScreen() {
 
       setMyPostsHasMore(data.length === 20);
     } catch (error: any) {
-      console.error('❌ Erro ao carregar meus posts:', error);
-      console.error('❌ Error response:', error.response);
       if (error.response?.status === 500) {
         setMyPostsHasMore(false);
       }
@@ -368,7 +306,7 @@ export default function ExploreScreen() {
     }
   };
 
-  const loadLeaderboard = async (isRefresh = false) => {
+  const loadLeaderboard = async (isRefresh = false, type?: LeaderboardType, scope?: 'friends' | 'global') => {
     try {
       if (isRefresh) {
         setLeaderboardRefreshing(true);
@@ -376,15 +314,22 @@ export default function ExploreScreen() {
         setLeaderboardLoading(true);
       }
 
-      const result = leaderboardScope === 'friends'
-        ? await leaderboardService.getFriendsLeaderboard(leaderboardType, 50)
-        : await leaderboardService.getGlobalLeaderboard(leaderboardType, 100);
+      // Usa os parâmetros passados ou os valores do estado
+      const effectiveType = type ?? leaderboardType;
+      const effectiveScope = scope ?? leaderboardScope;
+
+      console.log('[LEADERBOARD] Carregando com:', { effectiveType, effectiveScope });
+
+      const result = effectiveScope === 'friends'
+        ? await leaderboardService.getFriendsLeaderboard(effectiveType, 50)
+        : await leaderboardService.getGlobalLeaderboard(effectiveType, 100);
 
       if (result && result.leaderboard) {
+        console.log('[LEADERBOARD] Dados recebidos:', result.leaderboard.length, 'usuários');
         setLeaderboard(result.leaderboard);
       }
     } catch (error: any) {
-      console.error('Erro ao carregar leaderboard:', error);
+      // Silently fail
     } finally {
       setLeaderboardLoading(false);
       setLeaderboardRefreshing(false);
@@ -394,18 +339,10 @@ export default function ExploreScreen() {
 
   // Load more on scroll (feed/myPosts only)
   const loadMore = () => {
-    console.log('[EXPLORE] 📜 loadMore chamado - tab:', activeTab);
-    console.log('[EXPLORE] Feed state:', { feedLoading, feedRefreshing, hasMore, initialLoad });
-    console.log('[EXPLORE] MyPosts state:', { myPostsLoading, myPostsRefreshing, myPostsHasMore, myPostsInitialLoad });
-    
     if (activeTab === 'feed' && !feedLoading && !feedRefreshing && hasMore && !initialLoad) {
-      console.log('[EXPLORE] ✅ Carregando mais no feed');
       loadFeed();
     } else if (activeTab === 'myPosts' && !myPostsLoading && !myPostsRefreshing && myPostsHasMore && !myPostsInitialLoad) {
-      console.log('[EXPLORE] ✅ Carregando mais em myPosts');
       loadMyPosts();
-    } else {
-      console.log('[EXPLORE] ⏸️ Não carregando mais (condições não atendidas)');
     }
   };
 
@@ -422,9 +359,11 @@ export default function ExploreScreen() {
 
   // Change leaderboard filter
   const changeLeaderboardFilter = (type: LeaderboardType, scope: 'friends' | 'global') => {
+    console.log('[LEADERBOARD] Mudando filtro para:', { type, scope });
     setLeaderboardType(type);
     setLeaderboardScope(scope);
-    loadLeaderboard(true);
+    // Passa os novos valores diretamente para evitar usar estado desatualizado
+    loadLeaderboard(true, type, scope);
   };
 
   // Atualizar stats após interação (like/comment)
@@ -576,6 +515,14 @@ export default function ExploreScreen() {
                 Desafios
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.filterButton, leaderboardType === 'distance' && styles.activeFilter]}
+              onPress={() => changeLeaderboardFilter('distance', leaderboardScope)}
+            >
+              <Text style={[styles.filterText, leaderboardType === 'distance' && styles.activeFilterText]}>
+                KM
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -659,10 +606,12 @@ export default function ExploreScreen() {
       ) : (
         <FlatList
           data={leaderboard}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}-${leaderboardType}-${leaderboardScope}`}
+          extraData={leaderboardType}
           renderItem={({ item, index }) => {
             const stat = leaderboardType === 'xp' ? item.xp
               : leaderboardType === 'streak' ? item.currentStreak
+              : leaderboardType === 'distance' ? (item.totalDistance || 0)
               : item.challengesCompleted;
             
             return (
@@ -670,7 +619,7 @@ export default function ExploreScreen() {
                 position={index + 1}
                 user={item}
                 stat={stat}
-                statType={leaderboardType === 'challenges' ? 'xp' : leaderboardType}
+                statType={leaderboardType as 'xp' | 'streak' | 'challenges' | 'distance'}
                 isCurrentUser={item.isCurrentUser}
               />
             );

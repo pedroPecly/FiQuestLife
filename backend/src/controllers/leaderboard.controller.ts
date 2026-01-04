@@ -14,12 +14,12 @@
 import type { Context } from 'hono';
 import { prisma } from '../lib/prisma.js';
 
-type LeaderboardType = 'xp' | 'streak' | 'challenges';
+type LeaderboardType = 'xp' | 'streak' | 'challenges' | 'distance';
 
 /**
  * GET /leaderboard/friends?type=xp
  * Retorna ranking dos amigos do usuário
- * Types: xp (total XP), streak (current streak), challenges (completed challenges)
+ * Types: xp (total XP), streak (current streak), challenges (completed challenges), distance (km percorridos)
  */
 export const getFriendsLeaderboard = async (c: Context) => {
   try {
@@ -76,8 +76,11 @@ export const getFriendsLeaderboard = async (c: Context) => {
     let rankedUsers: any[] = [];
 
     if (type === 'challenges') {
-      // Busca usuários com contagem de desafios completados
-      const usersWithChallenges = await prisma.user.findMany({
+      // ⚠️ IMPORTANTE: Conta pelo histórico de recompensas, não por userChallenges
+      // Motivo: desafios completados antigos podem ser deletados do banco
+      // Mas o histórico de recompensas permanece para sempre
+      
+      const usersWithRewards = await prisma.user.findMany({
         where: {
           id: {
             in: allUserIds,
@@ -85,30 +88,77 @@ export const getFriendsLeaderboard = async (c: Context) => {
         },
         select: {
           ...selectFields,
-          userChallenges: {
+          rewardHistory: {
             where: {
-              status: 'COMPLETED',
+              source: 'CHALLENGE_COMPLETION'
             },
             select: {
-              id: true,
+              id: true
+            }
+          }
+        },
+      });
+
+      console.log('[LEADERBOARD DEBUG] Usuários encontrados:', usersWithRewards.length);
+
+      rankedUsers = usersWithRewards
+        .map(user => {
+          // Divide por 2 porque cada desafio gera 2 rewards (XP + COINS)
+          const challengesCompleted = Math.floor(user.rewardHistory.length / 2);
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            avatarUrl: user.avatarUrl,
+            level: user.level,
+            xp: user.xp,
+            currentStreak: user.currentStreak,
+            longestStreak: user.longestStreak,
+            challengesCompleted,
+            totalDistance: 0,
+          };
+        })
+        .sort((a, b) => b.challengesCompleted - a.challengesCompleted)
+        .slice(0, limit);
+    } else if (type === 'distance') {
+      // Ranking por distância total percorrida (em km)
+      const usersWithDistance = await prisma.user.findMany({
+        where: {
+          id: {
+            in: allUserIds,
+          },
+        },
+        select: {
+          ...selectFields,
+          activityTracking: {
+            select: {
+              distance: true,
             },
           },
         },
       });
 
-      rankedUsers = usersWithChallenges
-        .map(user => ({
-          id: user.id,
-          username: user.username,
-          name: user.name,
-          avatarUrl: user.avatarUrl,
-          level: user.level,
-          xp: user.xp,
-          currentStreak: user.currentStreak,
-          longestStreak: user.longestStreak,
-          challengesCompleted: user.userChallenges.length,
-        }))
-        .sort((a, b) => b.challengesCompleted - a.challengesCompleted)
+      rankedUsers = usersWithDistance
+        .map(user => {
+          // Soma total de distância em km
+          const totalDistance = user.activityTracking.reduce(
+            (sum: number, activity: any) => sum + (activity.distance || 0),
+            0
+          );
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            avatarUrl: user.avatarUrl,
+            level: user.level,
+            xp: user.xp,
+            currentStreak: user.currentStreak,
+            longestStreak: user.longestStreak,
+            challengesCompleted: 0, // Adiciona campo padrão
+            totalDistance: Math.round(totalDistance * 100) / 100, // Arredonda para 2 casas decimais
+          };
+        })
+        .sort((a, b) => b.totalDistance - a.totalDistance)
         .slice(0, limit);
     } else {
       // Para XP e Streak, query simples
@@ -144,6 +194,7 @@ export const getFriendsLeaderboard = async (c: Context) => {
             currentStreak: user.currentStreak,
             longestStreak: user.longestStreak,
             challengesCompleted,
+            totalDistance: 0,
           };
         })
       );
@@ -203,38 +254,81 @@ export const getGlobalLeaderboard = async (c: Context) => {
       case 'streak':
         orderByField = { currentStreak: 'desc' };
         break;
+      case 'distance':
+        // Distance será calculado pela soma do ActivityTracking
+        break;
     }
 
     let rankedUsers: any[] = [];
 
     if (type === 'challenges') {
-      const usersWithChallenges = await prisma.user.findMany({
+      // ⚠️ IMPORTANTE: Conta pelo histórico de recompensas, não por userChallenges
+      const usersWithRewards = await prisma.user.findMany({
         select: {
           ...selectFields,
-          userChallenges: {
+          rewardHistory: {
             where: {
-              status: 'COMPLETED',
+              source: 'CHALLENGE_COMPLETION'
             },
             select: {
-              id: true,
+              id: true
+            }
+          }
+        },
+      });
+
+      rankedUsers = usersWithRewards
+        .map(user => {
+          // Divide por 2 porque cada desafio gera 2 rewards (XP + COINS)
+          const challengesCompleted = Math.floor(user.rewardHistory.length / 2);
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            avatarUrl: user.avatarUrl,
+            level: user.level,
+            xp: user.xp,
+            currentStreak: user.currentStreak,
+            longestStreak: user.longestStreak,
+            challengesCompleted,
+            totalDistance: 0,
+          };
+        })
+        .sort((a, b) => b.challengesCompleted - a.challengesCompleted)
+        .slice(0, limit);
+    } else if (type === 'distance') {
+      // Ranking por distância total percorrida (em km)
+      const usersWithDistance = await prisma.user.findMany({
+        select: {
+          ...selectFields,
+          activityTracking: {
+            select: {
+              distance: true,
             },
           },
         },
       });
 
-      rankedUsers = usersWithChallenges
-        .map(user => ({
-          id: user.id,
-          username: user.username,
-          name: user.name,
-          avatarUrl: user.avatarUrl,
-          level: user.level,
-          xp: user.xp,
-          currentStreak: user.currentStreak,
-          longestStreak: user.longestStreak,
-          challengesCompleted: user.userChallenges.length,
-        }))
-        .sort((a, b) => b.challengesCompleted - a.challengesCompleted)
+      rankedUsers = usersWithDistance
+        .map(user => {
+          const totalDistance = user.activityTracking.reduce(
+            (sum: number, activity: any) => sum + (activity.distance || 0),
+            0
+          );
+          return {
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            avatarUrl: user.avatarUrl,
+            level: user.level,
+            xp: user.xp,
+            currentStreak: user.currentStreak,
+            longestStreak: user.longestStreak,
+            challengesCompleted: 0,
+            totalDistance: Math.round(totalDistance * 100) / 100,
+          };
+        })
+        .sort((a, b) => b.totalDistance - a.totalDistance)
         .slice(0, limit);
     } else {
       const users = await prisma.user.findMany({
@@ -263,6 +357,7 @@ export const getGlobalLeaderboard = async (c: Context) => {
             currentStreak: user.currentStreak,
             longestStreak: user.longestStreak,
             challengesCompleted,
+            totalDistance: 0,
           };
         })
       );

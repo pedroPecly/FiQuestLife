@@ -7,7 +7,7 @@ import {
     DIFFICULTY_LABELS,
     UserChallenge,
 } from '@/services/challenge';
-import { createChallengeInvite, getInvitationByUserChallenge } from '@/services/challengeInvitation';
+import { createChallengeInvite } from '@/services/challengeInvitation';
 import MultiTrackerService from '@/services/multiTracker';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
@@ -31,11 +31,10 @@ export default function ChallengeCard({
   alreadyUsedToChallenge = false,
   onInviteSent,
 }: ChallengeCardProps) {
-  const { challenge, status, id } = userChallenge;
+  const { challenge, status, id, challengeInvitation } = userChallenge;
   const isCompleted = status === 'COMPLETED';
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showFriendModal, setShowFriendModal] = useState(false);
-  const [invitation, setInvitation] = useState<any>(null);
   const [sendingInvite, setSendingInvite] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingProgress, setTrackingProgress] = useState(0);
@@ -44,7 +43,7 @@ export default function ChallengeCard({
   // Para desafios com rastreamento
   const hasTracking = challenge.trackingType && challenge.targetValue && challenge.targetUnit;
 
-  // Carrega informação de convite se existir
+  // Verifica status de rastreamento
   useEffect(() => {
     const checkTrackingStatus = () => {
       const session = MultiTrackerService.getSession(id);
@@ -71,15 +70,6 @@ export default function ChallengeCard({
 
     return unsubscribe;
   }, [id]);
-
-  const loadInvitation = async () => {
-    try {
-      const inv = await getInvitationByUserChallenge(id);
-      setInvitation(inv);
-    } catch (error) {
-      console.error('Erro ao carregar convite:', error);
-    }
-  };
 
   const categoryColor = CATEGORY_COLORS[challenge.category];
   const categoryLabel = CATEGORY_LABELS[challenge.category];
@@ -161,10 +151,10 @@ export default function ChallengeCard({
           </View>
 
           {/* Badge de desafio recebido de amigo - ao lado da dificuldade */}
-          {invitation && (
+          {challengeInvitation && (
             <View style={styles.inviteBadge}>
               <Ionicons name="people" size={14} color="#20B2AA" />
-              <Text style={styles.inviteBadgeText}>Desafio de {invitation.senderName}</Text>
+              <Text style={styles.inviteBadgeText}>Desafio de {challengeInvitation.fromUser.name}</Text>
             </View>
           )}
         </View>
