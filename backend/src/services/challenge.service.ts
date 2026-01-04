@@ -66,6 +66,18 @@ export const assignDailyChallenges = async (userId: string) => {
         },
         include: {
           challenge: true,
+          challengeInvitation: {
+            include: {
+              fromUser: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
         },
       })
     )
