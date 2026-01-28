@@ -158,7 +158,6 @@ export function useNotifications() {
         console.log('🕒 Timestamp:', timestamp);
         console.log('📝 Título:', content.title);
         console.log('📝 Corpo:', content.body);
-        console.log('📝 Channel ID:', content.channelId);
         console.log('📝 Som:', content.sound);
         console.log('📝 Badge:', content.badge);
         console.log('📝 Dados completos:', JSON.stringify(content.data, null, 2));

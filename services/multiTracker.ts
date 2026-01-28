@@ -35,6 +35,13 @@ export interface ActiveSession {
   startTime: number;
   currentValue: number;
   completed: boolean;
+  isPaused: boolean;
+  pausedTime: number; // Tempo total pausado em ms
+  lastPauseTime: number | null; // Timestamp do último pause
+  accumulatedDuration: number; // Para DURATION: duração já acumulada antes da última pausa
+  baseSteps: number; // Para STEPS: passos já contabilizados antes de pausar
+  baseDistance: number; // Para DISTANCE: distância já contabilizada antes de pausar
+  sessionStartSteps: number; // Passos no momento de iniciar/retomar (para calcular delta)
 }
 
 // ==========================================
@@ -51,12 +58,19 @@ class MultiTrackerService {
    * Inicia tracking de um desafio
    * Se já estiver rastreando globalmente, apenas adiciona à lista
    */
-  async startTracking(session: Omit<ActiveSession, 'startTime' | 'currentValue' | 'completed'>): Promise<void> {
+  async startTracking(session: Omit<ActiveSession, 'startTime' | 'currentValue' | 'completed' | 'isPaused' | 'pausedTime' | 'lastPauseTime' | 'accumulatedDuration' | 'baseSteps' | 'baseDistance' | 'sessionStartSteps'>): Promise<void> {
     const newSession: ActiveSession = {
       ...session,
       startTime: Date.now(),
       currentValue: 0,
       completed: false,
+      isPaused: false,
+      pausedTime: 0,
+      lastPauseTime: null,
+      accumulatedDuration: 0,
+      baseSteps: 0,
+      baseDistance: 0,
+      sessionStartSteps: 0,
     };
 
     this.activeSessions.set(session.userChallengeId, newSession);
@@ -94,6 +108,77 @@ class MultiTrackerService {
     console.log(`[MULTI TRACKER] Desafio parado: ${userChallengeId} (${this.activeSessions.size} restantes)`);
     
     return session;
+  }
+
+  /**
+   * Pausa tracking de um desafio específico
+   * Mantém a sessão mas para de atualizar valores
+   */
+  async pauseTracking(userChallengeId: string): Promise<void> {
+    const session = this.activeSessions.get(userChallengeId);
+    if (!session || session.isPaused) return;
+
+    // Para todos os tipos: calcular e salvar valor atual
+    if (session.trackingType === 'DURATION') {
+      const elapsedSinceLastResume = Math.floor((Date.now() - session.startTime) / 1000);
+      session.accumulatedDuration = session.accumulatedDuration + elapsedSinceLastResume;
+      session.currentValue = session.accumulatedDuration;
+      console.log(`[MULTI TRACKER PAUSE] DURATION - currentValue: ${session.currentValue}s, acumulado: ${session.accumulatedDuration}s`);
+    } else if (session.trackingType === 'STEPS') {
+      // Salvar passos acumulados como base
+      session.baseSteps = session.currentValue;
+      console.log(`[MULTI TRACKER PAUSE] STEPS - baseSteps salvos: ${session.baseSteps}`);
+    } else if (session.trackingType === 'DISTANCE') {
+      // Salvar distância acumulada como base
+      session.baseDistance = session.currentValue;
+      console.log(`[MULTI TRACKER PAUSE] DISTANCE - baseDistance salva: ${session.baseDistance}`);
+    }
+
+    session.isPaused = true;
+    session.lastPauseTime = Date.now();
+    
+    await this.saveSessionsToStorage();
+    this.notifyListeners();
+    
+    console.log(`[MULTI TRACKER] Desafio pausado: ${userChallengeId}, currentValue salvo: ${session.currentValue}`);
+  }
+
+  /**
+   * Retoma tracking de um desafio pausado
+   */
+  async resumeTracking(userChallengeId: string): Promise<void> {
+    const session = this.activeSessions.get(userChallengeId);
+    if (!session || !session.isPaused) return;
+
+    // Calcular tempo que ficou pausado
+    if (session.lastPauseTime) {
+      const pauseDuration = Date.now() - session.lastPauseTime;
+      session.pausedTime += pauseDuration;
+    }
+
+    // Para STEPS: resetar sessionStartSteps para capturar novo baseline ao retomar
+    if (session.trackingType === 'STEPS') {
+      session.sessionStartSteps = 0; // Será atualizado na primeira leitura do pedômetro
+      console.log(`[MULTI TRACKER RESUME] STEPS - aguardando nova leitura (base: ${session.baseSteps})`);
+    }
+
+    // Para DISTANCE: GPS continuará do ponto anterior
+    if (session.trackingType === 'DISTANCE') {
+      console.log(`[MULTI TRACKER RESUME] DISTANCE - retomando (base: ${session.baseDistance})`);
+    }
+
+    // Resetar startTime para agora (novo ciclo para DURATION)
+    session.startTime = Date.now();
+    session.isPaused = false;
+    session.lastPauseTime = null;
+
+    // Reiniciar sensores se necessário
+    await this.startGlobalTracking();
+
+    await this.saveSessionsToStorage();
+    this.notifyListeners();
+    
+    console.log(`[MULTI TRACKER] Desafio retomado: ${userChallengeId} (acumulado: ${session.accumulatedDuration}s)`);
   }
 
   /**
@@ -184,8 +269,17 @@ class MultiTrackerService {
    */
   private updateStepSessions(steps: number): void {
     this.activeSessions.forEach((session, id) => {
-      if (session.trackingType === 'STEPS') {
-        session.currentValue = steps;
+      if (session.trackingType === 'STEPS' && !session.isPaused) {
+        // Na primeira leitura após retomar, definir sessionStartSteps
+        if (session.sessionStartSteps === 0) {
+          session.sessionStartSteps = steps;
+          console.log(`[MULTI TRACKER STEPS] Baseline definido: ${steps} passos`);
+        }
+        
+        // Calcular passos nesta sessão + passos anteriores acumulados
+        const stepsInCurrentSession = steps - session.sessionStartSteps;
+        session.currentValue = session.baseSteps + stepsInCurrentSession;
+        
         this.checkCompletion(session);
       }
     });
@@ -198,23 +292,45 @@ class MultiTrackerService {
   private updateAllSessions(): void {
     const now = Date.now();
     const distance = LocationService.getCurrentDistance();
+    let hasChanges = false;
 
     this.activeSessions.forEach((session) => {
-      // Atualizar DISTANCE
+      // Não atualizar sessões pausadas
+      if (session.isPaused) return;
+
+      // Atualizar DISTANCE - somar distância atual com a base acumulada
       if (session.trackingType === 'DISTANCE') {
-        session.currentValue = distance;
+        const oldValue = session.currentValue;
+        // distance é a distância da sessão atual do GPS, adicionar à base
+        session.currentValue = session.baseDistance + distance;
+        if (oldValue !== session.currentValue) hasChanges = true;
         this.checkCompletion(session);
       }
 
-      // Atualizar DURATION
+      // Atualizar DURATION - usar duração acumulada + tempo desde último resume
       if (session.trackingType === 'DURATION') {
-        session.currentValue = Math.floor((now - session.startTime) / 1000);
+        const elapsedSinceResume = Math.floor((now - session.startTime) / 1000);
+        const newValue = session.accumulatedDuration + elapsedSinceResume;
+        
+        if (session.currentValue !== newValue) {
+          session.currentValue = newValue;
+          hasChanges = true;
+          
+          // Log a cada 3 segundos
+          if (session.currentValue % 3 === 0) {
+            console.log(`[MULTI TRACKER DURATION] Acumulado: ${session.accumulatedDuration}s + Desde resume: ${elapsedSinceResume}s = ${session.currentValue}s`);
+          }
+        }
+        
         this.checkCompletion(session);
       }
     });
 
-    this.saveSessionsToStorage();
-    this.notifyListeners();
+    // Só salvar e notificar se algo mudou
+    if (hasChanges) {
+      this.saveSessionsToStorage();
+      this.notifyListeners();
+    }
   }
 
   /**
@@ -313,6 +429,7 @@ class MultiTrackerService {
 
   /**
    * Carrega sessões do AsyncStorage (ao abrir app)
+   * Valida se os desafios ainda existem no backend antes de restaurar
    */
   async loadSessionsFromStorage(): Promise<void> {
     try {
@@ -330,11 +447,60 @@ class MultiTrackerService {
         return;
       }
       
-      data.forEach(session => {
+      // Validar todas as sessões em paralelo para melhor performance
+      const validationPromises = data.map(async (session) => {
+        try {
+          await api.get(`/user-challenges/${session.userChallengeId}`);
+          return {
+            success: true,
+            session: {
+              ...session,
+              baseSteps: session.baseSteps ?? 0,
+              baseDistance: session.baseDistance ?? 0,
+              sessionStartSteps: session.sessionStartSteps ?? 0,
+            } as ActiveSession,
+          };
+        } catch (error: any) {
+          const reason = error?.response?.status === 404 
+            ? 'desafio não existe' 
+            : error?.message || 'erro desconhecido';
+          return {
+            success: false,
+            session,
+            reason,
+          };
+        }
+      });
+
+      const results = await Promise.allSettled(validationPromises);
+      const validSessions: ActiveSession[] = [];
+      
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const { success, session, reason } = result.value;
+          if (success) {
+            validSessions.push(session as ActiveSession);
+            console.log(`[MULTI TRACKER] ✅ Sessão válida: ${session.userChallengeId}`);
+          } else {
+            console.log(`[MULTI TRACKER] ⚠️ Descartando sessão: ${session.userChallengeId} (${reason})`);
+          }
+        } else {
+          console.log(`[MULTI TRACKER] ⚠️ Falha crítica ao validar sessão ${data[index]?.userChallengeId}`);
+        }
+      });
+      
+      // Restaurar apenas sessões válidas
+      if (validSessions.length === 0) {
+        console.log('[MULTI TRACKER] Nenhuma sessão válida encontrada');
+        await AsyncStorage.removeItem(ACTIVE_SESSIONS_KEY);
+        return;
+      }
+      
+      validSessions.forEach(session => {
         this.activeSessions.set(session.userChallengeId, session);
       });
 
-      console.log(`[MULTI TRACKER] ${this.activeSessions.size} sessões carregadas, aguardando sensores...`);
+      console.log(`[MULTI TRACKER] ${this.activeSessions.size} sessões válidas carregadas, aguardando sensores...`);
       
       // Aguardar 2 segundos para sensores estarem prontos
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -361,6 +527,18 @@ class MultiTrackerService {
         // Ignore
       }
     }
+  }
+
+  /**
+   * Limpa todas as sessões (útil ao fazer logout ou trocar de conta)
+   */
+  async clearAllSessions(): Promise<void> {
+    console.log('[MULTI TRACKER] Limpando todas as sessões...');
+    this.activeSessions.clear();
+    await this.stopGlobalTracking();
+    await AsyncStorage.removeItem(ACTIVE_SESSIONS_KEY);
+    this.notifyListeners();
+    console.log('[MULTI TRACKER] ✅ Sessões limpas');
   }
 }
 

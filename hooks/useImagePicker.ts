@@ -86,7 +86,7 @@ export const useImagePicker = () => {
           uri: asset.uri,
           width: asset.width,
           height: asset.height,
-          type: asset.type,
+          type: asset.type || undefined,
           fileName: asset.fileName || undefined,
         };
       }
@@ -127,7 +127,7 @@ export const useImagePicker = () => {
           uri: asset.uri,
           width: asset.width,
           height: asset.height,
-          type: asset.type,
+          type: asset.type || undefined,
           fileName: asset.fileName || undefined,
         };
       }

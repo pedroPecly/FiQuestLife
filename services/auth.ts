@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '../types/user';
 import ActivitySyncService from './activitySync';
 import { unregisterPushToken } from './pushToken';
+import MultiTrackerService from './multiTracker';
 
 // Chave para armazenar o token
 const TOKEN_KEY = '@FiQuestLife:token';
@@ -92,6 +93,9 @@ export const authStorage = {
       
       // Limpar cache de sincronização de atividades
       ActivitySyncService.clearCache();
+      
+      // Limpar todas as sessões de tracking ativas
+      await MultiTrackerService.clearAllSessions();
       
       console.log('[AUTH] Logout concluído com sucesso');
       console.log('[AUTH] ℹ️ Notificações locais mantidas para próximo login');

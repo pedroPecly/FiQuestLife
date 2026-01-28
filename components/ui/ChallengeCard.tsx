@@ -38,6 +38,7 @@ export default function ChallengeCard({
   const [sendingInvite, setSendingInvite] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingProgress, setTrackingProgress] = useState(0);
+  const [hasActiveSession, setHasActiveSession] = useState(false); // Indica se há sessão (ativa ou pausada)
   const { alert } = useAlert();
 
   // Para desafios com rastreamento
@@ -48,8 +49,11 @@ export default function ChallengeCard({
     const checkTrackingStatus = () => {
       const session = MultiTrackerService.getSession(id);
       if (session) {
-        setIsTracking(true);
+        // isTracking = true apenas se NÃO estiver pausado
+        const isActive = !session.isPaused;
+        setIsTracking(isActive);
         setTrackingProgress(session.currentValue);
+        setHasActiveSession(true); // Há uma sessão ativa (mesmo que pausada)
         
         // Se completou, auto-finalizar
         if (session.completed && !isCompleted) {
@@ -58,6 +62,7 @@ export default function ChallengeCard({
       } else {
         setIsTracking(false);
         setTrackingProgress(0);
+        setHasActiveSession(false); // Não há sessão
       }
     };
 
@@ -69,7 +74,7 @@ export default function ChallengeCard({
     });
 
     return unsubscribe;
-  }, [id]);
+  }, [id, isCompleted, onComplete]);
 
   const categoryColor = CATEGORY_COLORS[challenge.category];
   const categoryLabel = CATEGORY_LABELS[challenge.category];
@@ -95,12 +100,18 @@ export default function ChallengeCard({
 
 
   const handleToggleTracking = async () => {
-    if (isTracking) {
-      // Parar tracking
-      await MultiTrackerService.stopTracking(id, false);
-      alert.info('Rastreamento pausado', 'Você pode retomar a qualquer momento');
+    const session = MultiTrackerService.getSession(id);
+    
+    if (session?.isPaused) {
+      // Se está pausado, retomar
+      await MultiTrackerService.resumeTracking(id);
+      alert.info('Rastreamento retomado', 'Continue de onde parou!');
+    } else if (isTracking) {
+      // Se está ativo, pausar
+      await MultiTrackerService.pauseTracking(id);
+      alert.info('Rastreamento pausado', 'Seu progresso foi salvo');
     } else {
-      // Iniciar tracking
+      // Se não iniciou, iniciar
       try {
         await MultiTrackerService.startTracking({
           challengeId: challenge.id,
@@ -174,7 +185,7 @@ export default function ChallengeCard({
         {hasTracking && !isCompleted && (
           <StepCounterWidget
             trackingType={challenge.trackingType!}
-            currentValue={isTracking ? trackingProgress : (userChallenge.steps || userChallenge.distance || userChallenge.duration || 0)}
+            currentValue={trackingProgress > 0 ? trackingProgress : (userChallenge.steps || userChallenge.distance || userChallenge.duration || 0)}
             targetValue={challenge.targetValue!}
             targetUnit={challenge.targetUnit!}
           />
@@ -205,12 +216,23 @@ export default function ChallengeCard({
               onPress={handleToggleTracking}
             >
               <Ionicons 
-                name={isTracking ? "pause-circle" : "play-circle"} 
+                name={
+                  hasActiveSession && !isTracking 
+                    ? "play-circle"  // Pausado: mostrar play
+                    : isTracking 
+                      ? "pause-circle"  // Ativo: mostrar pause
+                      : "play-circle"   // Não iniciado: mostrar play
+                } 
                 size={20} 
                 color="#FFF" 
               />
               <Text style={styles.buttonText}>
-                {isTracking ? 'Pausar' : 'Iniciar'}
+                {hasActiveSession && !isTracking 
+                  ? 'Continuar'  // Se há sessão mas não está ativa = pausado
+                  : isTracking 
+                    ? 'Pausar' 
+                    : 'Iniciar'
+                }
               </Text>
             </TouchableOpacity>
           )}
