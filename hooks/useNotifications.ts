@@ -19,13 +19,13 @@ import { useEffect, useRef, useState } from 'react';
 import { authStorage } from '../services/auth';
 import { getLocalNotifications, saveLocalNotification } from '../services/localNotificationStorage';
 import {
-    addNotificationReceivedListener,
-    addNotificationResponseListener,
-    ensureNotificationChannelExists,
-    getNotificationsEnabled,
-    requestNotificationPermissions,
-    scheduleDailyReminder,
-    scheduleStreakReminder,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  ensureNotificationChannelExists,
+  getNotificationsEnabled,
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  scheduleStreakReminder,
 } from '../services/notifications';
 import { registerPushToken } from '../services/pushToken';
 

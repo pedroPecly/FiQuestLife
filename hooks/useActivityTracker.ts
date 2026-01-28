@@ -22,8 +22,8 @@ import type { TrackingType } from '@/services/challenge';
 import LocationService from '@/services/location';
 import PedometerService from '@/services/pedometer';
 import {
-    calculateProgress,
-    formatActivityValueWithUnit,
+  calculateProgress,
+  formatActivityValueWithUnit,
 } from '@/utils/activityFormatters';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useRef, useState } from 'react';

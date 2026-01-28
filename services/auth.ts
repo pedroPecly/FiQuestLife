@@ -13,8 +13,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User } from '../types/user';
 import ActivitySyncService from './activitySync';
-import { unregisterPushToken } from './pushToken';
 import MultiTrackerService from './multiTracker';
+import { unregisterPushToken } from './pushToken';
 
 // Chave para armazenar o token
 const TOKEN_KEY = '@FiQuestLife:token';
