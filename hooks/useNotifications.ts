@@ -24,8 +24,6 @@ import {
   ensureNotificationChannelExists,
   getNotificationsEnabled,
   requestNotificationPermissions,
-  scheduleDailyReminder,
-  scheduleStreakReminder,
 } from '../services/notifications';
 import { registerPushToken } from '../services/pushToken';
 
@@ -88,9 +86,7 @@ export function useNotifications() {
       const enabled = await getNotificationsEnabled();
       
       if (enabled) {
-        await scheduleDailyReminder();
-        await scheduleStreakReminder();
-        console.log('✅ Passo 4/4: Lembretes agendados');
+        console.log('✅ Passo 4/4: Preferências verificadas');
         console.log('✅✅✅ SETUP DE NOTIFICAÇÕES COMPLETO');
       } else {
         console.log('ℹ️ Notificações desabilitadas pelo usuário');

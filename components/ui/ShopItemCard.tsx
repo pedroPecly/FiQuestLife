@@ -16,7 +16,7 @@
 
 import shopService, { ShopItem, ShopItemType } from '@/services/shop';
 import React, { memo } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ShopItemCardProps {
   item: ShopItem;
@@ -135,15 +135,20 @@ export default memo(function ShopItemCard({ item, onPress, userCoins }: ShopItem
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 20, // Padrão do projeto
     borderWidth: 2,
     marginBottom: 16,
     overflow: 'hidden',
-    elevation: 4,
+    elevation: 5, // Padrão do projeto
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8, // Padrão do projeto
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+      },
+    }),
   },
   cardDisabled: {
     opacity: 0.6,
@@ -184,7 +189,7 @@ const styles = StyleSheet.create({
     height: 150,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F8FF', // Alice Blue - padrão do projeto
   },
   image: {
     width: '80%',
@@ -208,12 +213,12 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F', // Padrão do projeto
   },
   description: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
     marginBottom: 12,
     lineHeight: 20,
   },
@@ -224,7 +229,7 @@ const styles = StyleSheet.create({
   },
   metadataLabel: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
     marginRight: 6,
   },
   metadataValue: {
@@ -259,7 +264,7 @@ const styles = StyleSheet.create({
   },
   stock: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
   },
   stockLow: {
     color: '#FF9800',

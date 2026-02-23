@@ -42,25 +42,33 @@ export default function ShopAndInventoryScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Tab Navigation */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'shop' && styles.tabActive]}
-          onPress={() => setActiveTab('shop')}
-        >
-          <Text style={[styles.tabText, activeTab === 'shop' && styles.tabTextActive]}>
-            🛒 Loja
-          </Text>
-        </TouchableOpacity>
+      {/* Pill Tab Switcher — padrão do projeto */}
+      <View style={styles.tabSwitcherWrapper}>
+        <View style={styles.tabSwitcher}>
+          <TouchableOpacity
+            style={[styles.pill, activeTab === 'shop' && styles.pillActive]}
+            onPress={() => setActiveTab('shop')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'shop' }}
+            accessibilityLabel="Loja"
+          >
+            <Text style={[styles.pillText, activeTab === 'shop' && styles.pillTextActive]}>
+              🛒 Loja
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'inventory' && styles.tabActive]}
-          onPress={() => setActiveTab('inventory')}
-        >
-          <Text style={[styles.tabText, activeTab === 'inventory' && styles.tabTextActive]}>
-            🎒 Mochila
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.pill, activeTab === 'inventory' && styles.pillActive]}
+            onPress={() => setActiveTab('inventory')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'inventory' }}
+            accessibilityLabel="Mochila"
+          >
+            <Text style={[styles.pillText, activeTab === 'inventory' && styles.pillTextActive]}>
+              🎒 Mochila
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Content - Mantém ambas montadas para evitar reload */}
@@ -81,41 +89,56 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FF',
   },
-  tabBar: {
+  // ==========================================
+  // PILL TAB SWITCHER — Padrão do projeto
+  // ==========================================
+  tabSwitcherWrapper: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  tabSwitcher: {
     flexDirection: 'row',
-    backgroundColor: '#FFF',
-    borderBottomWidth: 2,
-    borderBottomColor: '#E0E0E0',
-    // Sombra cross-platform
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 5,
+    gap: 6,
+    // Sombra padrão do projeto (iOS + Android + web)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
     ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
       },
     }),
   },
-  tab: {
+  pill: {
     flex: 1,
-    paddingVertical: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
     alignItems: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    justifyContent: 'center',
   },
-  tabActive: {
-    borderBottomColor: '#20B2AA',
+  pillActive: {
+    backgroundColor: '#20B2AA',
+    // Sombra colorida no pill ativo
+    shadowColor: '#20B2AA',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  tabText: {
-    fontSize: 16,
+  pillText: {
+    fontSize: 15,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto para texto secundário
   },
-  tabTextActive: {
-    color: '#20B2AA',
+  pillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   content: {
     flex: 1,

@@ -200,99 +200,6 @@ export async function areNotificationsEnabled(): Promise<boolean> {
 // ==========================================
 
 /**
- * Agenda lembrete diário de desafios
- * Envia todo dia às 9h da manhã
- * Lembra usuário de completar seus desafios diários
- */
-export async function scheduleDailyReminder(): Promise<void> {
-  try {
-    // Cancela TODOS os lembretes do tipo DAILY_REMINDER para evitar duplicação
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    let cancelledCount = 0;
-    
-    for (const notif of scheduled) {
-      if (notif.content.data?.type === 'DAILY_REMINDER') {
-        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
-        cancelledCount++;
-      }
-    }
-    
-    if (cancelledCount > 0) {
-      console.log(`🧹 Cancelados ${cancelledCount} lembretes diários antigos`);
-    }
-
-    // Agenda novo lembrete diário (9h)
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🎯 Novos Desafios Disponíveis!',
-        body: 'Seus desafios diários já estão prontos. Vamos conquistá-los?',
-        data: { type: 'DAILY_REMINDER' },
-        channelId: 'default',
-        sound: true,
-        badge: 1,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: 9,
-        minute: 0,
-      },
-    });
-
-    console.log(`✅ Lembrete diário agendado para 9h (ID: ${notificationId})`);
-  } catch (error) {
-    console.error('❌ Erro ao agendar lembrete diário:', error);
-  }
-}
-
-/**
- * Agenda lembrete de streak (final do dia)
- * Envia às 21h se não completou nenhum desafio
- * Evita que usuário perca sua sequência
- */
-export async function scheduleStreakReminder(): Promise<void> {
-  try {
-    // Cancela TODOS os lembretes do tipo STREAK_REMINDER para evitar duplicação
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    let cancelledCount = 0;
-    
-    for (const notif of scheduled) {
-      if (notif.content.data?.type === 'STREAK_REMINDER') {
-        await Notifications.cancelScheduledNotificationAsync(notif.identifier);
-        cancelledCount++;
-      }
-    }
-    
-    if (cancelledCount > 0) {
-      console.log(`🧹 Cancelados ${cancelledCount} lembretes de streak antigos`);
-    }
-
-    // Agenda novo lembrete de streak (21h)
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🔥 Não perca sua sequência!',
-        body: 'Complete pelo menos um desafio hoje para manter seu streak!',
-        data: { 
-          type: 'STREAK_REMINDER',
-          saveToFeed: true, // Flag para salvar no feed ao receber
-        },
-        channelId: 'default',
-        sound: true,
-        badge: 1,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: 21,
-        minute: 0,
-      },
-    });
-
-    console.log(`✅ Lembrete de streak agendado para 21h (ID: ${notificationId})`);
-  } catch (error) {
-    console.error('❌ Erro ao agendar lembrete de streak:', error);
-  }
-}
-
-/**
  * Cancela lembrete de streak
  * Chamado quando usuário completa um desafio
  * Evita notificação desnecessária
@@ -407,9 +314,7 @@ export async function setNotificationsEnabled(enabled: boolean): Promise<void> {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(enabled));
 
     if (enabled) {
-      // Ativa notificações - agenda lembretes
-      await scheduleDailyReminder();
-      await scheduleStreakReminder();
+      // Notificações ativadas — lembretes fixos removidos
       console.log('✅ Notificações ativadas');
     } else {
       // Desativa notificações - cancela todos os lembretes

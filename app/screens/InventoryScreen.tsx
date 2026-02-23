@@ -252,9 +252,8 @@ export default function InventoryScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Inventário</Text>
           <Text style={styles.headerSubtitle}>
-            {filteredInventory.length} {filteredInventory.length === 1 ? 'item' : 'itens'}
+            {filteredInventory.length} {filteredInventory.length === 1 ? 'item no inventário' : 'itens no inventário'}
           </Text>
         </View>
         <View style={styles.coinsContainer}>
@@ -457,19 +456,19 @@ const styles = StyleSheet.create({
   },
   topCard: {
     backgroundColor: '#FFF',
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: 20,
+    marginTop: 0,    // sem margem — o pill switcher do pai já dá o espaçamento
     marginBottom: 12,
-    borderRadius: 16,
+    borderRadius: 20,
+    // Sombra padrão do projeto (iOS + Android + web)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
     ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
       },
     }),
   },
@@ -478,35 +477,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingTop: 14,
+    paddingBottom: 10,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F',
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginTop: 0,
+    fontSize: 13,
+    color: '#666', // Padrão do projeto
+    fontWeight: '500',
+    marginTop: 2,
   },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#FFF9E6',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#FFD700',
   },
   coinIcon: {
-    fontSize: 24,
-    marginRight: 8,
+    fontSize: 20,
+    marginRight: 6,
   },
   coinsValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#B8860B', // Dourado escuro — melhor contraste
   },
   boostsContainer: {
     padding: 12,
@@ -514,8 +516,8 @@ const styles = StyleSheet.create({
   },
   boostsTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F', // Padrão do projeto
     marginBottom: 12,
   },
   boostsList: {
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
   boostCard: {
     backgroundColor: '#FF9800',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 16, // Padrão do projeto
     minWidth: 100,
     alignItems: 'center',
   },
@@ -586,7 +588,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 14,
-    color: '#1C1C1E',
+    color: '#333', // Padrão do projeto
     fontWeight: '600',
     textAlign: 'center',
     includeFontPadding: false,
@@ -606,7 +608,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingBottom: 32,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -619,13 +623,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F', // Padrão do projeto
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 40,
@@ -645,14 +649,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: '#E6E6EA',
+    backgroundColor: '#F0F8FF', // Padrão Alice Blue do projeto
     marginLeft: 'auto',
     flexDirection: 'row',
     alignItems: 'center',
   },
   collapseButtonText: {
     fontSize: 12,
-    color: '#1C1C1E',
+    color: '#2F4F4F', // Padrão do projeto
     fontWeight: '600',
   },
   collapseButtonIcon: {
@@ -672,7 +676,7 @@ const styles = StyleSheet.create({
   },
   collapsedText: {
     fontSize: 14,
-    color: '#1C1C1E',
+    color: '#666', // Padrão do projeto
   },
   collapseIcon: {
     fontSize: 16,

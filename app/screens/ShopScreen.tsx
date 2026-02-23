@@ -276,14 +276,13 @@ export default function ShopScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-      {/* Card com Header + Busca + Filtros */}
+      {/* Card com saldo + Busca + Filtros */}
       <View style={styles.topCard}>
-      {/* Header com saldo */}
+      {/* Linha de saldo + contagem de itens */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Loja</Text>
           <Text style={styles.headerSubtitle}>
-            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'itens'} disponíveis
+            {filteredItems.length} {filteredItems.length === 1 ? 'item disponível' : 'itens disponíveis'}
           </Text>
         </View>
         <View style={styles.coinsContainer}>
@@ -292,25 +291,7 @@ export default function ShopScreen() {
         </View>
       </View>
 
-      {/* Busca */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar itens..."
-          placeholderTextColor="#8E8E93"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(sanitizeSearch(text))}
-          maxLength={100}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="search"
-          accessible={true}
-          accessibilityLabel="Campo de busca de itens"
-          accessibilityHint="Digite para buscar itens na loja"
-        />
-      </View>
-
-      {/* Filtros (recolhíveis dentro de um card branco) */}
+      {/* Filtros recolhíveis (busca + chips) */}
       <View style={styles.filtersCard}>
       {filtersCollapsed ? (
         <TouchableOpacity
@@ -339,6 +320,24 @@ export default function ShopScreen() {
         </TouchableOpacity>
       ) : (
         <>
+          {/* Busca */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar itens..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={(text) => setSearchQuery(sanitizeSearch(text))}
+              maxLength={100}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              accessible={true}
+              accessibilityLabel="Campo de busca de itens"
+              accessibilityHint="Digite para buscar itens na loja"
+            />
+          </View>
+
           {/* Filtros de tipo */}
           <Animated.View style={[styles.animatedContainer, { height: animatedHeight, overflow: 'hidden' }]}> 
             <View
@@ -532,19 +531,19 @@ const styles = StyleSheet.create({
   },
   topCard: {
     backgroundColor: '#FFF',
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: 20,
+    marginTop: 0,    // sem margem — o pill switcher do pai já dá o espaçamento
     marginBottom: 12,
-    borderRadius: 16,
+    borderRadius: 20,
+    // Sombra padrão do projeto (iOS + Android + web)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
     ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
+      web: {
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
       },
     }),
   },
@@ -553,49 +552,45 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    paddingTop: 14,
+    paddingBottom: 10,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginTop: 0,
+    fontSize: 13,
+    color: '#666', // Padrão do projeto
+    fontWeight: '500',
+    marginTop: 2,
   },
   coinsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#FFF9E6',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#FFD700',
   },
   coinIcon: {
     fontSize: 24,
     marginRight: 8,
   },
   coinsValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#B8860B', // Dourado escuro — melhor contraste que preto no fundo claro
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 6,
+    paddingHorizontal: 0,
+    paddingBottom: 10,
   },
   searchInput: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F8FF', // Alice Blue — padrão do projeto
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: '#1C1C1E',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    paddingVertical: 11,
+    fontSize: 15,
+    color: '#2F4F4F', // Padrão do projeto
   },
   filtersContainer: {
     paddingHorizontal: 0,
@@ -626,7 +621,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 14,
-    color: '#1C1C1E',
+    color: '#333',
     fontWeight: '600',
     textAlign: 'center',
     includeFontPadding: false,
@@ -646,7 +641,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingBottom: 32,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -659,13 +656,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F', // Padrão do projeto
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -684,14 +681,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: '#E6E6EA',
+    backgroundColor: '#F0F8FF', // Padrão Alice Blue do projeto
     marginLeft: 'auto',
     flexDirection: 'row',
     alignItems: 'center',
   },
   collapseButtonText: {
     fontSize: 12,
-    color: '#1C1C1E',
+    color: '#2F4F4F', // Padrão do projeto
     fontWeight: '600',
   },
   collapseButtonIcon: {
@@ -711,7 +708,7 @@ const styles = StyleSheet.create({
   },
   collapsedText: {
     fontSize: 14,
-    color: '#1C1C1E',
+    color: '#666', // Padrão do projeto
   },
   collapseIcon: {
     fontSize: 16,

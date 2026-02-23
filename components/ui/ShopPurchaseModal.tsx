@@ -185,24 +185,6 @@ export default function ShopPurchaseModal({
                 </Text>
               </View>
             </View>
-
-            <View style={styles.balanceRow}>
-              <Text style={styles.balanceLabel}>Seu saldo:</Text>
-              <View style={styles.costValue}>
-                <Text style={styles.coinIcon}>🪙</Text>
-                <Text style={styles.balanceText}>{userCoins}</Text>
-              </View>
-            </View>
-
-            <View style={styles.balanceRow}>
-              <Text style={styles.balanceLabel}>Saldo após compra:</Text>
-              <View style={styles.costValue}>
-                <Text style={styles.coinIcon}>🪙</Text>
-                <Text style={[styles.balanceAfter, !canAfford && styles.balanceAfterNegative]}>
-                  {userCoins - totalCost}
-                </Text>
-              </View>
-            </View>
           </View>
 
           {/* Aviso de saldo insuficiente */}
@@ -256,7 +238,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24, // Padrão do projeto (igual ao modal de badges)
     width: '100%',
     maxWidth: 400,
     maxHeight: '90%',
@@ -266,29 +248,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F2F2F7',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    padding: 18,
+    // backgroundColor é definido dinamicamente pela rarityColor
+    borderBottomWidth: 0,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#FFFFFF', // Branco pois o fundo é sempre colorido (rarityColor)
   },
   closeButton: {
-    padding: 4,
+    padding: 6,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
   },
   closeButtonText: {
-    fontSize: 24,
-    color: '#1C1C1E',
+    fontSize: 20,
+    color: '#FFFFFF', // Branco para contrastar com rarityColor
     fontWeight: 'bold',
   },
   imageContainer: {
     height: 150,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F8FF', // Alice Blue - padrão do projeto
   },
   image: {
     width: '70%',
@@ -312,12 +295,12 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
+    fontWeight: '700',
+    color: '#2F4F4F', // Padrão do projeto
   },
   description: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#666', // Padrão do projeto
     marginBottom: 12,
     lineHeight: 20,
   },
@@ -341,7 +324,7 @@ const styles = StyleSheet.create({
   },
   quantityLabel: {
     fontSize: 16,
-    color: '#1C1C1E',
+    color: '#2F4F4F', // Padrão do projeto
     fontWeight: '600',
   },
   quantitySelector: {
@@ -378,11 +361,11 @@ const styles = StyleSheet.create({
   },
   costContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#F2F2F7',
+    paddingVertical: 14,
+    backgroundColor: '#F7F7F7', // Padrão do projeto (infoRow)
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#EFEFEF',
   },
   costRow: {
     flexDirection: 'row',
@@ -398,12 +381,12 @@ const styles = StyleSheet.create({
   },
   costLabel: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#666',
   },
   costLabelTotal: {
     fontSize: 18,
-    color: '#1C1C1E',
-    fontWeight: 'bold',
+    color: '#2F4F4F',
+    fontWeight: '700',
   },
   costValue: {
     flexDirection: 'row',
@@ -415,7 +398,7 @@ const styles = StyleSheet.create({
   },
   costText: {
     fontSize: 16,
-    color: '#1C1C1E',
+    color: '#333',
   },
   costTextTotal: {
     fontSize: 24,
@@ -425,34 +408,12 @@ const styles = StyleSheet.create({
   costTextInsufficient: {
     color: '#FF5252',
   },
-  balanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  balanceLabel: {
-    fontSize: 12,
-    color: '#8E8E93',
-  },
-  balanceText: {
-    fontSize: 14,
-    color: '#1C1C1E',
-  },
-  balanceAfter: {
-    fontSize: 14,
-    color: '#4CAF50',
-    fontWeight: '600',
-  },
-  balanceAfterNegative: {
-    color: '#FF5252',
-  },
   warningContainer: {
-    backgroundColor: 'rgba(255, 82, 82, 0.1)',
+    backgroundColor: 'rgba(255, 82, 82, 0.08)',
     padding: 12,
     marginHorizontal: 16,
     marginTop: 12,
-    borderRadius: 8,
+    borderRadius: 10, // Padrão do projeto
     borderWidth: 1,
     borderColor: '#FF5252',
   },
@@ -469,20 +430,22 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     height: 50,
-    borderRadius: 12,
+    borderRadius: 10, // Padrão do projeto
     justifyContent: 'center',
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#F0F0F0',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   cancelButtonText: {
     fontSize: 16,
-    color: '#1C1C1E',
+    color: '#2F4F4F', // Padrão do projeto
     fontWeight: '600',
   },
   confirmButton: {
-    backgroundColor: '#20B2AA',
+    backgroundColor: '#20B2AA', // Accent teal padrão do projeto
   },
   confirmButtonDisabled: {
     backgroundColor: '#E0E0E0',
