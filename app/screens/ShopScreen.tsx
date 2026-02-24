@@ -25,7 +25,6 @@ import {
     Alert,
     Animated, Easing,
     FlatList,
-    Keyboard,
     LayoutAnimation,
     Platform,
     RefreshControl,
@@ -33,7 +32,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     UIManager,
     View
 } from 'react-native';
@@ -53,7 +51,7 @@ const SHOP_RARITIES = [
   { value: ShopItemRarity.LEGENDARY, label: 'Lendário', color: '#FF9800' },
 ];
 
-export default function ShopScreen() {
+export default function ShopScreen({ onPurchaseComplete }: { onPurchaseComplete?: () => void } = {}) {
   const [user, setUser] = useState<User | null>(null);
 
   const [items, setItems] = useState<ShopItem[]>([]);
@@ -259,6 +257,8 @@ export default function ShopScreen() {
       // Atualizar dados sem alert
       await Promise.all([refreshUser(), loadItems()]);
       setModalVisible(false);
+      // Notificar o inventário para recarregar
+      onPurchaseComplete?.();
     } catch (error: any) {
       throw error; // Modal irá tratar
     }
@@ -274,8 +274,7 @@ export default function ShopScreen() {
   const hasActiveFilters = selectedType || selectedRarity || searchQuery.trim();
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+    <View style={styles.container}>
       {/* Card com saldo + Busca + Filtros */}
       <View style={styles.topCard}>
       {/* Linha de saldo + contagem de itens */}
@@ -488,6 +487,9 @@ export default function ShopScreen() {
       <FlatList
         data={filteredItems}
         keyExtractor={(item) => item.id}
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         renderItem={({ item }) => (
           <ShopItemCard item={item} onPress={handleItemPress} userCoins={user?.coins || 0} />
         )}
@@ -520,7 +522,6 @@ export default function ShopScreen() {
         onConfirm={handlePurchase}
       />
       </View>
-    </TouchableWithoutFeedback>
   );
 }
 
@@ -535,6 +536,7 @@ const styles = StyleSheet.create({
     marginTop: 0,    // sem margem — o pill switcher do pai já dá o espaçamento
     marginBottom: 12,
     borderRadius: 20,
+    overflow: 'hidden',
     // Sombra padrão do projeto (iOS + Android + web)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

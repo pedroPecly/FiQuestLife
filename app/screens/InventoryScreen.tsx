@@ -28,7 +28,6 @@ import {
     Animated,
     Easing,
     FlatList,
-    Keyboard,
     LayoutAnimation,
     Platform,
     RefreshControl,
@@ -36,7 +35,6 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     UIManager,
     View,
 } from 'react-native';
@@ -49,7 +47,7 @@ const INVENTORY_TYPES = [
   { value: ShopItemType.PACK, icon: '📦', label: 'Pacote' },
 ];
 
-export default function InventoryScreen() {
+export default function InventoryScreen({ refreshToken }: { refreshToken?: number } = {}) {
   const [user, setUser] = useState<User | null>(null);
 
   const [inventory, setInventory] = useState<UserInventoryItem[]>([]);
@@ -178,6 +176,14 @@ export default function InventoryScreen() {
     loadData();
   }, []); // Removido refreshUser e loadData das dependências
 
+  // Recarrega inventário quando uma compra é feita na loja
+  useEffect(() => {
+    if (refreshToken && refreshToken > 0) {
+      loadData();
+      refreshUser();
+    }
+  }, [refreshToken]);
+
   // Aplicar filtros
   const applyFilters = useCallback(
     (inventoryList: UserInventoryItem[]) => {
@@ -245,8 +251,7 @@ export default function InventoryScreen() {
   const coinsMultiplier = shopService.calculateTotalMultiplier(activeBoosts, 'COINS_MULTIPLIER' as any);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
+    <View style={styles.container}>
       {/* Card com Header + Boosts + Filtros */}
       <View style={styles.topCard}>
       {/* Header */}
@@ -418,6 +423,9 @@ export default function InventoryScreen() {
       <FlatList
         data={filteredInventory}
         keyExtractor={(item) => item.id}
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         renderItem={({ item }) => (
           <InventoryItemCard
             inventoryItem={item}
@@ -444,8 +452,7 @@ export default function InventoryScreen() {
           </View>
         }
       />
-      </View>
-    </TouchableWithoutFeedback>
+    </View>
   );
 }
 
@@ -460,6 +467,7 @@ const styles = StyleSheet.create({
     marginTop: 0,    // sem margem — o pill switcher do pai já dá o espaçamento
     marginBottom: 12,
     borderRadius: 20,
+    overflow: 'hidden',
     // Sombra padrão do projeto (iOS + Android + web)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

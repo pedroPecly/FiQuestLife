@@ -39,6 +39,11 @@ type Tab = 'shop' | 'inventory';
 
 export default function ShopAndInventoryScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('shop');
+  const [inventoryRefreshToken, setInventoryRefreshToken] = useState(0);
+
+  const handlePurchaseComplete = () => {
+    setInventoryRefreshToken((prev) => prev + 1);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -74,10 +79,10 @@ export default function ShopAndInventoryScreen() {
       {/* Content - Mantém ambas montadas para evitar reload */}
       <View style={styles.content}>
         <View style={[styles.screenContainer, activeTab !== 'shop' && styles.screenHidden]}>
-          <ShopScreen />
+          <ShopScreen onPurchaseComplete={handlePurchaseComplete} />
         </View>
         <View style={[styles.screenContainer, activeTab !== 'inventory' && styles.screenHidden]}>
-          <InventoryScreen />
+          <InventoryScreen refreshToken={inventoryRefreshToken} />
         </View>
       </View>
     </SafeAreaView>
