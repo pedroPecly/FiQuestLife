@@ -19,11 +19,11 @@ import { useEffect, useRef, useState } from 'react';
 import { authStorage } from '../services/auth';
 import { getLocalNotifications, saveLocalNotification } from '../services/localNotificationStorage';
 import {
-  addNotificationReceivedListener,
-  addNotificationResponseListener,
-  ensureNotificationChannelExists,
-  getNotificationsEnabled,
-  requestNotificationPermissions,
+    addNotificationReceivedListener,
+    addNotificationResponseListener,
+    ensureNotificationChannelExists,
+    getNotificationsEnabled,
+    requestNotificationPermissions,
 } from '../services/notifications';
 import { registerPushToken } from '../services/pushToken';
 
@@ -50,7 +50,7 @@ export function useNotifications() {
       console.log('🔔 INICIANDO SETUP DE NOTIFICAÇÕES');
       console.log('📅 Timestamp:', new Date().toISOString());
       console.log('===============================================');
-      
+
       // PASSO 1: CRÍTICO - Criar canal Android PRIMEIRO
       // Em APKs standalone, o canal DEVE existir antes de qualquer notificação
       console.log('📋 Passo 1/4: Criando canal Android...');

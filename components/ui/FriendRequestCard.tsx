@@ -75,7 +75,6 @@ export const FriendRequestCard: React.FC<FriendRequestCardProps> = ({
           <UserStatsRow
             stats={[
               { icon: 'trophy', iconColor: theme.colors.warning, value: `Lvl ${user.level}` },
-              { icon: 'star', iconColor: theme.colors.accent, value: `${user.xp} XP` },
             ]}
             size="small"
             gap={12}

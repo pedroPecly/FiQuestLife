@@ -36,7 +36,8 @@ export interface DailyProgress {
 }
 
 export interface ChallengeProgress {
-  challengeId: string;
+  userChallengeId: string; // ID do UserChallenge (usado nas chamadas de API)
+  challengeId: string;     // ID do Challenge (referência, não usado diretamente)
   title: string;
   currentValue: number;
   targetValue: number;
@@ -45,11 +46,16 @@ export interface ChallengeProgress {
 }
 
 interface ActiveChallenge {
-  id: string;
+  id: string;              // UserChallenge ID (usado em progress/complete)
+  challengeId: string;     // Challenge ID (referência)
   title: string;
   trackingType: 'STEPS' | 'DISTANCE' | 'DURATION';
   targetValue: number;
+  targetUnit: string;
   currentProgress: number;
+  steps: number;
+  distance: number;
+  duration: number;
   status: string;
 }
 
@@ -241,7 +247,7 @@ class ActivitySyncService {
     challenge: ActiveChallenge,
     todayData: DailyProgress
   ): Promise<ChallengeProgress> {
-    const { id, title, trackingType, targetValue, currentProgress, status } = challenge;
+    const { id, challengeId, title, trackingType, targetValue, currentProgress, status } = challenge;
 
     // Determinar valor atual baseado no tipo
     let currentValue = currentProgress || 0;
@@ -257,7 +263,8 @@ class ActivitySyncService {
         // Duração requer sessões explícitas (não auto-sync)
         // Manter progresso atual
         return {
-          challengeId: id,
+          userChallengeId: id,
+          challengeId,
           title,
           currentValue: currentProgress || 0,
           targetValue,
@@ -271,7 +278,7 @@ class ActivitySyncService {
     // Verificar se atingiu meta
     const completed = currentValue >= targetValue && status !== 'COMPLETED';
 
-    // Atualizar no backend
+    // Atualizar no backend via endpoint correto (usa UserChallenge ID)
     try {
       if (completed) {
         // Auto-completar desafio
@@ -284,7 +291,7 @@ class ActivitySyncService {
           },
         });
       } else {
-        // Apenas atualizar progresso
+        // Apenas atualizar progresso (PUT /challenges/:userChallengeId/progress)
         await api.put(`/challenges/${id}/progress`, {
           currentValue,
           trackingData: {
@@ -295,16 +302,16 @@ class ActivitySyncService {
         });
       }
     } catch (error: any) {
-      // Se endpoint não existe (404), apenas log warning
       if (error.response?.status === 404) {
-        console.warn(`[ACTIVITY SYNC] Endpoint para atualizar desafio ${id} não encontrado (esperado durante desenvolvimento)`);
+        console.warn(`[ACTIVITY SYNC] Endpoint para atualizar desafio ${id} não encontrado`);
       } else {
         console.error(`[ACTIVITY SYNC] Erro ao atualizar desafio ${id}:`, error.message);
       }
     }
 
     return {
-      challengeId: id,
+      userChallengeId: id,
+      challengeId,
       title,
       currentValue,
       targetValue,
@@ -346,7 +353,7 @@ class ActivitySyncService {
     try {
       await api.post('/activity/batch-sync', {
         results: results.map(r => ({
-          challengeId: r.challengeId,
+          userChallengeId: r.userChallengeId, // ✅ ID correto do UserChallenge
           currentValue: r.currentValue,
           completed: r.completed,
         })),
@@ -355,7 +362,7 @@ class ActivitySyncService {
     } catch (error: any) {
       // Falha silenciosa, será sincronizado na próxima abertura
       if (error.response?.status === 404) {
-        console.warn('[ACTIVITY SYNC] Endpoint /activity/batch-sync não encontrado (esperado durante desenvolvimento)');
+        console.warn('[ACTIVITY SYNC] Endpoint /activity/batch-sync não encontrado');
       } else {
         console.error('[ACTIVITY SYNC] Erro no batch sync:', error.message);
       }

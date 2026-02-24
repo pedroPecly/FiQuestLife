@@ -17,7 +17,9 @@
     "prisma:seed-shop": "tsx prisma/seed-shop.ts",
     "prisma:add-challenges": "tsx prisma/add-challenges.ts",
     "prisma:add-badges": "tsx prisma/add-badges.ts",
-    "test:shop": "tsx src/tests/shop.service.test.ts"
+    "test:shop": "tsx src/tests/shop.service.test.ts",
+    "migrate:progression:dry": "tsx prisma/migrate-progression.ts",
+    "migrate:progression:apply": "tsx prisma/migrate-progression.ts --apply"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

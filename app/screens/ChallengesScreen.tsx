@@ -2,6 +2,8 @@ import { Header } from '@/components/layout';
 import { ChallengeCard, LoadingScreen, NotificationsModal } from '@/components/ui';
 import { ChallengeInvitesModal } from '@/components/ui/ChallengeInvitesModal';
 import { useAlert } from '@/hooks/useAlert';
+import { useAppState } from '@/hooks/useAppState';
+import activitySync from '@/services/activitySync';
 import { authService } from '@/services/api';
 import challengeService, { CompleteChallengeResponse, UserChallenge } from '@/services/challenge';
 import { getChallengesAlreadyUsedToday, getPendingInvites } from '@/services/challengeInvitation';
@@ -9,9 +11,10 @@ import {
     cancelStreakReminder,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
+import { xpProgressInLevel, xpNeededForNextLevel } from '@/utils/progressionUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     RefreshControl,
     ScrollView,
@@ -27,6 +30,7 @@ import { styles } from '../styles/challenges.styles';
 export default function ChallengesScreen() {
   const insets = useSafeAreaInsets();
   const { alert } = useAlert();
+  const appState = useAppState();
   const [user, setUser] = useState<User | null>(null);
   const [challenges, setChallenges] = useState<UserChallenge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +41,16 @@ export default function ChallengesScreen() {
   const [invitesVisible, setInvitesVisible] = useState(false);
   const [pendingInvitesCount, setPendingInvitesCount] = useState(0);
   const [usedChallengeIds, setUsedChallengeIds] = useState<string[]>([]);
+
+  /**
+   * Mapa de progresso em tempo real dos desafios auto-rastreados.
+   * Chave = UserChallenge.id  |  Valor = currentValue bruto (passos ou metros)
+   * Atualizado pelo ActivitySyncService sempre que o app fica ativo.
+   */
+  const [activityProgressMap, setActivityProgressMap] = useState<Record<string, number>>({});
+
+  // Ref para controlar se o syn já está rodando (evita chamadas paralelas)
+  const syncingRef = useRef(false);
   
   // Carrega count de notificações não lidas
   const loadUnreadCount = useCallback(async () => {
@@ -98,6 +112,11 @@ export default function ChallengesScreen() {
       }
       setChallenges(challengesData);
       setUsedChallengeIds(usedChallenges);
+
+      // Após carregar os desafios, disparar o sync de atividades em background.
+      // Invalida cache para garantir que os desafios recém-carregados sejam usados.
+      activitySync.invalidateChallengesCache();
+      runActivitySync();
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       alert.error('Erro', error.response?.data?.error || 'Não foi possível carregar os dados');
@@ -107,12 +126,58 @@ export default function ChallengesScreen() {
     }
   };
 
+  /**
+   * Executa sincronização de atividades (passos / distância) com o app nativo de saúde.
+   * - Atualiza `activityProgressMap` com os valores em tempo real.
+   * - Se algum desafio for auto-completado, recarrega a lista completa.
+   */
+  const runActivitySync = useCallback(async () => {
+    if (syncingRef.current) return;
+    syncingRef.current = true;
+
+    try {
+      const results = await activitySync.syncActivityOnAppOpen();
+
+      if (results.length === 0) return;
+
+      // Atualizar mapa de progresso para renderização em tempo real
+      const newMap: Record<string, number> = {};
+      let hasAutoCompleted = false;
+
+      for (const r of results) {
+        newMap[r.userChallengeId] = r.currentValue;
+        if (r.completed) hasAutoCompleted = true;
+      }
+
+      setActivityProgressMap((prev) => ({ ...prev, ...newMap }));
+
+      // Se houve auto-complete, recarregar desafios para refletir status COMPLETED
+      if (hasAutoCompleted) {
+        console.log('[CHALLENGES SCREEN] ✅ Desafio auto-completado! Recarregando lista...');
+        const updatedChallenges = await challengeService.getDailyChallenges();
+        setChallenges(updatedChallenges);
+      }
+    } catch (error) {
+      // Sync é best-effort; falhas não afetam a experiência do usuário
+      console.warn('[CHALLENGES SCREEN] Sync de atividades falhou (non-critical):', error);
+    } finally {
+      syncingRef.current = false;
+    }
+  }, []);
+
   // Recarrega dados quando a tela ganhar foco
   useFocusEffect(
     useCallback(() => {
       loadData();
     }, [])
   );
+
+  // Quando o app volta ao foreground (sai do background), re-sincronizar atividades
+  useEffect(() => {
+    if (appState === 'active') {
+      runActivitySync();
+    }
+  }, [appState, runActivitySync]);
 
   // Pull to refresh
   const onRefresh = useCallback(() => {
@@ -222,7 +287,9 @@ export default function ChallengesScreen() {
 
           <View style={styles.statItem}>
             <Text style={styles.statIcon}>⭐</Text>
-            <Text style={styles.statValue}>{(user?.xp || 0) % 1000}/1000</Text>
+            <Text style={styles.statValue}>
+              {xpProgressInLevel(user?.xp || 0, user?.level)}/{xpNeededForNextLevel(user?.xp || 0, user?.level)} XP
+            </Text>
           </View>
 
           <View style={styles.statItem}>
@@ -298,6 +365,7 @@ export default function ChallengesScreen() {
                 isCompleting={completingId === userChallenge.id}
                 alreadyUsedToChallenge={usedChallengeIds.includes(userChallenge.challenge.id)}
                 onInviteSent={loadUsedChallenges}
+                activityCurrentValue={activityProgressMap[userChallenge.id]}
               />
             ))
           )}

@@ -10,7 +10,7 @@
  * - Stats (XP, coins ou streak)
  */
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Avatar } from './Avatar';
@@ -63,8 +63,8 @@ export function LeaderboardCard({ position, user, stat, statType, isCurrentUser 
         };
       case 'coins':
         return {
-          icon: 'logo-bitcoin' as const,
-          color: COLORS.warning,
+          icon: null,
+          color: '#B8860B',
           label: 'FiCoins',
         };
       case 'streak':
@@ -129,7 +129,11 @@ export function LeaderboardCard({ position, user, stat, statType, isCurrentUser 
       {/* Stat */}
       <View style={styles.statContainer}>
         <View style={styles.statRow}>
-          <Ionicons name={config.icon} size={20} color={config.color} />
+          {statType === 'coins' ? (
+            <MaterialCommunityIcons name="cash" size={20} color={config.color} />
+          ) : (
+            <Ionicons name={config.icon!} size={20} color={config.color} />
+          )}
           <Text style={[styles.statValue, { color: config.color }]}>
             {(stat || 0).toLocaleString('pt-BR')}
           </Text>

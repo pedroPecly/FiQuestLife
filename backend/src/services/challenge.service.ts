@@ -15,6 +15,7 @@
 
 import type { ChallengeCategory } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
+import { levelFromXP } from '../utils/progressionUtils.js';
 import {
     notifyBadgeEarned,
     notifyLevelUp,
@@ -54,13 +55,19 @@ export const assignDailyChallenges = async (userId: string) => {
   const selectedChallenges = shuffled.slice(0, 5);
 
   // Cria registros em UserChallenge
+  // Desafios com tracking automático (STEPS/DISTANCE) entram direto como IN_PROGRESS
+  // pois não exigem ação manual do usuário para iniciar
+  const AUTO_TRACKING_TYPES = new Set(['STEPS', 'DISTANCE', 'DURATION']);
+
   const userChallenges = await Promise.all(
     selectedChallenges.map((challenge) =>
       prisma.userChallenge.create({
         data: {
           userId,
           challengeId: challenge.id,
-          status: 'PENDING',
+          status: challenge.trackingType && AUTO_TRACKING_TYPES.has(challenge.trackingType)
+            ? 'IN_PROGRESS'   // auto-rastreado pelo sistema de saúde
+            : 'PENDING',      // requer ação manual do usuário
           assignedAt: new Date(),
           progress: 0,
         },
@@ -264,8 +271,14 @@ export const updateUserStats = async (userId: string, xp: number, coins: number)
   const newXP = user.xp + xp;
   const newCoins = user.coins + coins;
 
-  // Calcula novo nível: 1000 XP por nível
-  const newLevel = Math.floor(newXP / 1000) + 1;
+  // Calcula novo nível com fórmula quadrática: xpParaNivel(n) = 50*(n-1)*(n+5)
+  // Gap entre níveis: 100n + 250 XP (cresce linearmente)
+  //
+  // PROTEÇÃO DE MIGRAÇÃO: usuários que progrediram com a fórmula antiga (1000 XP/nível)
+  // nunca perdem o nível já conquistado. O Math.max garante que o nível só sobe.
+  // Contexto: a fórmula nova e a antiga se cruzam no nível 15 — abaixo disso a nova
+  // é mais generosa (boost gratuito), acima disso exigiria mais XP (regressão inaceitável).
+  const newLevel = Math.max(currentLevel, levelFromXP(newXP));
   const leveledUp = newLevel > currentLevel;
 
   // Atualiza usuário
@@ -496,6 +509,78 @@ export const checkAndAwardBadges = async (userId: string) => {
 
   return newBadges;
 };
+
+/**
+ * ============================================
+ * ATUALIZA PROGRESSO DE DESAFIO COM TRACKING
+ * ============================================
+ *
+ * Atualiza o progresso de um desafio de atividade física
+ * (passos, distância) sem completá-lo.
+ * Transiciona automaticamente de PENDING para IN_PROGRESS.
+ *
+ * @param userId          - ID do usuário
+ * @param userChallengeId - ID do UserChallenge (não do Challenge)
+ * @param currentValue    - Valor atual (passos em int, metros em float)
+ * @param trackingData    - Dados brutos de sensor para persistência
+ */
+export const updateChallengeProgress = async (
+  userId: string,
+  userChallengeId: string,
+  currentValue: number,
+  trackingData?: { steps?: number; distance?: number; timestamp?: number }
+) => {
+  const userChallenge = await prisma.userChallenge.findUnique({
+    where: { id: userChallengeId },
+    include: { challenge: true },
+  });
+
+  if (!userChallenge) throw new Error('Desafio não encontrado');
+  if (userChallenge.userId !== userId) throw new Error('Este desafio não pertence a você');
+
+  // Já completado → ignorar silenciosamente
+  if (userChallenge.status === 'COMPLETED') {
+    return { skipped: true, reason: 'already_completed' };
+  }
+
+  const targetValue = userChallenge.challenge.targetValue ?? 0;
+  // Limitar em 99 aqui; 100 só ao completar via completeChallenge
+  const progressPct = targetValue > 0
+    ? Math.min(Math.round((currentValue / targetValue) * 100), 99)
+    : 0;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: any = {
+    progress: progressPct,
+    status: 'IN_PROGRESS' as const, // auto-transição de PENDING → IN_PROGRESS
+  };
+
+  const trackingType = userChallenge.challenge.trackingType;
+  if (trackingType === 'STEPS') {
+    updateData.steps = Math.round(currentValue);
+  } else if (trackingType === 'DISTANCE') {
+    updateData.distance = currentValue; // mantido em metros (igual ao targetValue)
+  } else if (trackingType === 'DURATION') {
+    updateData.duration = Math.round(currentValue);
+  }
+
+  if (trackingData) {
+    updateData.activityData = trackingData;
+  }
+
+  await prisma.userChallenge.update({
+    where: { id: userChallengeId },
+    data: updateData,
+  });
+
+  console.log(
+    `[CHALLENGE SERVICE] 📈 Progresso atualizado: userChallenge=${userChallengeId}, ${progressPct}% (${currentValue}/${targetValue})`
+  );
+
+  return { updated: true, progress: progressPct };
+};
+
+// ============================================
 
 /**
  * Busca histórico de desafios completados

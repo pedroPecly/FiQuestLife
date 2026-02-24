@@ -22,6 +22,11 @@ interface ChallengeCardProps {
   isCompleting?: boolean;
   alreadyUsedToChallenge?: boolean;
   onInviteSent?: () => void;
+  /**
+   * Valor atual do sensor de saúde (passos ou metros) vindo do ActivitySyncService.
+   * Quando presente, substitui o valor persistido no banco para exibição em tempo real.
+   */
+  activityCurrentValue?: number;
 }
 
 export default function ChallengeCard({
@@ -30,6 +35,7 @@ export default function ChallengeCard({
   isCompleting = false,
   alreadyUsedToChallenge = false,
   onInviteSent,
+  activityCurrentValue,
 }: ChallengeCardProps) {
   const { challenge, status, id, challengeInvitation } = userChallenge;
   const isCompleted = status === 'COMPLETED';
@@ -43,6 +49,14 @@ export default function ChallengeCard({
 
   // Para desafios com rastreamento
   const hasTracking = challenge.trackingType && challenge.targetValue && challenge.targetUnit;
+
+  /**
+   * Desafios de PASSOS e DISTÂNCIA são auto-rastreados:
+   * os dados vêm automaticamente do app nativo de saúde (iOS/Android).
+   * Eles não precisam que o usuário pressione "Iniciar".
+   */
+  const isAutoTracked =
+    challenge.trackingType === 'STEPS' || challenge.trackingType === 'DISTANCE';
 
   // Verifica status de rastreamento
   useEffect(() => {
@@ -185,7 +199,16 @@ export default function ChallengeCard({
         {hasTracking && !isCompleted && (
           <StepCounterWidget
             trackingType={challenge.trackingType!}
-            currentValue={trackingProgress > 0 ? trackingProgress : (userChallenge.steps || userChallenge.distance || userChallenge.duration || 0)}
+            currentValue={
+              // 1ª prioridade: valor em tempo real do sensor de saúde nativo
+              activityCurrentValue !== undefined
+                ? activityCurrentValue
+                // 2ª prioridade: sessão de tracking manual ativa
+                : trackingProgress > 0
+                  ? trackingProgress
+                  // 3ª prioridade: valor persistido no banco
+                  : (userChallenge.steps ?? userChallenge.distance ?? userChallenge.duration ?? 0)
+            }
             targetValue={challenge.targetValue!}
             targetUnit={challenge.targetUnit!}
           />
@@ -206,8 +229,20 @@ export default function ChallengeCard({
 
         {/* Botões de ação */}
         <View style={styles.actionsContainer}>
-          {/* Botão de rastreamento para desafios com tracking */}
-          {hasTracking && !isCompleted && (
+          {/* DESAFIOS AUTO-RASTREADOS (PASSOS / DISTÂNCIA):
+              Dados vêm automaticamente do app de saúde nativo — sem ação do usuário.
+          */}
+          {hasTracking && !isCompleted && isAutoTracked && (
+            <View style={styles.autoSyncBadge}>
+              <Ionicons name="sync" size={14} color="#10B981" />
+              <Text style={styles.autoSyncText}>Sincronizado automaticamente</Text>
+            </View>
+          )}
+
+          {/* DESAFIOS COM TRACKING MANUAL (ex: DURATION / corrida GPS)
+              Esses ainda precisam que o usuário pressione Iniciar.
+          */}
+          {hasTracking && !isCompleted && !isAutoTracked && (
             <TouchableOpacity
               style={[
                 styles.button,
@@ -215,24 +250,19 @@ export default function ChallengeCard({
               ]}
               onPress={handleToggleTracking}
             >
-              <Ionicons 
+              <Ionicons
                 name={
-                  hasActiveSession && !isTracking 
-                    ? "play-circle"  // Pausado: mostrar play
-                    : isTracking 
-                      ? "pause-circle"  // Ativo: mostrar pause
-                      : "play-circle"   // Não iniciado: mostrar play
-                } 
-                size={20} 
-                color="#FFF" 
+                  hasActiveSession && !isTracking
+                    ? 'play-circle'   // Pausado → mostrar play
+                    : isTracking
+                      ? 'pause-circle' // Ativo → mostrar pause
+                      : 'play-circle'  // Não iniciado → mostrar play
+                }
+                size={20}
+                color="#FFF"
               />
               <Text style={styles.buttonText}>
-                {hasActiveSession && !isTracking 
-                  ? 'Continuar'  // Se há sessão mas não está ativa = pausado
-                  : isTracking 
-                    ? 'Pausar' 
-                    : 'Iniciar'
-                }
+                {hasActiveSession && !isTracking ? 'Continuar' : isTracking ? 'Pausar' : 'Iniciar'}
               </Text>
             </TouchableOpacity>
           )}
@@ -454,6 +484,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#10B981',
+  },
+  // Badge exibido em desafios de passos/distância (auto-sincronizados)
+  autoSyncBadge: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  autoSyncText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#059669',
   },
   button: {
     flex: 1,

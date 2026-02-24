@@ -11,7 +11,7 @@
 import { Hono } from 'hono';
 import * as activityController from '../controllers/activity.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { prisma } from '../lib/prisma.js';
+import { completeChallenge, updateChallengeProgress } from '../services/challenge.service.js';
 import { getUserId } from '../utils/context.helpers.js';
 
 const activity = new Hono();
@@ -54,48 +54,54 @@ activity.get('/history', activityController.getActivityHistory);
 
 /**
  * POST /api/activity/batch-sync
- * Sincroniza progresso de múltiplos desafios em batch
- * Usado pelo sistema de sincronização automática
+ * Sincroniza progresso de múltiplos desafios de atividade em batch.
+ * Recebe: { results: [{ userChallengeId, currentValue, completed }] }
+ *
+ * Para cada item:
+ *  - completed=true  → completa o desafio (recompensas/badges/etc)
+ *  - completed=false → apenas atualiza o progresso (percentual + campos brutos)
  */
 activity.post('/batch-sync', async (c) => {
   try {
     const userId = getUserId(c);
-    const { results } = await c.req.json();
+    const body = await c.req.json();
+    const results: Array<{
+      userChallengeId: string;
+      currentValue: number;
+      completed: boolean;
+    }> = body.results ?? [];
 
-    if (!Array.isArray(results) || results.length === 0) {
-      return c.json({
-        success: true,
-        message: 'Nenhum resultado para sincronizar',
-      });
+    if (results.length === 0) {
+      return c.json({ success: true, message: 'Nenhum resultado para sincronizar' });
     }
 
-    // Atualizar todos os progressos em batch usando transaction
-    const updates = results.map((result: any) =>
-      prisma.userChallenge.updateMany({
-        where: {
-          userId,
-          challengeId: result.challengeId,
-        },
-        data: {
-          progress: result.currentValue,
-        },
+    const outcomes = await Promise.allSettled(
+      results.map(async ({ userChallengeId, currentValue, completed }) => {
+        if (completed) {
+          return completeChallenge(userId, userChallengeId);
+        }
+        return updateChallengeProgress(userId, userChallengeId, currentValue);
       })
     );
 
-    await prisma.$transaction(updates);
+    const processed = outcomes.filter((o) => o.status === 'fulfilled').length;
+    const failed = outcomes
+      .filter((o) => o.status === 'rejected')
+      .map((o) => (o as PromiseRejectedResult).reason?.message ?? 'unknown');
+
+    if (failed.length > 0) {
+      console.warn('[ACTIVITY] batch-sync parcialmente falhou:', failed);
+    }
 
     return c.json({
       success: true,
-      message: `${results.length} desafios sincronizados`,
+      message: `${processed} desafios sincronizados${failed.length ? `, ${failed.length} ignorados` : ''}`,
+      data: { processed, failed: failed.length },
     });
   } catch (error: any) {
     console.error('[ACTIVITY] Erro no batch sync:', error);
     return c.json(
-      {
-        success: false,
-        message: 'Erro ao sincronizar desafios',
-        error: error.message,
-      },
+      { success: false, message: 'Erro ao sincronizar desafios', error: error.message },
       500
     );
   }

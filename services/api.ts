@@ -68,11 +68,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Se receber 401 (não autorizado), limpa o token
+    // Se receber 401, limpa o token apenas se havia um token ativo
+    // (evita log de ruído quando a requisição é feita após logout)
     if (error.response?.status === 401) {
-      console.log('🔓 Token inválido ou expirado - limpando dados...');
       try {
-        await authStorage.clear();
+        const token = await authStorage.getToken();
+        if (token) {
+          console.log('🔓 Token inválido ou expirado - limpando dados...');
+          await authStorage.clear();
+        }
       } catch (clearError) {
         console.error('❌ Erro ao limpar storage:', clearError);
       }

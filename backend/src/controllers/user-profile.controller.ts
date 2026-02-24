@@ -205,8 +205,14 @@ export const getUserProfile = async (c: Context) => {
           category: ub.badge.category,
           earnedAt: ub.earnedAt,
         })),
-        recentChallenges: recentChallenges.map(uc => ({
-          id: uc.challenge.id,
+        recentChallenges: recentChallenges
+          // Desduplicar: manter apenas a conclusão mais recente de cada desafio
+          // (um usuário pode completar o mesmo desafio em dias diferentes)
+          .filter((uc, index, self) =>
+            index === self.findIndex(u => u.challenge.id === uc.challenge.id)
+          )
+          .map(uc => ({
+          id: uc.id,              // ID do UserChallenge — sempre único
           title: uc.challenge.title,
           category: uc.challenge.category,
           difficulty: uc.challenge.difficulty,

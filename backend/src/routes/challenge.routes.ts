@@ -1,14 +1,3 @@
-/**
- * ============================================
- * CHALLENGE ROUTES - Rotas de Desafios
- * ============================================
- * 
- * Rotas protegidas da API de desafios
- * Requer autenticação via authMiddleware
- * 
- * @created 20 de outubro de 2025
- */
-
 import { Hono } from 'hono';
 import { challengeInvitationController } from '../controllers/challenge-invitation.controller.js';
 import {
@@ -17,8 +6,9 @@ import {
     getDailyChallenges,
     getHistory,
 } from '../controllers/challenge.controller.js';
-import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { prisma } from '../lib/prisma.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { updateChallengeProgress } from '../services/challenge.service.js';
 import { getUserId } from '../utils/context.helpers.js';
 
 const challengeRoutes = new Hono();
@@ -34,8 +24,9 @@ challengeRoutes.get('/daily', getDailyChallenges);
 
 /**
  * GET /challenges/active-with-tracking
- * Busca desafios ativos do usuário que possuem tracking automático
- * Usado pelo sistema de sincronização automática
+ * Busca desafios ativos e pendentes que possuem tracking automático
+ * (STEPS / DISTANCE / DURATION). Retorna o UserChallenge ID para
+ * que o cliente use diretamente nos endpoints de progress/complete.
  */
 challengeRoutes.get('/active-with-tracking', async (c) => {
   try {
@@ -44,11 +35,20 @@ challengeRoutes.get('/active-with-tracking', async (c) => {
     const userChallenges = await prisma.userChallenge.findMany({
       where: {
         userId,
-        status: 'IN_PROGRESS',
+        // Inclui IN_PROGRESS (já iniciado) e PENDING (auto-tracking: iniciará ao primeiro sync)
+        status: { in: ['IN_PROGRESS', 'PENDING'] },
         challenge: {
           trackingType: {
             in: ['STEPS', 'DISTANCE', 'DURATION'],
           },
+        },
+        // Só desafios atribuídos hoje
+        assignedAt: {
+          gte: (() => {
+            const t = new Date();
+            t.setHours(0, 0, 0, 0);
+            return t;
+          })(),
         },
       },
       include: {
@@ -58,34 +58,67 @@ challengeRoutes.get('/active-with-tracking', async (c) => {
             title: true,
             trackingType: true,
             targetValue: true,
+            targetUnit: true,
           },
         },
       },
     });
 
-    const formattedChallenges = userChallenges.map((uc: any) => ({
-      id: uc.challenge.id,
+    const formattedChallenges = userChallenges.map((uc) => ({
+      // ⚠️ id = UserChallenge.id (usado nos endpoints de progress/complete)
+      id: uc.id,
+      challengeId: uc.challenge.id,
       title: uc.challenge.title,
       trackingType: uc.challenge.trackingType,
       targetValue: uc.challenge.targetValue,
-      currentProgress: uc.progress || 0,
+      targetUnit: uc.challenge.targetUnit,
+      currentProgress: uc.progress ?? 0,
+      // valores brutos já salvos
+      steps: uc.steps ?? 0,
+      distance: uc.distance ?? 0,
+      duration: uc.duration ?? 0,
       status: uc.status,
     }));
 
-    return c.json({
-      success: true,
-      data: formattedChallenges,
-    });
+    return c.json({ success: true, data: formattedChallenges });
   } catch (error: any) {
     console.error('[CHALLENGES] Erro ao buscar desafios com tracking:', error);
     return c.json(
-      {
-        success: false,
-        message: 'Erro ao buscar desafios com tracking',
-        error: error.message,
-      },
+      { success: false, message: 'Erro ao buscar desafios com tracking', error: error.message },
       500
     );
+  }
+});
+
+/**
+ * PUT /challenges/:id/progress
+ * Atualiza progresso de um desafio de atividade física sem completá-lo.
+ * :id = UserChallenge ID
+ *
+ * Body: { currentValue: number, trackingData?: { steps?, distance?, timestamp? } }
+ */
+challengeRoutes.put('/:id/progress', async (c) => {
+  try {
+    const userId = getUserId(c);
+    const userChallengeId = c.req.param('id');
+
+    const body = await c.req.json();
+    const { currentValue, trackingData } = body as {
+      currentValue: number;
+      trackingData?: { steps?: number; distance?: number; timestamp?: number };
+    };
+
+    if (typeof currentValue !== 'number') {
+      return c.json({ success: false, message: 'currentValue é obrigatório e deve ser número' }, 400);
+    }
+
+    const result = await updateChallengeProgress(userId, userChallengeId, currentValue, trackingData);
+    return c.json({ success: true, data: result });
+  } catch (error: any) {
+    if (error.message === 'Desafio não encontrado') return c.json({ success: false, message: error.message }, 404);
+    if (error.message === 'Este desafio não pertence a você') return c.json({ success: false, message: error.message }, 403);
+    console.error('[CHALLENGES] Erro ao atualizar progresso:', error);
+    return c.json({ success: false, message: 'Erro ao atualizar progresso', error: error.message }, 500);
   }
 });
 

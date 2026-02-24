@@ -50,7 +50,6 @@ export const FriendCard: React.FC<FriendCardProps> = ({ friend, onPress, onRemov
           <UserStatsRow
             stats={[
               { icon: 'trophy', iconColor: theme.colors.warning, value: `Lvl ${friend.level}` },
-              { icon: 'star', iconColor: theme.colors.accent, value: `${friend.xp} XP` },
               { icon: 'fire', iconColor: theme.colors.error, value: `${friend.currentStreak} dias` },
             ]}
             size="small"

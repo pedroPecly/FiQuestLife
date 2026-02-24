@@ -149,6 +149,10 @@ export const getPendingInvites = async () => {
 
     return response.data.data as ChallengeInvitation[];
   } catch (error: any) {
+    // 401 é comportamento esperado após logout: sem sessão = sem convites pendentes
+    if (error.response?.status === 401) {
+      return [] as ChallengeInvitation[];
+    }
     console.error('[CHALLENGE INVITATION] Erro ao buscar convites pendentes:', error);
     throw new Error(error.response?.data?.message || 'Erro ao buscar convites');
   }

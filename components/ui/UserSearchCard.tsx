@@ -93,7 +93,6 @@ export const UserSearchCard: React.FC<UserSearchCardProps> = ({
           <UserStatsRow
             stats={[
               { icon: 'trophy', iconColor: theme.colors.warning, value: `Lvl ${user.level}` },
-              { icon: 'star', iconColor: theme.colors.accent, value: `${user.xp} XP` },
             ]}
             size="small"
             gap={10}

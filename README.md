@@ -16,30 +16,30 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 ### **🎯 Gamificação**
 - XP, Níveis e Moedas Virtuais
 - Streaks diários com sistema de recompensas
-- Sistema de Level Up automático (1000 XP/nível)
+- Sistema de Level Up automático com progressão quadrática — `xp(n) = 50×(n−1)×(n+5)` (gap cresce +100 XP por nível)
 
 ### **🏆 Desafios e Conquistas**
 - 50 desafios em 8 categorias (Física, Nutrição, Hidratação, Mental, Sono, Social, Produtividade, Meditação)
-- **Sistema Dual de Tracking:**
-  - **Manual:** Modal com GPS e cronômetro para sessões intencionais (corrida, ciclismo)
-  - **Automático:** Sincronização em background de passos e distância (app pode ficar fechado)
-- **Tracking Automático de Atividades Físicas:**
-  - 📱 **Fase 1 (Expo Go):** Pedômetro nativo + auto-sync ao abrir app
-    - Conta passos mesmo com app fechado
-    - Estimativa de distância (passos × 0.78m)
-    - Completa desafios automaticamente
+- **Sistema de Tracking de Atividades Físicas:**
+  - **Auto-rastreamento (STEPS / DISTANCE):** passos e distância **nunca precisam ser ativados manualmente**
+    - Ao abrir o app, o sistema lê automaticamente os dados do app nativo de saúde (iOS Health / Google Fit)
+    - Os cards de desafio exibem o progresso atual imediatamente (badge "Sincronizado automaticamente")
+    - Quando a meta é atingida, o desafio é completado automaticamente com XP e moedas
+    - Desafios de passos/distância são criados com status `IN_PROGRESS` desde o início
+  - **Rastreamento manual (DURATION):** corrida com GPS e cronômetro — requer pressionar "Iniciar"
+    - Modal interativo com GPS, cronômetro e progresso em tempo real
+    - Botões Pausar / Retomar / Finalizar
+  - 📱 **Sensores utilizados (Expo Go — multiplataforma):**
+    - Pedômetro nativo (iOS HealthKit / Android sensor): conta passos 24/7 mesmo com app fechado
+    - Estimativa de distância (passos × 0.78 m) com precisão ±5–10%
   - 🏥 **Fase 2 (Development Build):** Apple Health + Google Fit
-    - Distância REAL via GPS (não estimativa)
-    - Integração com Apple Watch e smartwatches Android
-    - Dados de calorias ativas queimadas
-    - Histórico completo de atividades
-    - Onboarding intuitivo para conectar Health APIs
-    - Fallback automático para Fase 1 se Health não disponível
+    - Distância REAL via GPS, dados de wearables, histórico completo
+    - Fallback automático para sensores nativos se Health não disponível
   - 🔧 **Otimizações:**
-    - Cache de desafios (5min TTL) para reduzir chamadas API
-    - Memoização com useCallback para evitar re-renders
-    - Memory leak fix com cleanup de timeouts
-    - Graceful degradation com fallback para cache expirado
+    - Cache de desafios (5 min TTL) para reduzir chamadas à API
+    - Re-sync automático ao voltar ao foreground (`AppState`)
+    - Progresso propagado em tempo real para cada card (`activityProgressMap`)
+    - `batch-sync` corrigido para usar `userChallengeId` ao invés de `challengeId`
 - **7 desafios sociais auto-verificáveis** que completam automaticamente ao realizar ações no app:
   - 🎯 Desafiar um Amigo (convite enviado)
   - 🤝 Aceitar um Desafio (convite aceito)
@@ -172,12 +172,15 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 FiQuestLife/
 ├── app/                        # 📱 Frontend (React Native + Expo Router)
 │   ├── (tabs)/                # Navegação em abas (file-based routing)
-│   │   ├── _layout.tsx       # Layout das tabs (Home, Desafios, Explorar, Configurações)
+│   │   │   ├── _layout.tsx       # Layout das tabs
 │   │   ├── index.tsx         # Tab Home (ProfileScreen)
-│   │   ├── challenges.tsx    # 🆕 Tab Desafios (ChallengesScreen)
-│   │   ├── badges.tsx        # 🆕 Tab Badges (BadgesScreen) - Sprint 7
-│   │   ├── explore.tsx       # Tab Explorar
-│   │   └── settings.tsx      # ⚙️ Tab Configurações (5 seções organizadas em cards)
+│   │   ├── challenges.tsx    # Tab Desafios (ChallengesScreen)
+│   │   ├── badges.tsx        # Tab Badges (BadgesScreen)
+│   │   ├── explore.tsx       # Tab Explorar / Leaderboard
+│   │   ├── friends.tsx       # 🆕 Tab Amigos (FriendsScreen)
+│   │   ├── inventory.tsx     # 🆕 Tab Inventário (InventoryScreen)
+│   │   ├── shop.tsx          # 🆕 Tab Loja (ShopScreen)
+│   │   └── settings.tsx      # Tab Configurações
 │   ├── screens/               # 📱 Componentes das telas
 │   │   ├── index.ts          # Barrel export
 │   │   ├── ActivityFeedScreen.tsx # 🆕 Feed de atividades dos amigos (Sprint 11)
@@ -206,8 +209,10 @@ FiQuestLife/
 │   ├── _layout.tsx           # Layout raiz do app
 │   ├── index.tsx             # Rota inicial (redirect)
 │   ├── edit-profile.tsx      # Rota para EditProfileScreen
-│   ├── challenges.tsx        # 🆕 Rota para ChallengesScreen
-│   └── badges.tsx            # 🆕 Rota para BadgesScreen
+│   ├── challenges.tsx        # Rota para ChallengesScreen
+│   ├── badges.tsx            # Rota para BadgesScreen
+│   ├── history.tsx           # 🆕 Rota para RewardHistoryScreen
+│   └── user-profile.tsx      # Rota para perfil de outros usuários
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
 │   ├── ui/                   # 35 componentes de UI
@@ -226,6 +231,7 @@ FiQuestLife/
 │   │   ├── ChallengeCard.tsx # 🆕 Card de desafio com auto-verify badge
 │   │   ├── ChallengeInvitesModal.tsx # 🆕 Modal de convites de desafios
 │   │   ├── CommentModal.tsx  # 🆕 Modal de comentários em atividades (Sprint 12)
+│   │   ├── DailyProgressWidget.tsx # 🆕 Widget de progresso diário de atividades
 │   │   ├── DateInput.tsx     # Input de data com formatação DD/MM/YYYY
 │   │   ├── EmptyState.tsx    # 🆕 Estado vazio genérico reutilizável (Sprint 11)
 │   │   ├── FeedActivityCard.tsx # 🆕 Card de atividade do feed (Sprint 12)
@@ -261,25 +267,32 @@ FiQuestLife/
 │       └── SimpleHeader.tsx  # 🆕 Cabeçalho simples sem notificações (Sprint 12)
 │
 ├── hooks/                     # 🎣 Hooks Personalizados
-│   ├── useAlert.ts           # Hook para gerenciamento de alertas
-│   ├── useImagePicker.ts     # 🆕 Hook para upload de fotos (galeria/câmera)
-│   ├── useNotifications.ts   # 🆕 Hook para sistema de notificações (Sprint 9)
 │   ├── use-color-scheme.ts   # Hook para detecção de tema (claro/escuro)
 │   ├── use-color-scheme.web.ts # Versão web do hook de tema
-│   └── use-theme-color.ts    # Hook para cores temáticas
+│   ├── use-theme-color.ts    # Hook para cores temáticas
+│   ├── useActivityTracker.ts # 🆕 Hook para controle do ActivityTrackerModal (Sprint 17)
+│   ├── useAlert.ts           # Hook para gerenciamento de alertas
+│   ├── useAppState.ts        # 🆕 Hook para detectar foreground/background do app
+│   ├── useFriendRequestNotifications.ts # 🆕 Hook para notificações de solicitações de amizade
+│   ├── useImagePicker.ts     # 🆕 Hook para upload de fotos (galeria/câmera)
+│   ├── useNotifications.ts   # 🆕 Hook para sistema de notificações (Sprint 9)
+│   └── useTheme.ts           # 🆕 Hook para tema e cores dinâmicas
 │
 ├── types/                     # 📝 Definições de Tipos TypeScript
 │   └── user.ts               # Interface User (compartilhada)
 │
 ├── utils/                     # 🛠️ Funções Utilitárias
+│   ├── activityFormatters.ts # Formatação de passos, distância e duração
 │   ├── dateUtils.ts          # Formatação e cálculos de datas
-│   ├── dialog.ts             # Helpers para dialogs (legado)
+│   ├── invitationUtils.ts    # Helpers para convites de desafios
+│   ├── notificationHelper.ts # Helpers de notificações locais
+│   ├── progressionUtils.ts   # 🆕 Funções de progressão e level up (fórmula quadrática)
 │   └── validators.ts         # Validações (email, username, password, etc)
 │
 ├── services/                  # 🌐 Comunicação com API
 │   ├── api.ts                # ⚠️ ALTERAR IP AQUI - Axios + endpoints
 │   ├── activity.ts           # 🆕 Serviço de rastreamento de atividades (Sprint 17)
-│   ├── activitySync.ts       # 🆕 Sincronização automática de atividades (Fase 1+2)
+│   ├── activitySync.ts       # 🆕 Sincronização automática de atividades (auto-track)
 │   ├── auth.ts               # Gerenciamento de token JWT + AsyncStorage
 │   ├── badge.ts              # 🆕 Serviço de badges (Sprint 7)
 │   ├── challenge.ts          # 🆕 Serviço de desafios (Sprint 6)
@@ -287,11 +300,10 @@ FiQuestLife/
 │   ├── feed.ts               # 🆕 Serviço de feed social (Sprint 12)
 │   ├── feedInteractions.ts   # 🆕 Serviço de curtidas/comentários (Sprint 12)
 │   ├── friend.ts             # 🆕 Serviço de amigos completo (Sprint 11)
-│   ├── googleFit.ts          # 🆕 Integração Google Fit para Android (Fase 2)
-│   ├── healthKit.ts          # 🆕 Integração Apple Health para iOS (Fase 2)
 │   ├── leaderboard.ts        # 🆕 Serviço de rankings (Sprint 12)
-│   ├── location.ts           # 🆕 Serviço de GPS e distância (Sprint 17)
 │   ├── localNotificationStorage.ts # 🆕 Armazenamento local de notificações
+│   ├── location.ts           # 🆕 Serviço de GPS e distância (Sprint 17)
+│   ├── multiTracker.ts       # 🆕 Gerenciamento de múltiplos desafios simultâneos (Sprint 17)
 │   ├── notificationNavigation.ts # 🆕 Navegação de notificações (Sprint 14)
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   ├── pedometer.ts          # 🆕 Serviço de contagem de passos (Sprint 17)
@@ -319,54 +331,66 @@ FiQuestLife/
 │   │   │   ├── friend.controller.ts     # 🆕 Gerenciamento de amigos (12 endpoints - Sprint 11)
 │   │   │   ├── health.controller.ts     # Health check
 │   │   │   ├── leaderboard.controller.ts # 🆕 Rankings (Sprint 12)
-│   │   │   ├── notification.controller.ts # 🆕 Notificações backend (Sprint 13)
 │   │   │   ├── push-token.controller.ts # 🆕 Gerenciamento de tokens push (Sprint 13)
 │   │   │   ├── reward.controller.ts     # 🆕 Histórico de recompensas (3 endpoints - Sprint 10)
 │   │   │   ├── shop.controller.ts       # 🆕 Loja e inventário (7 endpoints - Sprint 16)
-│   │   │   └── user.controller.ts       # 🆕 Perfis públicos (Sprint 12)
+│   │   │   └── user-profile.controller.ts # 🆕 Perfis públicos (Sprint 12)
 │   │   ├── services/         # 🔧 Lógica de Negócio
 │   │   │   ├── activity.service.ts      # 🆕 7 funções de rastreamento (Sprint 17)
 │   │   │   ├── auto-verify.service.ts   # 🆕 Auto-verificação de desafios sociais (354 linhas)
 │   │   │   ├── badge.service.ts         # 🆕 3 funções de badges (168 linhas)
-│   │   │   ├── challenge.service.ts     # 🆕 8 funções de desafios (457 linhas)
+│   │   │   ├── challenge.service.ts     # 🆕 8+ funções de desafios (inclui updateChallengeProgress)
 │   │   │   ├── challenge-invitation.service.ts # 🆕 Convites de desafios (474 linhas)
 │   │   │   ├── expo-push.service.ts     # 🆕 Serviço Expo Push API (Sprint 13)
 │   │   │   ├── feed.service.ts          # 🆕 Feed social (Sprint 12)
+│   │   │   ├── feed-v2.service.ts       # 🆕 Feed social v2 com melhorias de query
 │   │   │   ├── friend.service.ts        # 🆕 12 funções de amigos (774 linhas - Sprint 11)
-│   │   │   ├── leaderboard.service.ts   # 🆕 Rankings (Sprint 12)
 │   │   │   ├── notification.service.ts  # 🆕 Notificações com proteção duplicatas (Sprint 13)
 │   │   │   ├── reward.service.ts        # 🆕 3 funções de recompensas (161 linhas - Sprint 10)
-│   │   │   └── shop.service.ts          # 🆕 Loja/inventário (7 funções, 775 linhas - Sprint 16)
+│   │   │   ├── shop.service.ts          # 🆕 Loja/inventário (7 funções, 775 linhas - Sprint 16)
+│   │   │   └── user-activity.service.ts # 🆕 Atividades do usuário para feed e perfil
 │   │   ├── routes/           # 🛣️ Definição de rotas
-│   │   │   ├── activity.routes.ts       # 🆕 Rotas de rastreamento (protegidas - Sprint 17)
+│   │   │   ├── activity.routes.ts       # 🆕 Rotas de rastreamento + batch-sync (protegidas - Sprint 17)
 │   │   │   ├── auth.ts                  # Rotas de autenticação
 │   │   │   ├── badge.routes.ts          # 🆕 Rotas de badges (protegidas)
-│   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios (protegidas)
+│   │   │   ├── challenge.routes.ts      # 🆕 Rotas de desafios + PUT /progress (protegidas)
 │   │   │   ├── challenge-invitation.routes.ts # 🆕 Rotas de convites (protegidas)
 │   │   │   ├── feed.routes.ts           # 🆕 Rotas de feed (protegidas - Sprint 12)
 │   │   │   ├── friend.routes.ts         # 🆕 Rotas de amigos (protegidas - Sprint 11)
 │   │   │   ├── health.ts                # Health check
 │   │   │   ├── leaderboard.routes.ts    # 🆕 Rotas de rankings (protegidas - Sprint 12)
-│   │   │   ├── notification.routes.ts   # 🆕 Rotas de notificações (protegidas - Sprint 13)
 │   │   │   ├── push-token.routes.ts     # 🆕 Rotas de tokens push (protegidas - Sprint 13)
 │   │   │   ├── reward.ts                # 🆕 Rotas de recompensas (protegidas - Sprint 10)
 │   │   │   ├── shop.routes.ts           # 🆕 Rotas de loja (7 rotas protegidas - Sprint 16)
-│   │   │   └── user.ts                  # Rotas de usuário e perfis públicos (protegidas)
+│   │   │   ├── user.ts                  # Rotas de usuário (protegidas)
+│   │   │   └── user-profile.routes.ts   # 🆕 Rotas de perfis públicos (protegidas - Sprint 12)
 │   │   ├── middlewares/      # 🔒 Middlewares
 │   │   │   ├── auth.middleware.ts       # Validação JWT
 │   │   │   ├── error.middleware.ts      # Tratamento de erros
 │   │   │   └── rate-limit.middleware.ts # 🆕 Rate limiting (5 limiters - Sprint 12)
-│   │   ├── lib/              # 🔧 Clientes e utilitários
+│   │   ├── lib/              # 🔧 Clientes instanciados
 │   │   │   ├── prisma.ts                # Prisma Client
-│   │   │   ├── supabase.ts              # Supabase Client
-│   │   │   └── validation.ts            # 🆕 Validação UUID e sanitização (Sprint 12)
+│   │   │   └── supabase.ts              # Supabase Client
+│   │   ├── utils/            # 🛠️ Utilitários do backend
+│   │   │   ├── context.helpers.ts       # Helpers de contexto Hono
+│   │   │   ├── progressionUtils.ts      # 🆕 Fórmula de level up quadrática
+│   │   │   └── validation.ts            # Validação UUID e sanitização
+│   │   ├── jobs/             # ⏰ Jobs periódicos
+│   │   │   └── cleanup-invitations.job.ts # Limpeza de convites expirados
+│   │   ├── tests/            # 🧪 Testes
+│   │   │   └── shop.service.test.ts     # Testes do serviço de loja
 │   │   └── index.ts          # Entry point do servidor (rotas registradas)
 │   ├── prisma/
 │   │   ├── schema.prisma     # 🗄️ Schema do banco de dados (15 models)
-│   │   ├── seed.ts           # 🌱 Seed de badges (29 badges tradicionais)
-│   │   ├── add-badges.ts     # 🆕 Seed de badges progressivos (18 badges sociais)
-│   │   ├── seed-challenges.ts # 🆕 Seed de desafios (52 desafios: 42 base + 10 com rastreamento)
-│   │   ├── add-challenges.ts # 🆕 Seed de desafios sociais auto-verificáveis (7 desafios)
+│   │   ├── seed.ts           # 🌱 Seed principal (badges tradicionais)
+│   │   ├── seed-challenges.ts # Seed de desafios (52 desafios)
+│   │   ├── seed-shop.ts      # 🆕 Seed da loja (15 itens)
+│   │   ├── add-badges.ts     # Seed de badges progressivos (18 badges sociais)
+│   │   ├── add-challenges.ts # Seed de desafios sociais auto-verificáveis (7 desafios)
+│   │   ├── add-social-challenges-and-badges.ts # 🆕 Seed combinado social
+│   │   ├── migrate-progression.ts # 🆕 Migração para fórmula de progressão quadrática
+│   │   ├── update-challenges-photo-requirement.ts # 🆕 Script de atualização de requisitos de foto
+│   │   ├── validate-shop.ts  # 🆕 Script de validação dos itens da loja
 │   │   ├── migrations/       # Histórico de mudanças do DB (12 migrations)
 │   │   │   ├── migration_lock.toml
 │   │   │   ├── 20251016122028_add_username/
@@ -490,6 +514,60 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ---
 
 ## 🆕 Últimas Atualizações
+
+### **Fevereiro de 2026**
+- ✅ **Sistema de Progressão Quadrática (Level Up)** (24/02/2026)
+  - **Problema resolvido:** fórmula antiga era linear plana — todo nível custava exatamente 1.000 XP, sem diferenciação. Subir do nível 1 para 2 era idêntico ao 49 para 50.
+  - **Nova fórmula:** `xpParaChegar(n) = 50 × (n−1) × (n+5)`
+    - Gap entre níveis cresce **linearmente**: `gap(n → n+1) = 100n + 250 XP`
+    - Inversa algébrica **O(1)** sem loop: `nivel(xp) = ⌊√(xp/50 + 9) − 2⌋`
+    - Nível 1→2: 350 XP | Nível 10→11: 1.250 XP | Nível 50→51: 5.250 XP | Nível 99→100: 10.150 XP
+  - **Curva de progressão** (~400 XP/dia de atividade):
+    - Nível 10 → 6.750 XP (~17 dias) | Nível 20 → 23.750 XP (~2 meses)
+    - Nível 50 → 134.750 XP (~11 meses) | Nível 100 → 519.750 XP (~4,3 anos)
+  - **Arquivos criados:**
+    - `utils/progressionUtils.ts` (frontend): `xpForLevel`, `levelFromXP`, `xpProgressInLevel`, `xpNeededForNextLevel`, `xpLevelProgress`, `xpProgressLabel`
+    - `backend/src/utils/progressionUtils.ts` (backend): espelho das funções de cálculo
+    - `backend/prisma/migrate-progression.ts`: script de migração com modo dry-run e apply
+  - **Arquivos atualizados:**
+    - `backend/src/services/challenge.service.ts`: substituiu `Math.floor(xp / 1000) + 1` por `levelFromXP(newXP)` com guarda `Math.max(currentLevel, ...)` para proteção de migração
+    - `app/screens/ProfileScreen.tsx`, `app/screens/ChallengesScreen.tsx`, `app/user-profile.tsx`: display de XP usa `xpProgressInLevel(xp, level)` / `xpNeededForNextLevel(xp, level)` com suporte ao nível armazenado no banco
+  - **Migração executada:**
+    - 0 usuários perderam nível (proteção garantida pelo `Math.max`)
+    - 4 usuários receberam boost gratuito (nova fórmula mais generosa abaixo do nível 15)
+    - 5 usuários sem impacto
+  - **Scripts de migração adicionados ao `backend/package.json`:**
+    - `npm run migrate:progression:dry` — relatório de impacto sem alterar o banco
+    - `npm run migrate:progression:apply` — aplica as atualizações de nível
+
+- ✅ **Auto-Progressão de Desafios de Passos e Distância** (24/02/2026)
+  - **Problema resolvido:** desafios de STEPS/DISTANCE exigiam o usuário pressionar "Iniciar" — agora são 100% automáticos.
+  - **Fluxo novo:**
+    1. App abre → `activitySync.syncActivityOnAppOpen()` lê passos/km do sensor nativo
+    2. Progresso é exibido em tempo real nos cards sem nenhuma ação do usuário
+    3. Ao atingir a meta, o desafio é auto-completado com XP, moedas e badges
+    4. Quando o app volta ao foreground (`AppState`), o sync é re-executado automaticamente
+  - **Backend — `challenge.service.ts`:**
+    - Nova função `updateChallengeProgress` — atualiza `progress` %, campos brutos (`steps`, `distance`) e auto-transiciona `PENDING → IN_PROGRESS`
+    - `assignDailyChallenges` cria desafios `STEPS`/`DISTANCE`/`DURATION` com status `IN_PROGRESS` desde a atribuição
+  - **Backend — `challenge.routes.ts`:**
+    - `GET /challenges/active-with-tracking` corrigido: retornava `id: challenge.id` (errado) → agora `id: userChallenge.id` (correto); inclui status `PENDING` + `IN_PROGRESS`; filtrado por desafios atribuídos hoje
+    - `PUT /challenges/:id/progress` novo endpoint — atualiza progresso sem completar o desafio (`:id` = UserChallenge ID)
+  - **Backend — `activity.routes.ts`:**
+    - `POST /activity/batch-sync` reescrito — usa `userChallengeId` corretamente; chama `completeChallenge` (com recompensas) se `completed=true`, senão `updateChallengeProgress`
+  - **Frontend — `activitySync.ts`:**
+    - Interface `ActiveChallenge` e `ChallengeProgress` atualizadas com `userChallengeId` separado de `challengeId`
+    - Todos os endpoints de API usam o ID correto de UserChallenge
+  - **Frontend — `ChallengeCard.tsx`:**
+    - Nova prop `activityCurrentValue?: number` — recebe valor do sensor em tempo real
+    - Detecção automática `isAutoTracked` (STEPS/DISTANCE)
+    - Desafios auto-rastreados: **botão "Iniciar" removido** → substituído por badge verde "Sincronizado automaticamente"
+    - Desafios DURATION mantêm o rastreamento manual
+    - `StepCounterWidget` prioriza: valor do sensor → sessão manual → valor do banco
+  - **Frontend — `ChallengesScreen.tsx`:**
+    - `activityProgressMap: Record<userChallengeId, currentValue>` para progresso em tempo real
+    - `runActivitySync()` executado após `loadData()` e ao retornar ao foreground
+    - Auto-reload da lista quando qualquer desafio é auto-completado
 
 ### **Dezembro de 2025**
 - ✅ **Sprint 17: Sistema de Rastreamento de Atividades + Health Integration** (30/12/2025)

@@ -18,6 +18,7 @@ import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import { getUserBadges } from '../../services/badge';
 import type { User } from '../../types/user';
+import { xpProgressInLevel, xpNeededForNextLevel } from '../../utils/progressionUtils';
 import { styles } from '../styles/profile.styles';
 
 const ProfileScreen = () => {
@@ -234,7 +235,7 @@ const ProfileScreen = () => {
 
             <StatBox
               icon="star"
-              value={`${(user.xp || 0) % 1000}/1000`}
+              value={`${xpProgressInLevel(user.xp || 0, user.level)}/${xpNeededForNextLevel(user.xp || 0, user.level)}`}
               label="XP"
               iconColor="#20B2AA"
             />

@@ -6,22 +6,22 @@
  * Modal para gerenciar convites de desafios recebidos
  */
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import {
-  acceptChallengeInvite,
-  ChallengeInvitation,
-  getPendingInvites,
-  rejectChallengeInvite,
+    acceptChallengeInvite,
+    ChallengeInvitation,
+    getPendingInvites,
+    rejectChallengeInvite,
 } from '../../services/challengeInvitation';
 import { getTimeUntilExpiration, isInvitationExpired } from '../../utils/invitationUtils';
 import { Avatar } from './Avatar';
@@ -175,12 +175,12 @@ export function ChallengeInvitesModal({
 
             <View style={styles.rewardsContainer}>
               <View style={styles.rewardItem}>
-                <Ionicons name="flash" size={14} color="#FFD700" />
-                <Text style={styles.rewardText}>{item.challenge.xpReward} XP</Text>
+                <Ionicons name="star" size={14} color="#5856D6" />
+                <Text style={[styles.rewardText, styles.xpText]}>{item.challenge.xpReward} XP</Text>
               </View>
               <View style={styles.rewardItem}>
-                <Ionicons name="logo-bitcoin" size={14} color="#FF9800" />
-                <Text style={styles.rewardText}>{item.challenge.coinsReward}</Text>
+                <MaterialCommunityIcons name="cash" size={15} color="#B8860B" />
+                <Text style={[styles.rewardText, styles.coinsText]}>{item.challenge.coinsReward}</Text>
               </View>
             </View>
           </View>
@@ -201,10 +201,10 @@ export function ChallengeInvitesModal({
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <ActivityIndicator size="small" color="#F44336" />
+              <ActivityIndicator size="small" color="#FFF" />
             ) : (
               <>
-                <Ionicons name="close-circle-outline" size={20} color="#F44336" />
+                <Ionicons name="close-circle-outline" size={20} color="#FFF" />
                 <Text style={styles.rejectButtonText}>Recusar</Text>
               </>
             )}
@@ -291,12 +291,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   inviteCard: {
-    backgroundColor: '#F8F8F8',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 2,
     borderColor: '#20B2AA',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   inviteCardExpired: {
     opacity: 0.6,
@@ -384,7 +389,13 @@ const styles = StyleSheet.create({
   rewardText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#555',
+  },
+  coinsText: {
+    color: '#B8860B',
+  },
+  xpText: {
+    color: '#5856D6',
   },
   messageContainer: {
     flexDirection: 'row',
@@ -392,8 +403,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
     padding: 10,
-    backgroundColor: '#FFF',
-    borderRadius: 8,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EBEBEB',
   },
   messageText: {
     flex: 1,
@@ -414,14 +427,12 @@ const styles = StyleSheet.create({
     gap: 6,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#FFF',
-    borderWidth: 2,
-    borderColor: '#F44336',
+    backgroundColor: '#F44336',
   },
   rejectButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#F44336',
+    color: '#FFF',
   },
   acceptButton: {
     flex: 1,
