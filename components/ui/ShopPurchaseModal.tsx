@@ -15,6 +15,7 @@
  */
 
 import shopService, { ShopItem } from '@/services/shop';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -91,21 +92,27 @@ export default function ShopPurchaseModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {/* Header */}
-          <View style={[styles.header, { backgroundColor: rarityColor }]}>
-            <Text style={styles.headerTitle}>Confirmar Compra</Text>
-            <TouchableOpacity onPress={handleClose} disabled={loading} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>✕</Text>
-            </TouchableOpacity>
-          </View>
 
-          {/* Imagem do item */}
-          <View style={styles.imageContainer}>
+          {/* Hero: ícone + cor de raridade */}
+          <View style={[styles.hero, { backgroundColor: rarityColor + '22' }]}>
             {item.imageUrl ? (
-              <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="contain" />
+              <Image source={{ uri: item.imageUrl }} style={styles.heroImage} resizeMode="contain" />
             ) : (
-              <Text style={styles.placeholderIcon}>{typeIcon}</Text>
+              <View style={[styles.heroIconCircle, { backgroundColor: rarityColor + '33' }]}>
+                <Text style={styles.heroIcon}>{typeIcon}</Text>
+              </View>
             )}
+
+            {/* Badge de raridade sobre o hero */}
+
+            {/* Botão fechar flutuante */}
+            <TouchableOpacity
+              onPress={handleClose}
+              disabled={loading}
+              style={styles.closeButton}
+            >
+              <MaterialCommunityIcons name="close" size={22} color="#6B7280" />
+            </TouchableOpacity>
           </View>
 
           {/* Informações do item */}
@@ -114,7 +121,6 @@ export default function ShopPurchaseModal({
               <Text style={styles.typeIcon}>{typeIcon}</Text>
               <Text style={styles.title}>{item.title}</Text>
             </View>
-
             <Text style={styles.description}>{item.description}</Text>
 
             <View style={[styles.rarityBadge, { backgroundColor: rarityColor }]}>
@@ -245,40 +251,66 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 18,
-    // backgroundColor é definido dinamicamente pela rarityColor
-    borderBottomWidth: 0,
+    // removido — substituído pelo hero
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF', // Branco pois o fundo é sempre colorido (rarityColor)
+    // removido — substituído pelo hero
   },
   closeButton: {
-    padding: 6,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: '#FFFFFF', // Branco para contrastar com rarityColor
-    fontWeight: 'bold',
-  },
-  imageContainer: {
-    height: 150,
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F0F8FF', // Alice Blue - padrão do projeto
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  hero: {
+    height: 180,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroImage: {
+    width: 110,
+    height: 110,
+  },
+  heroIconCircle: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroIcon: {
+    fontSize: 60,
+  },
+  imageContainer: {
+    // removido — substituído pelo hero
   },
   image: {
-    width: '70%',
-    height: '70%',
+    // removido — substituído pelo hero
   },
   placeholderIcon: {
-    fontSize: 64,
+    // removido — substituído pelo hero
+  },
+  rarityBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  rarityText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   infoContainer: {
     padding: 16,
