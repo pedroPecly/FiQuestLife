@@ -12,13 +12,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '../../components/layout/Header';
-import { Avatar, BadgeItem, Card, InfoRow, StatBox } from '../../components/ui';
+import { Avatar, BadgeItem, Card, ImageViewerModal, InfoRow, StatBox } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import { getUserBadges } from '../../services/badge';
 import type { User } from '../../types/user';
-import { xpProgressInLevel, xpNeededForNextLevel } from '../../utils/progressionUtils';
+import { xpNeededForNextLevel, xpProgressInLevel } from '../../utils/progressionUtils';
 import { styles } from '../styles/profile.styles';
 
 const ProfileScreen = () => {
@@ -27,6 +27,7 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [recentBadges, setRecentBadges] = useState<any[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(false);
+  const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
   const { alert } = useAlert();
 
   // Recarrega dados quando a tela ganhar foco
@@ -203,12 +204,24 @@ const ProfileScreen = () => {
           </Text>
 
           <View style={styles.avatarContainer}>
-            <Avatar 
-              initials={getInitials()}
-              imageUrl={user.avatarUrl}
-              size={80}
-            />
+            <TouchableOpacity
+              onPress={() => setPhotoViewerVisible(true)}
+              activeOpacity={0.85}
+            >
+              <Avatar
+                initials={getInitials()}
+                imageUrl={user.avatarUrl}
+                size={80}
+              />
+            </TouchableOpacity>
           </View>
+
+          <ImageViewerModal
+            visible={photoViewerVisible}
+            imageUrl={user.avatarUrl}
+            initials={getInitials()}
+            onClose={() => setPhotoViewerVisible(false)}
+          />
 
           <View style={styles.infoContainer}>
             <InfoRow

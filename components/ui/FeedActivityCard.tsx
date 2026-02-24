@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ActivityRewardBadges } from './ActivityRewardBadges';
 import { CommentModal } from './CommentModal';
+import { ImageViewerModal } from './ImageViewerModal';
 
 const theme = {
   colors: {
@@ -87,6 +88,7 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
   const [commentsCount, setCommentsCount] = useState(activity.commentsCount || 0);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
   
   // Verifica se é um desafio vindo de convite
   const isFromInvitation = activity.type === 'CHALLENGE_COMPLETED' && activity.invitedBy;
@@ -206,16 +208,28 @@ export const FeedActivityCard: React.FC<FeedActivityCardProps> = ({ activity, on
         
         {/* Foto do desafio (se houver) */}
         {activity.photoUrl && (
-          <View style={styles.photoContainer}>
-            <Image 
-              source={{ uri: activity.photoUrl }} 
-              style={styles.challengePhoto} 
-              resizeMode="cover"
+          <>
+            <TouchableOpacity
+              onPress={() => setPhotoViewerVisible(true)}
+              activeOpacity={0.92}
+              style={styles.photoContainer}
+            >
+              <Image
+                source={{ uri: activity.photoUrl }}
+                style={styles.challengePhoto}
+                resizeMode="cover"
+              />
+              {activity.caption && (
+                <Text style={styles.photoCaption}>{activity.caption}</Text>
+              )}
+            </TouchableOpacity>
+
+            <ImageViewerModal
+              visible={photoViewerVisible}
+              imageUrl={activity.photoUrl}
+              onClose={() => setPhotoViewerVisible(false)}
             />
-            {activity.caption && (
-              <Text style={styles.photoCaption}>{activity.caption}</Text>
-            )}
-          </View>
+          </>
         )}
         
         {/* Badges de recompensas (XP e FiCoins) */}

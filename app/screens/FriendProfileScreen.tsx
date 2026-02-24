@@ -1,5 +1,5 @@
 import { Header } from '@/components/layout';
-import { Avatar, Button, LoadingScreen, StatBox } from '@/components/ui';
+import { Avatar, Button, ImageViewerModal, LoadingScreen, StatBox } from '@/components/ui';
 import type { Friend } from '@/services/friend';
 import { friendService } from '@/services/friend';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -26,6 +26,7 @@ export default function FriendProfileScreen() {
   const [friend, setFriend] = useState<Friend | null>(null);
   const [mutualFriends, setMutualFriends] = useState<Friend[]>([]);
   const [removing, setRemoving] = useState(false);
+  const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
 
   useEffect(() => {
     loadFriendData();
@@ -108,7 +109,19 @@ export default function FriendProfileScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <Avatar initials={initials} imageUrl={friend.avatarUrl} size={100} />
+          <TouchableOpacity
+            onPress={() => setPhotoViewerVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Avatar initials={initials} imageUrl={friend.avatarUrl} size={100} />
+          </TouchableOpacity>
+
+          <ImageViewerModal
+            visible={photoViewerVisible}
+            imageUrl={friend.avatarUrl}
+            initials={initials}
+            onClose={() => setPhotoViewerVisible(false)}
+          />
 
           <Text style={styles.name}>{friend.name}</Text>
           <Text style={styles.username}>@{friend.username}</Text>

@@ -9,11 +9,11 @@
  */
 
 import { SimpleHeader } from '@/components/layout';
-import { Avatar, BadgeItem, Button, Card, EmptyState, InfoRow, StatBox } from '@/components/ui';
+import { Avatar, BadgeItem, Button, Card, EmptyState, ImageViewerModal, InfoRow, StatBox } from '@/components/ui';
 import { authService } from '@/services/api';
 import { friendService } from '@/services/friend';
 import { UserProfile, userProfileService } from '@/services/userProfile';
-import { xpProgressInLevel, xpNeededForNextLevel } from '@/utils/progressionUtils';
+import { xpNeededForNextLevel, xpProgressInLevel } from '@/utils/progressionUtils';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -23,6 +23,7 @@ import {
     StatusBar,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +37,7 @@ export default function UserProfileScreen() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
 
   /**
    * Carrega ID do usuário atualmente logado
@@ -256,10 +258,22 @@ export default function UserProfileScreen() {
           </Text>
 
           <View style={styles.avatarContainer}>
-            <Avatar
+            <TouchableOpacity
+              onPress={() => setPhotoViewerVisible(true)}
+              activeOpacity={0.85}
+            >
+              <Avatar
+                initials={profile.user.username.substring(0, 2).toUpperCase()}
+                imageUrl={profile.user.avatarUrl || undefined}
+                size={80}
+              />
+            </TouchableOpacity>
+
+            <ImageViewerModal
+              visible={photoViewerVisible}
+              imageUrl={profile.user.avatarUrl}
               initials={profile.user.username.substring(0, 2).toUpperCase()}
-              imageUrl={profile.user.avatarUrl || undefined}
-              size={80}
+              onClose={() => setPhotoViewerVisible(false)}
             />
           </View>
 

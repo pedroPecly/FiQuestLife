@@ -20,6 +20,7 @@ export { FilterBar } from './FilterBar';
 export type { Filter, FilterBarProps } from './FilterBar';
 export { FriendCard } from './FriendCard';
 export { FriendRequestCard } from './FriendRequestCard';
+export { ImageViewerModal } from './ImageViewerModal';
 export { InfoRow } from './InfoRow';
 export { Input } from './Input';
 export { LeaderboardCard } from './LeaderboardCard';
