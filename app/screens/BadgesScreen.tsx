@@ -13,8 +13,8 @@
  * @created 27 de outubro de 2025
  */
 
-import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
@@ -30,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SimpleHeader } from '../../components/layout';
 import { BadgeCard, BadgeDetailModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
-import type { BadgeWithProgress, BadgesProgressResponse } from '../../services/badge';
+import type { BadgesProgressResponse, BadgeWithProgress } from '../../services/badge';
 import { CATEGORY_ICONS, CATEGORY_LABELS, getBadgesProgress, RARITY_COLORS } from '../../services/badge';
 import { styles } from '../styles/badges.styles';
 
