@@ -1,22 +1,23 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  Dimensions,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Modal,
+    ScrollView,
+    Share,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { styles } from '../../app/styles/BadgeDetailModal.styles';
 import type { BadgeWithProgress } from '../../services/badge';
 import {
-  CATEGORY_ICONS,
-  CATEGORY_LABELS,
-  formatBadgeProgress,
-  getRarityEmoji,
-  RARITY_COLORS,
-  RARITY_LABELS,
+    CATEGORY_ICONS,
+    CATEGORY_LABELS,
+    formatBadgeProgress,
+    getRarityEmoji,
+    RARITY_COLORS,
+    RARITY_LABELS,
 } from '../../services/badge';
 
 // ==========================================
@@ -76,6 +77,14 @@ export const BadgeDetailModal: React.FC<BadgeDetailModalProps> = ({
   onClose,
 }) => {
   if (!badge) return null;
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Acabei de conquistar o troféu "${badge.name}" no FiQuestLife! 🏆\n\n${badge.description}`,
+      });
+    } catch {}
+  };
 
   return (
     <Modal
@@ -196,6 +205,18 @@ export const BadgeDetailModal: React.FC<BadgeDetailModalProps> = ({
                   </Text>
                 </View>
               )
+            )}
+
+            {/* Compartilhar conquista */}
+            {badge.earned && (
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={handleShare}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="share-variant" size={18} color="#8B5CF6" />
+                <Text style={styles.shareButtonText}>Compartilhar conquista</Text>
+              </TouchableOpacity>
             )}
           </ScrollView>
         </TouchableOpacity>

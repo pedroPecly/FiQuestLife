@@ -203,4 +203,21 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  shareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    backgroundColor: '#F5F3FF',
+  },
+  shareButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#8B5CF6',
+  },
 });

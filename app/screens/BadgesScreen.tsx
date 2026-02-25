@@ -14,11 +14,13 @@
  */
 
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    FlatList,
+    Animated,
     RefreshControl,
+    SectionList,
     StatusBar,
     Text,
     TouchableOpacity,
@@ -28,9 +30,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SimpleHeader } from '../../components/layout';
 import { BadgeCard, BadgeDetailModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
-import type { BadgeWithProgress } from '../../services/badge';
-import { getBadgesProgress } from '../../services/badge';
+import type { BadgeWithProgress, BadgesProgressResponse } from '../../services/badge';
+import { CATEGORY_ICONS, CATEGORY_LABELS, getBadgesProgress, RARITY_COLORS } from '../../services/badge';
 import { styles } from '../styles/badges.styles';
+
+// ==========================================
+// CACHE
+// ==========================================
+
+const CACHE_KEY = '@badges_cache_v1';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+interface BadgesCache {
+  data: BadgesProgressResponse;
+  timestamp: number;
+}
 
 // ==========================================
 // TIPOS
@@ -62,20 +76,87 @@ export const BadgesScreen = () => {
   const { alert } = useAlert();
 
   // ==========================================
+  // COMPUTED
+  // ==========================================
+  const progressPercent = totalCount > 0 ? (earnedCount / totalCount) * 100 : 0;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progressPercent,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [progressPercent]);
+
+  const nearestBadge = useMemo(() => {
+    const unearned = badges.filter(
+      (b) => !b.earned && b.progress && b.progress.percentage > 0
+    );
+    if (unearned.length === 0) return null;
+    return unearned.reduce((prev, curr) =>
+      (curr.progress?.percentage ?? 0) > (prev.progress?.percentage ?? 0) ? curr : prev
+    );
+  }, [badges]);
+
+  // Seções agrupadas por categoria (para SectionList)
+  const sections = useMemo(() => {
+    const CATEGORY_ORDER = ['ACHIEVEMENT', 'CONSISTENCY', 'MASTERY', 'SPECIAL'] as const;
+    return CATEGORY_ORDER
+      .map((cat) => {
+        const items = filteredBadges.filter((b) => b.category === cat);
+        if (items.length === 0) return null;
+        const rows: BadgeWithProgress[][] = [];
+        for (let i = 0; i < items.length; i += 2) {
+          rows.push(items.slice(i, i + 2));
+        }
+        return { title: cat as string, data: rows };
+      })
+      .filter((s): s is { title: string; data: BadgeWithProgress[][] } => s !== null);
+  }, [filteredBadges]);
+
+  // ==========================================
   // LOAD DATA
   // ==========================================
-  const loadBadges = async () => {
+
+  const applyResponse = (response: BadgesProgressResponse, currentFilter: FilterType) => {
+    setBadges(response.badges);
+    setEarnedCount(response.earned);
+    setLockedCount(response.locked);
+    setTotalCount(response.total);
+    applyFilter(currentFilter, response.badges);
+  };
+
+  const saveCache = async (response: BadgesProgressResponse) => {
     try {
+      const entry: BadgesCache = { data: response, timestamp: Date.now() };
+      await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+    } catch {}
+  };
+
+  const loadBadges = async (forceRefresh = false) => {
+    try {
+      // Tenta usar cache se não for um refresh forçado
+      if (!forceRefresh) {
+        const raw = await AsyncStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const cached: BadgesCache = JSON.parse(raw);
+          if (Date.now() - cached.timestamp < CACHE_TTL) {
+            applyResponse(cached.data, filter);
+            setLoading(false);
+            // Refresh silencioso em background
+            getBadgesProgress()
+              .then((fresh) => { applyResponse(fresh, filter); saveCache(fresh); })
+              .catch(() => {});
+            return;
+          }
+        }
+      }
+
       setLoading(true);
       const response = await getBadgesProgress();
-
-      setBadges(response.badges);
-      setEarnedCount(response.earned);
-      setLockedCount(response.locked);
-      setTotalCount(response.total);
-
-      // Aplica filtro atual
-      applyFilter('all', response.badges);
+      applyResponse(response, filter);
+      await saveCache(response);
     } catch (error: any) {
       console.error('❌ Erro ao carregar conquistas:', error);
       alert.error('Erro', error.message || 'Não foi possível carregar as conquistas.');
@@ -89,7 +170,7 @@ export const BadgesScreen = () => {
   // ==========================================
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadBadges();
+    await loadBadges(true); // ignora cache no pull-to-refresh
     setRefreshing(false);
   };
 
@@ -156,12 +237,72 @@ export const BadgesScreen = () => {
       {/* Header com botão voltar */}
       <SimpleHeader title="Conquistas" />
 
-      {/* Subtítulo de progresso */}
-      <View style={styles.headerWrapper}>
-        <Text style={styles.headerSubtitle}>
-          {earnedCount}/{totalCount} troféus desbloqueados
-        </Text>
+      {/* Barra de progresso global */}
+      <View style={styles.progressCard}>
+        <View style={styles.progressLabelRow}>
+          <Text style={styles.progressLabel}>
+            {earnedCount}/{totalCount} troféus desbloqueados
+          </Text>
+          <Text style={styles.progressPercent}>{Math.round(progressPercent)}%</Text>
+        </View>
+        <View style={styles.progressTrack}>
+          <Animated.View
+            style={[
+              styles.progressFill,
+              {
+                width: progressAnim.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
+          />
+        </View>
       </View>
+
+      {/* Badge mais próxima de conquistar */}
+      {nearestBadge && (
+        <TouchableOpacity
+          style={styles.nearestCard}
+          onPress={() => openBadgeDetails(nearestBadge)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.nearestHeader}>🎯 Mais próxima de conquistar</Text>
+          <View style={styles.nearestRow}>
+            <View
+              style={[
+                styles.nearestIconBox,
+                { backgroundColor: RARITY_COLORS[nearestBadge.rarity] },
+              ]}
+            >
+              <Text style={styles.nearestIconEmoji}>
+                {CATEGORY_ICONS[nearestBadge.category]}
+              </Text>
+            </View>
+            <View style={styles.nearestInfo}>
+              <Text style={styles.nearestName} numberOfLines={1}>
+                {nearestBadge.name}
+              </Text>
+              <View style={styles.nearestProgressRow}>
+                <View style={styles.nearestBarTrack}>
+                  <View
+                    style={[
+                      styles.nearestBarFill,
+                      {
+                        width: `${nearestBadge.progress?.percentage ?? 0}%`,
+                        backgroundColor: RARITY_COLORS[nearestBadge.rarity],
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.nearestProgressText}>
+                  {nearestBadge.progress?.current}/{nearestBadge.progress?.required}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      )}
 
       {/* Filters */}
       <View style={styles.filtersContainer}>
@@ -196,12 +337,12 @@ export const BadgesScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Badges Grid */}
-      <FlatList
-        data={filteredBadges}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
+      {/* Badges agrupados por categoria */}
+      <SectionList
+        sections={sections}
+        keyExtractor={(row, index) => `row-${index}-${row.map((b) => b.id).join('-')}`}
         contentContainerStyle={styles.gridContent}
+        stickySectionHeadersEnabled={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -210,9 +351,24 @@ export const BadgesScreen = () => {
             tintColor="#8B5CF6"
           />
         }
-        renderItem={({ item }) => (
-          <View style={styles.badgeCardWrapper}>
-            <BadgeCard badge={item} onPress={() => openBadgeDetails(item)} />
+        renderSectionHeader={({ section }) => (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderIcon}>
+              {CATEGORY_ICONS[section.title as keyof typeof CATEGORY_ICONS]}
+            </Text>
+            <Text style={styles.sectionHeaderText}>
+              {CATEGORY_LABELS[section.title as keyof typeof CATEGORY_LABELS]}
+            </Text>
+          </View>
+        )}
+        renderItem={({ item: row }) => (
+          <View style={styles.badgeRow}>
+            {row.map((badge) => (
+              <View key={badge.id} style={styles.badgeCardWrapper}>
+                <BadgeCard badge={badge} onPress={() => openBadgeDetails(badge)} />
+              </View>
+            ))}
+            {row.length === 1 && <View style={styles.badgeCardWrapper} />}
           </View>
         )}
         ListEmptyComponent={

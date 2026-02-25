@@ -121,12 +121,6 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ badge, onPress }) => {
         )
       )}
 
-      {/* Lock Overlay for Locked Badges */}
-      {!isEarned && (
-        <View style={styles.lockOverlay}>
-          <MaterialCommunityIcons name="lock" size={40} color="rgba(0,0,0,0.3)" />
-        </View>
-      )}
     </TouchableOpacity>
   );
 };

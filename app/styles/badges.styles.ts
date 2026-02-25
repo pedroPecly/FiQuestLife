@@ -112,6 +112,36 @@ export const styles = StyleSheet.create({
     width: '50%',
   },
 
+  badgeRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+  },
+
+  // ==========================================
+  // SECTION HEADERS
+  // ==========================================
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+    marginTop: 4,
+  },
+
+  sectionHeaderIcon: {
+    fontSize: 18,
+  },
+
+  sectionHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#9CA3AF',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+
   // ==========================================
   // EMPTY STATE
   // ==========================================
@@ -355,4 +385,136 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+
+  // ==========================================
+  // PROGRESS CARD GLOBAL
+  // ==========================================
+  progressCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  progressLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4B5563',
+  },
+
+  progressPercent: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#8B5CF6',
+  },
+
+  progressTrack: {
+    height: 10,
+    backgroundColor: '#EDE9FE',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+
+  progressFill: {
+    height: '100%',
+    borderRadius: 5,
+    backgroundColor: '#8B5CF6',
+  },
+
+  // ==========================================
+  // NEAREST BADGE CARD
+  // ==========================================
+  nearestCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  nearestHeader: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8B5CF6',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+
+  nearestRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  nearestIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  nearestIconEmoji: {
+    fontSize: 26,
+  },
+
+  nearestInfo: {
+    flex: 1,
+  },
+
+  nearestName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+
+  nearestProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  nearestBarTrack: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#EDE9FE',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+
+  nearestBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+
+  nearestProgressText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#6B7280',
+    minWidth: 36,
+    textAlign: 'right',
+  },
+
 });
