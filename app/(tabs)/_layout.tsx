@@ -85,10 +85,11 @@ export default function TabLayout() {
           animationDuration: 300,
         }),
       }}>
+      {/* 1 — Início: hub pessoal do usuário (perfil, stats, conquistas) */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Início',
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
               name={focused ? 'home' : 'home-outline'}
@@ -98,6 +99,23 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* 2 — Explorar: feed social da comunidade */}
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explorar',
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'compass' : 'compass-outline'}
+              size={28}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      {/* 3 — Desafios: posição central = maior destaque visual (core loop) */}
       <Tabs.Screen
         name="challenges"
         options={{
@@ -111,32 +129,8 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? 'view-dashboard' : 'view-dashboard-outline'}
-              size={28}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="shop"
-        options={{
-          title: 'Loja',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? 'shopping' : 'shopping-outline'}
-              size={28}
-              color={color}
-            />
-          ),
-        }}
-      />
+
+      {/* 4 — Amigos: social com badge de notificação */}
       <Tabs.Screen
         name="friends"
         options={{
@@ -151,38 +145,26 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="inventory"
-        options={{
-          href: null, // Esconde da navegação
-        }}
-      />
-      <Tabs.Screen
-        name="badges"
-        options={{
-          title: 'Troféus',
-          tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? 'shield-star' : 'shield-star-outline'}
-              size={28}
-              color={color}
-            />
-          ),
-        }}
-      />
+
+      {/* 5 — Conta: configurações e gerenciamento de conta (extremo direito — padrão universal) */}
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Usuário',
+          title: 'Conta',
           tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
-              name={focused ? 'account' : 'account-outline'}
+              name={focused ? 'cog' : 'cog-outline'}
               size={28}
               color={color}
             />
           ),
         }}
       />
+
+      {/* Ocultas da navbar — acessíveis via navegação programática */}
+      <Tabs.Screen name="inventory" options={{ href: null }} />
+      <Tabs.Screen name="shop"      options={{ href: null }} />
+      <Tabs.Screen name="badges"    options={{ href: null }} />
     </Tabs>
   );
 }

@@ -32,6 +32,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SimpleHeader } from '../../components/layout';
 import InventoryScreen from './InventoryScreen';
 import ShopScreen from './ShopScreen';
 
@@ -46,7 +47,10 @@ export default function ShopAndInventoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container}>
+      {/* Header com botão voltar */}
+      <SimpleHeader title="Loja & Mochila" />
+
       {/* Pill Tab Switcher — padrão do projeto */}
       <View style={styles.tabSwitcherWrapper}>
         <View style={styles.tabSwitcher}>

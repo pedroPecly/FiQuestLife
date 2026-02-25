@@ -130,7 +130,7 @@ export function useNotifications() {
 
         case 'BADGE_EARNED':
           // Navega para tela de badges
-          router.push('/(tabs)/badges');
+          router.push('/conquistas');
           break;
 
         case 'LEVEL_UP':

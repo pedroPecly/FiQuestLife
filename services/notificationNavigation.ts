@@ -180,7 +180,7 @@ const handleActivityComment = (notification: LocalNotification): void => {
  * Navega para a aba de badges
  */
 const handleBadgeEarned = (notification: LocalNotification): void => {
-  router.push('/(tabs)/badges');
+  router.push('/conquistas');
 };
 
 /**

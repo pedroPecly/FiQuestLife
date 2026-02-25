@@ -287,7 +287,7 @@ const ProfileScreen = () => {
           </View>
           
           <TouchableOpacity
-            onPress={() => router.push('/(tabs)/badges')}
+            onPress={() => router.push('/conquistas' as any)}
             style={styles.viewAllButton}
           >
             <Text style={styles.viewAllButtonText}>Ver Todos</Text>
@@ -311,7 +311,7 @@ const ProfileScreen = () => {
                   earnedAt={userBadge.earnedAt}
                   rarity={userBadge.badge.rarity}
                   variant="mini"
-                  onPress={() => router.push('/(tabs)/badges')}
+                  onPress={() => router.push('/conquistas' as any)}
                 />
               ))}
             </ScrollView>
@@ -326,23 +326,23 @@ const ProfileScreen = () => {
           )}
         </Card>
 
-        {/* BOTÃO: HISTÓRICO DE RECOMPENSAS */}
+        {/* BOTÃO: LOJA & MOCHILA */}
         <TouchableOpacity
           style={styles.historyButton}
-          onPress={() => router.push('/history' as any)}
+          onPress={() => router.push('/loja' as any)}
           accessible={true}
-          accessibilityLabel="Ver histórico de recompensas"
+          accessibilityLabel="Ir para a loja e mochila"
           accessibilityRole="button"
-          accessibilityHint="Abre a tela com todo o histórico de XP, moedas e conquistas ganhas"
+          accessibilityHint="Abre a loja para comprar itens e gerenciar o inventário"
         >
           <View style={styles.historyButtonContent}>
-            <View style={styles.historyButtonIcon}>
-              <Text style={styles.historyButtonEmoji}>📜</Text>
+            <View style={[styles.historyButtonIcon, { backgroundColor: '#E6FAF8' }]}>
+              <Text style={styles.historyButtonEmoji}>🛍️</Text>
             </View>
             <View style={styles.historyButtonText}>
-              <Text style={styles.historyButtonTitle}>Histórico de Recompensas</Text>
+              <Text style={styles.historyButtonTitle}>Loja & Mochila</Text>
               <Text style={styles.historyButtonSubtitle}>
-                Veja todas as recompensas que você ganhou
+                Compre itens com FiCoins e gerencie seu inventário
               </Text>
             </View>
           </View>

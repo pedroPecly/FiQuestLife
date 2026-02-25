@@ -38,37 +38,26 @@ export const styles = StyleSheet.create({
   // ==========================================
   headerWrapper: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingTop: 4,
+    paddingBottom: 12,
   },
 
-  headerContent: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  headerContent: {},
 
   headerTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 8,
-    textAlign: 'center',
+    marginBottom: 2,
   },
 
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     fontWeight: '500',
-    textAlign: 'center',
   },
 
-  notificationContainer: {
-    position: 'absolute',
-    right: 20,
-    top: 20,
-  },
+  notificationContainer: {},
 
   // ==========================================
   // FILTERS

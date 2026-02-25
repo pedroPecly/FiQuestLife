@@ -14,7 +14,7 @@
  */
 
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -24,13 +24,12 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCard, BadgeDetailModal, NotificationBell, NotificationsModal } from '../../components/ui';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { SimpleHeader } from '../../components/layout';
+import { BadgeCard, BadgeDetailModal } from '../../components/ui';
 import { useAlert } from '../../hooks/useAlert';
-import { authStorage } from '../../services/auth';
 import type { BadgeWithProgress } from '../../services/badge';
 import { getBadgesProgress } from '../../services/badge';
-import { getLocalUnreadCount } from '../../services/localNotificationStorage';
 import { styles } from '../styles/badges.styles';
 
 // ==========================================
@@ -44,7 +43,6 @@ type FilterType = 'all' | 'earned' | 'locked';
 // ==========================================
 
 export const BadgesScreen = () => {
-  const insets = useSafeAreaInsets();
   // ==========================================
   // STATE
   // ==========================================
@@ -55,8 +53,6 @@ export const BadgesScreen = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedBadge, setSelectedBadge] = useState<BadgeWithProgress | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [feedVisible, setFeedVisible] = useState(false);
 
   // Contadores
   const [earnedCount, setEarnedCount] = useState(0);
@@ -64,29 +60,6 @@ export const BadgesScreen = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const { alert } = useAlert();
-
-  // Carrega count de notificações não lidas
-  const loadUnreadCount = useCallback(async () => {
-    try {
-      const user = await authStorage.getUser();
-      if (!user) {
-        setUnreadCount(0);
-        return;
-      }
-      const count = await getLocalUnreadCount(user.id);
-      setUnreadCount(count);
-    } catch (error) {
-      setUnreadCount(0);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUnreadCount();
-    const interval = setInterval(() => {
-      loadUnreadCount();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [loadUnreadCount]);
 
   // ==========================================
   // LOAD DATA
@@ -162,13 +135,14 @@ export const BadgesScreen = () => {
   // ==========================================
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
+        <SimpleHeader title="Conquistas" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#8B5CF6" />
           <Text style={styles.loadingText}>Carregando conquistas...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -176,26 +150,17 @@ export const BadgesScreen = () => {
   // RENDER MAIN
   // ==========================================
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F0F8FF" />
 
-      {/* Header */}
+      {/* Header com botão voltar */}
+      <SimpleHeader title="Conquistas" />
+
+      {/* Subtítulo de progresso */}
       <View style={styles.headerWrapper}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>🏆 Troféus</Text>
-          <Text style={styles.headerSubtitle}>
-            {earnedCount}/{totalCount} troféus desbloqueados
-          </Text>
-        </View>
-        
-        <View style={styles.notificationContainer}>
-          <NotificationBell
-            unreadCount={unreadCount}
-            onPress={() => setFeedVisible(true)}
-            size={26}
-            color="#2F4F4F"
-          />
-        </View>
+        <Text style={styles.headerSubtitle}>
+          {earnedCount}/{totalCount} troféus desbloqueados
+        </Text>
       </View>
 
       {/* Filters */}
@@ -206,7 +171,7 @@ export const BadgesScreen = () => {
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
-            Todos ({totalCount})
+            Todos
           </Text>
         </TouchableOpacity>
 
@@ -216,7 +181,7 @@ export const BadgesScreen = () => {
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'earned' && styles.filterTextActive]}>
-            Conquistados ({earnedCount})
+            Conquistados
           </Text>
         </TouchableOpacity>
 
@@ -226,7 +191,7 @@ export const BadgesScreen = () => {
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'locked' && styles.filterTextActive]}>
-            Bloqueados ({lockedCount})
+            Bloqueados
           </Text>
         </TouchableOpacity>
       </View>
@@ -265,22 +230,12 @@ export const BadgesScreen = () => {
         }
       />
 
-      {/* Modal de Notificações */}
-      <NotificationsModal
-        visible={feedVisible}
-        onClose={() => {
-          setFeedVisible(false);
-          loadUnreadCount();
-        }}
-        onUnreadCountChange={setUnreadCount}
-      />
-
       {/* Modal de Detalhes */}
       <BadgeDetailModal
         badge={selectedBadge}
         visible={modalVisible}
         onClose={closeBadgeDetails}
       />
-    </View>
+    </SafeAreaView>
   );
 };

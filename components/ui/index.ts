@@ -30,7 +30,6 @@ export { NotificationBell } from './NotificationBell';
 export { NotificationItem } from './NotificationItem';
 export { NotificationsModal } from './NotificationsModal';
 export { ProfileAvatar } from './ProfileAvatar';
-export { RewardCard } from './RewardCard';
 export { SearchBar } from './SearchBar';
 export type { SearchBarProps } from './SearchBar';
 export { SettingsMenuItem } from './SettingsMenuItem';

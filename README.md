@@ -138,8 +138,10 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 - Controle de privacidade de perfis
 
 ### **🎨 Interface**
-- 35+ componentes reutilizáveis (TabBar, FilterBar, BottomSheetModal, NotificationItem, ActivityRewardBadges, PhotoCaptureModal)
-- 12 telas completas e responsivas
+- 34+ componentes reutilizáveis (TabBar, FilterBar, BottomSheetModal, NotificationItem, ActivityRewardBadges, PhotoCaptureModal)
+- 11 telas completas e responsivas
+- **Navegação de 5 tabs:** Início → Explorar → Desafios (centro) → Amigos → Conta
+- Loja (`/loja`) e Conquistas (`/conquistas`) como rotas standalone sem navbar
 - Design iOS/Android/Web
 - Melhorias de UX no teclado (dismiss ao clicar fora, KeyboardAvoidingView em modais)
 - Safe area handling e estados vazios padronizados
@@ -171,16 +173,16 @@ Aplicativo de gamificação para transformar sua saúde e produtividade em uma a
 ```
 FiQuestLife/
 ├── app/                        # 📱 Frontend (React Native + Expo Router)
-│   ├── (tabs)/                # Navegação em abas (file-based routing)
-│   │   │   ├── _layout.tsx       # Layout das tabs
-│   │   ├── index.tsx         # Tab Home (ProfileScreen)
-│   │   ├── challenges.tsx    # Tab Desafios (ChallengesScreen)
-│   │   ├── badges.tsx        # Tab Badges (BadgesScreen)
-│   │   ├── explore.tsx       # Tab Explorar / Leaderboard
-│   │   ├── friends.tsx       # 🆕 Tab Amigos (FriendsScreen)
-│   │   ├── inventory.tsx     # 🆕 Tab Inventário (InventoryScreen)
-│   │   ├── shop.tsx          # 🆕 Tab Loja (ShopScreen)
-│   │   └── settings.tsx      # Tab Configurações
+│   ├── (tabs)/                # Navegação em abas (5 tabs visíveis + 3 ocultas)
+│   │   │   ├── _layout.tsx       # Layout das tabs (href:null nas tabs ocultas)
+│   │   ├── index.tsx         # ✅ Tab Início (ProfileScreen)
+│   │   ├── explore.tsx       # ✅ Tab Explorar / Leaderboard
+│   │   ├── challenges.tsx    # ✅ Tab Desafios (centro — ChallengesScreen)
+│   │   ├── friends.tsx       # ✅ Tab Amigos (FriendsScreen)
+│   │   ├── settings.tsx      # ✅ Tab Conta (ícone: cog)
+│   │   ├── badges.tsx        # 🔒 Oculto (href:null) — redirect para /conquistas
+│   │   ├── shop.tsx          # 🔒 Oculto (href:null) — redirect para /loja
+│   │   └── inventory.tsx     # 🔒 Oculto (href:null) — sem rota ativa
 │   ├── screens/               # 📱 Componentes das telas
 │   │   ├── index.ts          # Barrel export
 │   │   ├── ActivityFeedScreen.tsx # 🆕 Feed de atividades dos amigos (Sprint 11)
@@ -192,7 +194,6 @@ FiQuestLife/
 │   │   ├── InventoryScreen.tsx # 🆕 Tela de inventário/mochila (Sprint 16)
 │   │   ├── LoginScreen.tsx   # Login/Cadastro com validações
 │   │   ├── ProfileScreen.tsx # Perfil com gamificação e stats
-│   │   ├── RewardHistoryScreen.tsx # 🆕 Tela de histórico de recompensas (Sprint 10)
 │   │   ├── ShopAndInventoryScreen.tsx # 🆕 Tela unificada Loja+Inventário (Sprint 16)
 │   │   └── ShopScreen.tsx    # 🆕 Tela da loja de itens (Sprint 16)
 │   ├── styles/                # 🎨 Estilos separados por tela
@@ -203,15 +204,15 @@ FiQuestLife/
 │   │   ├── settings.styles.ts # Estilos do SettingsScreen
 │   │   ├── challenges.styles.ts # 🆕 Estilos do ChallengesScreen
 │   │   ├── badges.styles.ts  # 🆕 Estilos do BadgesScreen
-│   │   ├── reward-history.styles.ts # 🆕 Estilos do RewardHistoryScreen (Sprint 10)
-│   │   ├── reward-card.styles.ts # 🆕 Estilos do RewardCard (Sprint 10)
 │   │   └── explore.styles.ts # 🆕 Estilos do ExploreScreen
 │   ├── _layout.tsx           # Layout raiz do app
 │   ├── index.tsx             # Rota inicial (redirect)
 │   ├── edit-profile.tsx      # Rota para EditProfileScreen
 │   ├── challenges.tsx        # Rota para ChallengesScreen
-│   ├── badges.tsx            # Rota para BadgesScreen
-│   ├── history.tsx           # 🆕 Rota para RewardHistoryScreen
+│   ├── badges.tsx            # Redirect para /conquistas (compatibilidade)
+│   ├── shop.tsx              # Redirect para /loja (compatibilidade)
+│   ├── loja.tsx              # 🆕 Rota standalone Loja & Mochila (sem navbar)
+│   ├── conquistas.tsx        # 🆕 Rota standalone Conquistas (sem navbar)
 │   └── user-profile.tsx      # Rota para perfil de outros usuários
 │
 ├── components/                # 🧩 Componentes Reutilizáveis
@@ -249,7 +250,6 @@ FiQuestLife/
 │   │   ├── NotificationsModal.tsx # 🆕 Modal de notificações (Sprint 9/13)
 │   │   ├── PhotoCaptureModal.tsx # 🆕 Modal de captura/seleção de foto com legenda (Sprint 15)
 │   │   ├── ProfileAvatar.tsx # 🆕 Avatar com upload de foto (galeria/câmera)
-│   │   ├── RewardCard.tsx    # 🆕 Card individual de recompensa (Sprint 10)
 │   │   ├── SearchBar.tsx     # 🆕 Barra de busca completa reutilizável (Sprint 11)
 │   │   ├── SelectFriendModal.tsx # 🆕 Modal de seleção de amigo para convite
 │   │   ├── SettingsMenuItem.tsx # 🆕 Item de menu para telas de configurações
@@ -308,7 +308,6 @@ FiQuestLife/
 │   ├── notifications.ts      # 🆕 Serviço de notificações push (Sprint 9)
 │   ├── pedometer.ts          # 🆕 Serviço de contagem de passos (Sprint 17)
 │   ├── pushToken.ts          # 🆕 Gerenciamento de tokens push (Sprint 13)
-│   ├── reward.ts             # 🆕 Serviço de histórico de recompensas (Sprint 10)
 │   ├── shop.ts               # 🆕 Serviço de loja e inventário (Sprint 16)
 │   └── userProfile.ts        # 🆕 Serviço de perfis públicos (Sprint 12)
 │
@@ -516,6 +515,47 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ## 🆕 Últimas Atualizações
 
 ### **Fevereiro de 2026**
+
+- ✅ **Refatoração de Navegação: 7 → 5 Tabs** (2026)
+  - **Navbar reorganizada** para 5 tabs visíveis em ordem profissional: Início → Explorar → Desafios (centro) → Amigos → Conta
+  - Tabs `inventory`, `shop` e `badges` ocultadas com `href: null` no `_layout.tsx`
+  - Ícones atualizados: Explorar → `compass`, Conta → `cog`
+  - Acesso à Loja e Conquistas movido para ProfileScreen como botões de ação rápida
+
+- ✅ **Loja & Mochila como Tela Standalone (`/loja`)** (2026)
+  - Nova rota `app/loja.tsx` — tela canônica sem barra de navegação inferior
+  - Stack.Screen com `animation: slide_from_right` e `headerShown: false`
+  - `ShopAndInventoryScreen` adaptado: `SimpleHeader title="Loja & Mochila"`, `SafeAreaView` sem edges
+  - `app/(tabs)/shop.tsx` e `app/shop.tsx` convertidos em stubs de redirect para `/loja`
+  - ProfileScreen navega para `/loja` via botão "Loja & Mochila"
+
+- ✅ **Conquistas como Tela Standalone (`/conquistas`)** (2026)
+  - Nova rota `app/conquistas.tsx` — tela canônica sem barra de navegação inferior
+  - Stack.Screen com `animation: slide_from_right` e `headerShown: false`
+  - `BadgesScreen` adaptado: `SafeAreaView` + `SimpleHeader title="Conquistas"`, header compacto
+  - `app/(tabs)/badges.tsx` convertido em stub de redirect para `/conquistas`
+  - 4 referências atualizadas: `ProfileScreen`, `notificationNavigation.ts`, `useNotifications.ts`, `_layout.tsx`
+
+- ✅ **Remoção Completa do Histórico de Recompensas** (2026)
+  - **6 arquivos deletados:** `app/history.tsx`, `app/screens/RewardHistoryScreen.tsx`, `app/styles/reward-history.styles.ts`, `app/styles/reward-card.styles.ts`, `components/ui/RewardCard.tsx`, `services/reward.ts`
+  - Botão "Histórico de Recompensas" removido do ProfileScreen
+  - Export `RewardCard` removido de `components/ui/index.ts`
+
+- ✅ **Fix: Timer de DURATION não atualizava no UI** (2026)
+  - **Causa raiz:** `activityCurrentValue=0` (vindo do backend) passava em `0 !== undefined`, bloqueando `trackingProgress` do `MultiTrackerService`
+  - **Correção em `ChallengeCard.tsx`:** prioridade via `hasActiveSession` (boolean `true` desde `startTracking()`) — quando sessão ativa, usa `trackingProgress`; `activityCurrentValue` só é usado para STEPS/DISTANCE sem sessão ativa
+  - Timer DURATION agora atualiza corretamente a cada 2 segundos durante sessão de ciclismo/corrida
+
+- ✅ **Limpeza do Header da Tela de Conquistas** (2026)
+  - Removidos: `NotificationBell`, `NotificationsModal`, estado `unreadCount`/`feedVisible`, `setInterval` de contagem, imports `authStorage`/`getLocalUnreadCount`/`useEffect`
+  - Filtros simplificados: "Todos", "Conquistados", "Bloqueados" (sem contadores numéricos)
+  - Header compacto sem `position: absolute` (corrigido sobreposição do bell sobre os filtros)
+
+- ✅ **Fix da Posição do Badge de Raridade no ShopPurchaseModal** (2026)
+  - `rarityBadge` movido de volta para `infoContainer` (abaixo da descrição), removido do hero
+  - Style: `alignSelf: 'flex-start'`, `paddingHorizontal: 12`, `paddingVertical: 5`, `borderRadius: 20`
+
+
 - ✅ **Sistema de Progressão Quadrática (Level Up)** (24/02/2026)
   - **Problema resolvido:** fórmula antiga era linear plana — todo nível custava exatamente 1.000 XP, sem diferenciação. Subir do nível 1 para 2 era idêntico ao 49 para 50.
   - **Nova fórmula:** `xpParaChegar(n) = 50 × (n−1) × (n+5)`
@@ -848,7 +888,7 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 - ✅ **Componentização** - UserStatsRow, SearchBar, EmptyState, SimpleHeader reutilizáveis
 
 ### **Outubro de 2025**
-- ✅ **Histórico de Recompensas** - Tela completa com filtros e paginação infinita
+- ~~✅ **Histórico de Recompensas**~~ — *removido em 2026 (feature descontinuada)*
 - ✅ **Sistema de Notificações** - Push notifications com 5 tipos e lembretes agendados
 - ✅ **Sistema de Badges** - 29 conquistas em 5 categorias com 4 raridades
 - ✅ **Edição de Perfil** - Upload de foto, validações, campos completos

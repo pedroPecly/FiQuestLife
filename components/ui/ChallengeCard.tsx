@@ -200,13 +200,15 @@ export default function ChallengeCard({
           <StepCounterWidget
             trackingType={challenge.trackingType!}
             currentValue={
-              // 1ª prioridade: valor em tempo real do sensor de saúde nativo
-              activityCurrentValue !== undefined
-                ? activityCurrentValue
-                // 2ª prioridade: sessão de tracking manual ativa
-                : trackingProgress > 0
-                  ? trackingProgress
-                  // 3ª prioridade: valor persistido no banco
+              // 1ª prioridade: há sessão ativa no MultiTracker (manual ou timer)
+              // `hasActiveSession` cobre tanto recém-iniciada (value=0) quanto em progresso
+              hasActiveSession
+                ? trackingProgress
+                // 2ª prioridade: valor em tempo real do health app nativo (STEPS / DISTANCE apenas)
+                // DURATION nunca vem do health app — é sempre rastreamento manual
+                : activityCurrentValue !== undefined && challenge.trackingType !== 'DURATION'
+                  ? activityCurrentValue
+                  // 3ª prioridade: valor persistido no banco de dados
                   : (userChallenge.steps ?? userChallenge.distance ?? userChallenge.duration ?? 0)
             }
             targetValue={challenge.targetValue!}

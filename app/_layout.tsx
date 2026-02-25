@@ -102,7 +102,7 @@ export default function RootLayout() {
             [
               { 
                 text: 'Ver Badges', 
-                onPress: () => router.push('/(tabs)/badges')
+                onPress: () => router.push('/conquistas')
               },
               { text: 'OK', style: 'cancel' },
             ]

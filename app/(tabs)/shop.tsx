@@ -1,18 +1,13 @@
 /**
- * ============================================
- * SHOP TAB - LOJA + INVENTÁRIO UNIFICADOS
- * ============================================
- * 
- * Tab unificada com:
- * - Loja de itens
- * - Inventário/Mochila
- * 
- * @created 2 de dezembro de 2025
+ * Este arquivo mantém a rota /(tabs)/shop registrada no _layout.tsx
+ * (necessário para href: null funcionar no Expo Router),
+ * mas redireciona imediatamente para a rota standalone /loja
+ * que não possui a barra de navegação inferior.
  */
 
-import { ShopAndInventoryScreen } from '@/app/screens';
+import { Redirect } from 'expo-router';
 import React from 'react';
 
-export default function ShopTab() {
-  return <ShopAndInventoryScreen />;
+export default function ShopTabRedirect() {
+  return <Redirect href="/loja" />;
 }
