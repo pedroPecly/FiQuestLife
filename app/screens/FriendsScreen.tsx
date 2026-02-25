@@ -12,7 +12,7 @@ import { friendService } from '@/services/friend';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -39,6 +39,8 @@ export default function FriendsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
+  // Evita LoadingScreen completo em revisitas — mostra conteúdo anterior em background
+  const hasLoadedRef = useRef(false);
 
   // Friends tab
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -57,10 +59,17 @@ export default function FriendsScreen() {
   // Load initial data
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
       const task = InteractionManager.runAfterInteractions(() => {
-        loadData();
+        if (isActive) loadData();
       });
-      return () => task.cancel();
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
     }, [])
   );
 
@@ -87,12 +96,12 @@ export default function FriendsScreen() {
 
   const loadData = async () => {
     try {
-      setLoading(true);
       await Promise.all([loadFriends(), loadRequests(), loadStats()]);
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
       Alert.alert('Erro', 'Erro ao carregar dados. Tente novamente.');
     } finally {
+      hasLoadedRef.current = true;
       setLoading(false);
     }
   };

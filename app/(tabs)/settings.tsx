@@ -18,18 +18,18 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  InteractionManager,
-  Platform,
-  // Remover SafeAreaView do react-native
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    InteractionManager,
+    Platform,
+    // Remover SafeAreaView do react-native
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertModal, SettingsMenuItem } from '../../components/ui';
@@ -37,8 +37,8 @@ import { useAlert } from '../../hooks/useAlert';
 import { authService } from '../../services/api';
 import { authStorage } from '../../services/auth';
 import {
-  getNotificationsEnabled,
-  setNotificationsEnabled as saveNotificationsPreference,
+    getNotificationsEnabled,
+    setNotificationsEnabled as saveNotificationsPreference,
 } from '../../services/notifications';
 import type { User } from '../../types/user';
 import { styles } from '../styles/settings.styles';
@@ -58,16 +58,25 @@ export default function SettingsScreen() {
   const [dailyReminder, setDailyReminder] = useState('');
 
   const { alert, isVisible, alertConfig, hideAlert } = useAlert();
+  // Evita LoadingScreen completo em revisitas — mostra conteúdo anterior em background
+  const hasLoadedRef = useRef(false);
 
   // ==========================================
   // LIFECYCLE - Recarrega ao focar na tela
   // ==========================================
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
       const task = InteractionManager.runAfterInteractions(() => {
-        loadUserData();
+        if (isActive) loadUserData();
       });
-      return () => task.cancel();
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
     }, [])
   );
 
@@ -76,7 +85,6 @@ export default function SettingsScreen() {
   // ==========================================
   const loadUserData = async () => {
     try {
-      setLoading(true);
       const token = await authStorage.getToken();
 
       if (!token) {
@@ -104,6 +112,7 @@ export default function SettingsScreen() {
       alert.error('Erro', 'Erro ao carregar configurações.');
       router.back();
     } finally {
+      hasLoadedRef.current = true;
       setLoading(false);
     }
   };

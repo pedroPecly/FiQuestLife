@@ -11,7 +11,7 @@ import {
     cancelStreakReminder,
 } from '@/services/notifications';
 import type { User } from '@/types/user';
-import { xpProgressInLevel, xpNeededForNextLevel } from '@/utils/progressionUtils';
+import { xpNeededForNextLevel, xpProgressInLevel } from '@/utils/progressionUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -50,8 +50,10 @@ export default function ChallengesScreen() {
    */
   const [activityProgressMap, setActivityProgressMap] = useState<Record<string, number>>({});
 
-  // Ref para controlar se o syn já está rodando (evita chamadas paralelas)
+  // Ref para controlar se o synã já está rodando (evita chamadas paralelas)
   const syncingRef = useRef(false);
+  // Evita LoadingScreen completo em revisitas — mostra conteúdo anterior em background
+  const hasLoadedRef = useRef(false);
   
   // Carrega count de notificações não lidas
   const loadUnreadCount = useCallback(async () => {
@@ -101,7 +103,6 @@ export default function ChallengesScreen() {
   // Carregar usuário e desafios
   const loadData = async () => {
     try {
-      setLoading(true);
       // Token é injetado automaticamente pelo interceptor do axios
       const [userResponse, challengesData, usedChallenges] = await Promise.all([
         authService.getMe(),
@@ -123,6 +124,7 @@ export default function ChallengesScreen() {
       console.error('Erro ao carregar dados:', error);
       alert.error('Erro', error.response?.data?.error || 'Não foi possível carregar os dados');
     } finally {
+      hasLoadedRef.current = true;
       setLoading(false);
       setRefreshing(false);
     }
@@ -168,14 +170,22 @@ export default function ChallengesScreen() {
   }, []);
 
   // Recarrega dados quando a tela ganhar foco.
-  // InteractionManager garante que a animação de navegação termina antes de
-  // iniciar requests, evitando tela branca por sobrecarga do JS thread.
+  // - Primeira visita: mostra LoadingScreen imediatamente
+  // - Visitas seguintes: mantém conteúdo anterior visível e atualiza em background
+  // - isActive previne atualizações de estado em tasks canceladas
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
       const task = InteractionManager.runAfterInteractions(() => {
-        loadData();
+        if (isActive) loadData();
       });
-      return () => task.cancel();
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
     }, [])
   );
 

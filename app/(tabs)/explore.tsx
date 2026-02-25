@@ -87,7 +87,9 @@ export default function ExploreScreen() {
       setMyPostsLoading(false);
       setMyPostsRefreshing(false);
 
+      let isActive = true;
       const task = InteractionManager.runAfterInteractions(() => {
+        if (!isActive) return;
         if (activeTab === 'feed') {
           loadFeed(true);
         } else if (activeTab === 'myPosts') {
@@ -96,7 +98,10 @@ export default function ExploreScreen() {
           loadLeaderboard(true);
         }
       });
-      return () => task.cancel();
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
     }, [activeTab])
   );
 

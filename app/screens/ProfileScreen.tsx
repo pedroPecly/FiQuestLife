@@ -1,7 +1,7 @@
 // app/screens/ProfileScreen.tsx
 
 import { router, useFocusEffect } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     InteractionManager,
@@ -30,24 +30,33 @@ const ProfileScreen = () => {
   const [loadingBadges, setLoadingBadges] = useState(false);
   const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
   const { alert } = useAlert();
+  // Evita LoadingScreen completo em revisitas — mostra conteúdo anterior em background
+  const hasLoadedRef = useRef(false);
 
   // Recarrega dados quando a tela ganhar foco.
-  // InteractionManager garante que a animação de navegação termina antes de
-  // iniciar requests, evitando tela branca por sobrecarga do JS thread.
+  // - Primeira visita: mostra LoadingScreen imediatamente
+  // - Visitas seguintes: mantém conteúdo anterior visível e atualiza em background
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
       const task = InteractionManager.runAfterInteractions(() => {
-        loadUserData();
-        loadRecentBadges();
+        if (isActive) {
+          loadUserData();
+          loadRecentBadges();
+        }
       });
-      return () => task.cancel();
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
     }, [])
   );
 
   const loadUserData = async () => {
     try {
-      setLoading(true);
-      
       // Busca token armazenado
       const token = await authStorage.getToken();
       
@@ -62,7 +71,7 @@ const ProfileScreen = () => {
       const result = await authService.getMe();
       
       if (result.success) {
-        setUser(result.data); // result.data já é o objeto user após a correção no api.ts
+        setUser(result.data);
       } else {
         alert.error('Erro de Autenticação', 'Não foi possível carregar seus dados. Você foi desconectado.');
         // Força logout se não conseguir carregar dados
@@ -75,6 +84,7 @@ const ProfileScreen = () => {
       await authStorage.logout();
       router.replace('/');
     } finally {
+      hasLoadedRef.current = true;
       setLoading(false);
     }
   };
