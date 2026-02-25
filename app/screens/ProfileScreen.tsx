@@ -1,9 +1,10 @@
 // app/screens/ProfileScreen.tsx
 
 import { router, useFocusEffect } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
+    InteractionManager,
     ScrollView,
     StatusBar,
     Text,
@@ -30,18 +31,18 @@ const ProfileScreen = () => {
   const [photoViewerVisible, setPhotoViewerVisible] = useState(false);
   const { alert } = useAlert();
 
-  // Recarrega dados quando a tela ganhar foco
+  // Recarrega dados quando a tela ganhar foco.
+  // InteractionManager garante que a animação de navegação termina antes de
+  // iniciar requests, evitando tela branca por sobrecarga do JS thread.
   useFocusEffect(
     useCallback(() => {
-      loadUserData();
-      loadRecentBadges();
+      const task = InteractionManager.runAfterInteractions(() => {
+        loadUserData();
+        loadRecentBadges();
+      });
+      return () => task.cancel();
     }, [])
   );
-
-  useEffect(() => {
-    loadUserData();
-    loadRecentBadges();
-  }, []);
 
   const loadUserData = async () => {
     try {

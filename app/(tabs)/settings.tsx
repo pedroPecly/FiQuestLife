@@ -22,6 +22,7 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  InteractionManager,
   Platform,
   // Remover SafeAreaView do react-native
   ScrollView,
@@ -63,7 +64,10 @@ export default function SettingsScreen() {
   // ==========================================
   useFocusEffect(
     useCallback(() => {
-      loadUserData();
+      const task = InteractionManager.runAfterInteractions(() => {
+        loadUserData();
+      });
+      return () => task.cancel();
     }, [])
   );
 

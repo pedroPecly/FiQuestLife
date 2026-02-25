@@ -17,6 +17,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    InteractionManager,
     RefreshControl,
     StyleSheet,
     Text,
@@ -56,7 +57,10 @@ export default function FriendsScreen() {
   // Load initial data
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      const task = InteractionManager.runAfterInteractions(() => {
+        loadData();
+      });
+      return () => task.cancel();
     }, [])
   );
 

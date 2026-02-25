@@ -86,14 +86,17 @@ export default function ExploreScreen() {
       setFeedRefreshing(false);
       setMyPostsLoading(false);
       setMyPostsRefreshing(false);
-      
-      if (activeTab === 'feed') {
-        loadFeed(true);
-      } else if (activeTab === 'myPosts') {
-        loadMyPosts(true);
-      } else {
-        loadLeaderboard(true);
-      }
+
+      const task = InteractionManager.runAfterInteractions(() => {
+        if (activeTab === 'feed') {
+          loadFeed(true);
+        } else if (activeTab === 'myPosts') {
+          loadMyPosts(true);
+        } else {
+          loadLeaderboard(true);
+        }
+      });
+      return () => task.cancel();
     }, [activeTab])
   );
 

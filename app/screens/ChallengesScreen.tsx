@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+    InteractionManager,
     RefreshControl,
     ScrollView,
     Text,
@@ -100,6 +101,7 @@ export default function ChallengesScreen() {
   // Carregar usuário e desafios
   const loadData = async () => {
     try {
+      setLoading(true);
       // Token é injetado automaticamente pelo interceptor do axios
       const [userResponse, challengesData, usedChallenges] = await Promise.all([
         authService.getMe(),
@@ -165,10 +167,15 @@ export default function ChallengesScreen() {
     }
   }, []);
 
-  // Recarrega dados quando a tela ganhar foco
+  // Recarrega dados quando a tela ganhar foco.
+  // InteractionManager garante que a animação de navegação termina antes de
+  // iniciar requests, evitando tela branca por sobrecarga do JS thread.
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      const task = InteractionManager.runAfterInteractions(() => {
+        loadData();
+      });
+      return () => task.cancel();
     }, [])
   );
 
