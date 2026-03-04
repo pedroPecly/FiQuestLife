@@ -174,15 +174,19 @@ export default function ChallengeCard({
           <View style={[styles.difficultyBadge, { backgroundColor: difficultyColor }]}>
             <Text style={styles.difficultyText}>{difficultyLabel}</Text>
           </View>
-
-          {/* Badge de desafio recebido de amigo - ao lado da dificuldade */}
-          {challengeInvitation && (
-            <View style={styles.inviteBadge}>
-              <Ionicons name="people" size={14} color="#20B2AA" />
-              <Text style={styles.inviteBadgeText}>Desafio de {challengeInvitation.fromUser.name}</Text>
-            </View>
-          )}
         </View>
+
+        {/* Badge de desafio recebido de amigo - linha própria abaixo do header */}
+        {challengeInvitation && (
+          <View style={styles.inviteBadgeRow}>
+            <View style={styles.inviteBadge}>
+              <Ionicons name="people" size={13} color="#20B2AA" />
+              <Text style={styles.inviteBadgeText} numberOfLines={1}>
+                Desafio de {challengeInvitation.fromUser.name}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* Título e descrição */}
         <Text style={styles.title} numberOfLines={2}>{challenge.title}</Text>
@@ -367,28 +371,31 @@ const styles = StyleSheet.create({
   completedContainer: {
     opacity: 0.8,
   },
+  inviteBadgeRow: {
+    marginTop: 6,
+    marginBottom: 10,
+  },
   inviteBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#FF6B35',
-    gap: 4,
-    marginLeft: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: '#E6FAF9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#20B2AA',
+    gap: 6,
   },
   inviteBadgeText: {
-    color: '#FF6B35',
-    fontSize: 11,
-    fontWeight: '700',
+    color: '#20B2AA',
+    fontSize: 12,
+    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    flexWrap: 'wrap', // Permite quebra se necessário
+    marginBottom: 8,
     gap: 8,
   },
   categoryBadge: {
