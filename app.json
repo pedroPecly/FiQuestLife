@@ -6,7 +6,7 @@
       "ios",
       "android"
     ],
-    "version": "0.11.1",
+    "version": "0.9.5",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "fiquestlife",

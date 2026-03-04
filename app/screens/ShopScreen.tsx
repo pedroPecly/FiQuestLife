@@ -285,7 +285,7 @@ export default function ShopScreen({ onPurchaseComplete }: { onPurchaseComplete?
           </Text>
         </View>
         <View style={styles.coinsContainer}>
-          <Text style={styles.coinIcon}>🪙</Text>
+          <Text style={styles.coinIcon}>💰</Text>
           <Text style={styles.coinsValue}>{user?.coins || 0}</Text>
         </View>
       </View>
@@ -567,20 +567,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF9E6',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: '#FFD700',
   },
   coinIcon: {
-    fontSize: 24,
-    marginRight: 8,
+    fontSize: 14,
+    marginRight: 4,
   },
   coinsValue: {
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#B8860B', // Dourado escuro — melhor contraste que preto no fundo claro
+    color: '#B8860B',
   },
   searchContainer: {
     paddingHorizontal: 0,

@@ -129,7 +129,7 @@ export const TabBar: React.FC<TabBarProps> = ({
                 styles.badge,
                 tab.badgeColor === 'alert' && styles.badgeAlert
               ]}>
-                <Text style={styles.badgeText}>{tab.badge}</Text>
+                <Text style={styles.badgeText}>{tab.badge > 99 ? '99+' : tab.badge}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -180,9 +180,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 8,
-    gap: 6,
+    gap: 4,
+    position: 'relative',
+    overflow: 'visible',
   },
   tabSecondary: {
     backgroundColor: '#FFFFFF',
@@ -206,7 +208,7 @@ const styles = StyleSheet.create({
 
   // Tab Text
   tabText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#8E8E93',
   },
@@ -219,19 +221,23 @@ const styles = StyleSheet.create({
 
   // Badge
   badge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
     backgroundColor: '#007AFF',
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
+    zIndex: 10,
   },
   badgeAlert: {
     backgroundColor: '#FF3B30',
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: '#FFFFFF',
   },

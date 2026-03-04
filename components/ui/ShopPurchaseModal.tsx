@@ -172,7 +172,7 @@ export default function ShopPurchaseModal({
             <View style={styles.costRow}>
               <Text style={styles.costLabel}>Preço unitário:</Text>
               <View style={styles.costValue}>
-                <Text style={styles.coinIcon}>🪙</Text>
+                <Text style={styles.coinIcon}>💰</Text>
                 <Text style={styles.costText}>{item.price}</Text>
               </View>
             </View>
@@ -185,7 +185,7 @@ export default function ShopPurchaseModal({
             <View style={[styles.costRow, styles.costRowTotal]}>
               <Text style={styles.costLabelTotal}>Total:</Text>
               <View style={styles.costValue}>
-                <Text style={styles.coinIcon}>🪙</Text>
+                <Text style={styles.coinIcon}>💰</Text>
                 <Text style={[styles.costTextTotal, !canAfford && styles.costTextInsufficient]}>
                   {totalCost}
                 </Text>

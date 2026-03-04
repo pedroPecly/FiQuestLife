@@ -1,6 +1,6 @@
 {
   "name": "fiquestlife-backend",
-  "version": "1.0.0",
+  "version": "0.9.5",
   "description": "Backend do FiQuestLife com Node.js, Prisma e PostgreSQL (Supabase)",
   "main": "dist/index.js",
   "type": "module",

@@ -111,7 +111,7 @@ export default memo(function ShopItemCard({ item, onPress, userCoins }: ShopItem
         {/* Preço e estoque */}
         <View style={styles.footer}>
           <View style={styles.priceContainer}>
-            <Text style={styles.coinIcon}>🪙</Text>
+            <Text style={styles.coinIcon}>💰</Text>
             <Text style={[styles.price, !canAfford && styles.priceInsufficient]}>
               {item.price}
             </Text>

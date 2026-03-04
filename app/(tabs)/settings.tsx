@@ -429,14 +429,6 @@ export default function SettingsScreen() {
             iconColor="#607D8B"
             label="Limpar Cache"
             onPress={handleClearCache}
-          />
-
-          <SettingsMenuItem
-            type="clickable"
-            icon="download"
-            iconColor="#009688"
-            label="Exportar Dados"
-            onPress={() => alert.info('Em Breve', 'Exportação de dados em desenvolvimento!')}
             isLast
           />
         </View>
@@ -450,7 +442,7 @@ export default function SettingsScreen() {
             icon="information"
             iconColor="#2196F3"
             label="Versão"
-            subtitle="v0.11.1 (Beta)"
+            subtitle="v0.9.5 (Beta)"
           />
 
           <SettingsMenuItem
