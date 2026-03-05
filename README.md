@@ -285,6 +285,7 @@ FiQuestLife/
 │   ├── activityFormatters.ts # Formatação de passos, distância e duração
 │   ├── dateUtils.ts          # Formatação e cálculos de datas
 │   ├── invitationUtils.ts    # Helpers para convites de desafios
+│   ├── logger.ts             # 🆕 Logger centralizado (no-op em produção via __DEV__)
 │   ├── notificationHelper.ts # Helpers de notificações locais
 │   ├── progressionUtils.ts   # 🆕 Funções de progressão e level up (fórmula quadrática)
 │   └── validators.ts         # Validações (email, username, password, etc)
@@ -416,6 +417,8 @@ FiQuestLife/
 ├── .vscode/                   # Configurações do VS Code
 ├── node_modules/              # Dependências (não versionado)
 ├── app.json                   # Configuração do Expo
+├── babel.config.js            # 🆕 Configuração Babel (remove console.* em produção)
+├── eas.json                   # Configuração de builds EAS (dev/preview/production)
 ├── expo-env.d.ts             # Tipos do Expo
 ├── eslint.config.js          # Configuração ESLint
 ├── package.json               # Dependências do frontend
@@ -513,6 +516,28 @@ Escaneie o QR Code no Expo Go ou pressione `a` (Android) / `i` (iOS) / `w` (Web)
 ---
 
 ## 🆕 Últimas Atualizações
+
+### **Março de 2026**
+
+- ✅ **Remoção Automática de Logs em Produção** (05/03/2026)
+  - **Problema resolvido:** 448 chamadas `console.*` espalhadas pelo projeto continuavam executando no APK de produção — consumindo CPU/memória e expondo dados sensíveis (tokens, IDs, payloads) no LogCat do Android.
+  - **Solução implementada:**
+    - `babel-plugin-transform-remove-console` adicionado como devDependency
+    - `babel.config.js` criado na raiz: em `NODE_ENV=production`, o plugin remove **todos os `console.log/warn/error/info/debug`** do bundle em tempo de compilação — zero traces no APK
+    - Em desenvolvimento (`expo start`) os logs continuam funcionando normalmente
+    - `utils/logger.ts` criado: utilitário centralizado que verifica `__DEV__` em runtime — útil para logging condicional explícito em código novo
+    - `eas.json` atualizado: perfil `preview` agora também define `NODE_ENV=production`, garantindo remoção de logs em todos os builds internos de distribuição
+  - **Arquivos criados/alterados:**
+    - `babel.config.js` (novo): configuração Babel com plugin condicional por ambiente
+    - `utils/logger.ts` (novo): `logger.log/warn/error/info/debug` — no-op em produção
+    - `eas.json`: `env.NODE_ENV=production` adicionado ao perfil `preview`
+    - `package.json`: `babel-plugin-transform-remove-console` nas devDependencies
+  - **Comportamento por ambiente:**
+    | Ambiente | `console.*` direto | `logger.*` |
+    |---|---|---|
+    | `expo start` (dev) | ✅ aparece | ✅ aparece |
+    | `eas build --profile preview` | ❌ removido | ❌ silenciado |
+    | `eas build --profile production` | ❌ removido | ❌ silenciado |
 
 ### **Fevereiro de 2026**
 
