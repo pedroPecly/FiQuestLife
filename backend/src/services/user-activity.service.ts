@@ -67,20 +67,20 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
 
     const userChallenges = challengeCompletionIds.length > 0
       ? await prisma.userChallenge.findMany({
-          where: {
-            id: { in: challengeCompletionIds },
-          },
-          select: {
-            id: true,
-            photoUrl: true,
-            caption: true,
-            challenge: {
-              select: {
-                category: true,
-              },
+        where: {
+          id: { in: challengeCompletionIds },
+        },
+        select: {
+          id: true,
+          photoUrl: true,
+          caption: true,
+          challenge: {
+            select: {
+              category: true,
             },
           },
-        })
+        },
+      })
       : [];
 
     console.log('[USER ACTIVITY SERVICE] 📦 UserChallenges encontrados:', userChallenges.length);
@@ -89,22 +89,22 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
     // Buscar convites de desafios para as atividades de CHALLENGE_COMPLETION
     const invitations = challengeCompletionIds.length > 0
       ? await prisma.challengeInvitation.findMany({
-          where: {
-            userChallengeId: { in: challengeCompletionIds },
-            status: 'ACCEPTED',
-          },
-          select: {
-            userChallengeId: true,
-            fromUser: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-                avatarUrl: true,
-              },
+        where: {
+          userChallengeId: { in: challengeCompletionIds },
+          status: 'ACCEPTED',
+        },
+        select: {
+          userChallengeId: true,
+          fromUser: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              avatarUrl: true,
             },
           },
-        })
+        },
+      })
       : [];
 
     console.log('[USER ACTIVITY SERVICE] 🎯 Convites encontrados:', invitations.length);
@@ -141,11 +141,11 @@ export async function getUserOwnActivity(userId: string, limit: number = 20, off
 
     // Agrupar por sourceId (unificar XP + Moedas de uma mesma tarefa)
     const groupedMap = new Map<string, GroupedActivity>();
-    
+
     for (const activity of allActivities) {
       const key = activity.sourceId || activity.id;
       const userChallenge = activity.sourceId ? userChallengeMap.get(activity.sourceId) : null;
-      
+
       if (!groupedMap.has(key)) {
         // Primeira entrada para esta atividade
         groupedMap.set(key, {

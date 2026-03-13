@@ -55,7 +55,7 @@ app.use('*', cors());
 app.get('/', (c) => {
   return c.json({
     message: '🎮 Bem-vindo ao FiQuestLife API!',
-    version: '1.0.0',
+    version: '0.9.5',
     endpoints: {
       health: '/health - Verifica se API está online',
       database: '/health/db - Verifica conexão com banco',
@@ -80,7 +80,6 @@ app.get('/', (c) => {
       shopInventory: '/shop/inventory - Inventário (requer token)',
       shopBoosts: '/shop/boosts - Boosts ativos (requer token)',
     },
-    docs: 'Veja o arquivo GUIA.js pra aprender a usar a API',
     authentication: 'Use o header: Authorization: Bearer SEU_TOKEN',
   });
 });
