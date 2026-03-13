@@ -17,9 +17,9 @@ import type { ChallengeCategory } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { levelFromXP } from '../utils/progressionUtils.js';
 import {
-    notifyBadgeEarned,
-    notifyLevelUp,
-    notifyStreakMilestone,
+  notifyBadgeEarned,
+  notifyLevelUp,
+  notifyStreakMilestone,
 } from './notification.service.js';
 
 /**
@@ -335,7 +335,7 @@ export const checkAndUpdateStreak = async (userId: string) => {
   today.setHours(0, 0, 0, 0);
 
   const lastActive = user.lastActiveDate ? new Date(user.lastActiveDate) : null;
-  
+
   if (lastActive) {
     lastActive.setHours(0, 0, 0, 0);
   }

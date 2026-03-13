@@ -16,7 +16,7 @@ import { prisma } from '../lib/prisma.js';
 export async function getFriendActivityV2(userId: string, limit: number = 20, offset: number = 0) {
   try {
     console.log('[FEED V2] Iniciando busca - userId:', userId);
-    
+
     // Buscar IDs dos amigos
     const friendships = await prisma.friendship.findMany({
       where: { userId },
